@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guanaco core tests</title>
+  <style>
+    :root { color-scheme: light dark; font: 16px/1.55 system-ui, sans-serif; }
+    body { max-width: 880px; padding: 32px 24px; margin: auto; }
+    h1 { margin-bottom: 8px; }
+    #summary { font-weight: 700; }
+    li { padding: 7px 0; }
+    .pass { color: light-dark(#236842, #88ddb1); }
+    .fail { color: light-dark(#aa2626, #ff9999); }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; }
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+  <h1>Guanaco core tests</h1>
+  <p>Browser-native tests with mocked Ollama responses and isolated in-memory storage. No model or installed package is required.</p>
+  <p><a href="../">Return to Guanaco</a></p>
+  <p id="summary" role="status">Running tests…</p>
+  <ol id="results"></ol>
+  <script type="module" src="./core.test.js"></script>
+</body>
+</html>
