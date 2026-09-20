@@ -6,6 +6,7 @@ This repository is a collection of small applications generated end-to-end by AI
 
 | Directory | Description |
 | --- | --- |
+| [`frisbee/`](frisbee/) | A standard-library Python server for LAN file sharing and shared notes. |
 | [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama conversations. |
 
 ## Conventions

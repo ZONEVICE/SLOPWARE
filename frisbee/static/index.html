@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Frisbee</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="app-header">
+    <strong>Frisbee</strong>
+    <nav aria-label="Application">
+      <button id="workspace-tab" type="button" aria-pressed="true">Workspace</button>
+      <button id="notepad-tab" type="button" aria-pressed="false">Notepad</button>
+    </nav>
+    <button id="theme-toggle" type="button" aria-pressed="false">Light mode</button>
+  </header>
+  <main>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+    <section id="workspace-view" aria-labelledby="workspace-heading">
+      <div class="heading-row">
+        <h1 id="workspace-heading">Workspace</h1>
+        <button id="change-workspace" type="button" data-workspace-action hidden>Change workspace</button>
+      </div>
+      <form id="workspace-form">
+        <p>Choose the directory to share from the computer running Frisbee.</p>
+        <fieldset>
+          <legend>Workspace directory</legend>
+          <label class="choice"><input type="radio" name="workspace-mode" value="local" checked> Local workspace <small>The project's workspace/ directory.</small></label>
+          <label class="choice"><input type="radio" name="workspace-mode" value="absolute"> Absolute path <small>A directory on the host computer.</small></label>
+          <label for="absolute-path">Directory path</label>
+          <input id="absolute-path" type="text" placeholder="/home/user/Documents or C:\Users\user\Documents" autocomplete="off" spellcheck="false" disabled>
+          <label class="choice"><input type="radio" name="workspace-mode" value="host"> Host root <small>/ on Linux or the system drive on Windows.</small></label>
+        </fieldset>
+        <button id="open-workspace" type="submit">Open workspace</button>
+      </form>
+
+      <div id="workspace-content" hidden>
+        <p class="root-line">Host directory: <code id="workspace-root"></code></p>
+        <nav id="breadcrumbs" class="breadcrumbs" aria-label="Directory path"></nav>
+
+        <section id="directory-view" aria-label="Directory contents">
+          <div class="toolbar">
+            <button id="refresh-directory" type="button" data-workspace-action>Refresh</button>
+            <button id="new-directory" type="button" data-workspace-action>New folder</button>
+            <button id="upload-files" type="button" data-workspace-action>Upload files</button>
+            <button id="upload-folder" type="button" data-workspace-action>Upload folder</button>
+            <label class="toolbar-option"><input id="show-previews" type="checkbox" data-workspace-action> Show media previews</label>
+            <label class="toolbar-option"><input id="hide-hidden-folders" type="checkbox" data-workspace-action checked> Hide hidden folders</label>
+            <input id="files-input" type="file" multiple hidden>
+            <input id="folder-input" type="file" webkitdirectory directory multiple hidden>
+          </div>
+          <div class="directory-search">
+            <label for="directory-search">Search this directory</label>
+            <input id="directory-search" type="search" autocomplete="off" spellcheck="false" data-workspace-action>
+          </div>
+          <div class="toolbar selection-toolbar">
+            <span id="selection-count" aria-live="polite">0 selected</span>
+            <button id="download-selection" type="button" data-selection-action disabled>Download ZIP</button>
+            <button id="move-selection" type="button" data-selection-action disabled>Move</button>
+            <button id="delete-selection" type="button" data-selection-action disabled>Delete</button>
+          </div>
+
+          <section id="move-panel" class="panel" aria-labelledby="move-heading" hidden>
+            <h2 id="move-heading">Move selected items</h2>
+            <form id="move-form">
+              <label for="move-destination">Destination directory</label>
+              <div class="input-row">
+                <input id="move-destination" type="text" placeholder="/ for workspace root" autocomplete="off" spellcheck="false" aria-describedby="move-help">
+                <button id="browse-destination" type="button">Browse</button>
+              </div>
+              <p id="move-help" class="muted">Use an existing directory relative to this workspace. / means the workspace root.</p>
+              <div id="destination-browser" hidden>
+                <p>Directory: <code id="destination-current"></code></p>
+                <div class="toolbar">
+                  <button id="destination-root" type="button">Root</button>
+                  <button id="destination-parent" type="button">Up</button>
+                  <button id="destination-choose" type="button">Use this directory</button>
+                </div>
+                <ul id="destination-list" class="plain-list"></ul>
+              </div>
+              <div class="toolbar">
+                <button id="start-move" type="submit">Move here</button>
+                <button id="cancel-move" type="button">Cancel</button>
+              </div>
+            </form>
+          </section>
+
+          <div id="drop-zone" class="drop-zone">
+            <p id="directory-summary" class="muted" aria-live="polite">Loading directory...</p>
+            <p class="drop-hint muted">Drop files or folders here to upload.</p>
+            <table id="file-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="selection-cell"><input id="select-all" type="checkbox" aria-label="Select all items"></th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Created</th>
+                  <th scope="col">Files inside</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="file-list"></tbody>
+            </table>
+            <p id="empty-directory" hidden>This directory is empty.</p>
+          </div>
+        </section>
+
+        <section id="file-view" aria-labelledby="file-heading" hidden>
+          <div class="heading-row">
+            <h2 id="file-heading"></h2>
+            <div class="toolbar">
+              <button id="back-to-directory" type="button">Back to directory</button>
+              <a id="download-file" class="button-link" download>Download file</a>
+            </div>
+          </div>
+          <p id="file-details" class="muted"></p>
+          <div id="text-preview" hidden>
+            <div class="toolbar">
+              <button id="edit-file" type="button">Edit text</button>
+              <button id="save-file" type="button" disabled>Save changes</button>
+              <button id="discard-file" type="button" hidden>Discard changes</button>
+              <span id="file-edit-status" aria-live="polite">Read only</span>
+            </div>
+            <label class="sr-only" for="file-editor">File contents</label>
+            <textarea id="file-editor" class="editor" readonly spellcheck="false"></textarea>
+          </div>
+          <div id="image-preview" hidden><img id="preview-image" alt=""></div>
+          <div id="video-preview" hidden>
+            <video id="preview-video" controls playsinline preload="metadata">Your browser cannot play this video. Download it to open it on your device.</video>
+          </div>
+          <p id="binary-preview" class="panel" hidden>This file is binary. Download it to open it on your device.</p>
+          <p id="preview-status" role="status" hidden></p>
+        </section>
+      </div>
+    </section>
+
+    <section id="notepad-view" aria-labelledby="notepad-heading" hidden>
+      <div class="heading-row">
+        <h1 id="notepad-heading">Notepad</h1>
+        <div class="toolbar">
+          <button id="new-note" type="button">New note</button>
+          <button id="refresh-notes" type="button">Refresh notes</button>
+        </div>
+      </div>
+      <p class="muted">Notes are stored in the project's notepad/ directory and are available with any workspace.</p>
+      <div class="notepad-layout">
+        <aside aria-label="Saved notes">
+          <p id="notes-summary" aria-live="polite">Loading notes...</p>
+          <ul id="note-list" class="plain-list"></ul>
+        </aside>
+        <form id="note-form">
+          <label for="note-name">Note name <small>(stored as a .txt file)</small></label>
+          <input id="note-name" type="text" autocomplete="off" spellcheck="false" required>
+          <label for="note-editor">Note contents</label>
+          <textarea id="note-editor" class="editor" spellcheck="false"></textarea>
+          <div class="toolbar">
+            <button id="save-note" type="submit">Create note</button>
+            <button id="reload-note" type="button" disabled>Reload note</button>
+            <button id="delete-note" type="button" disabled>Delete note</button>
+            <span id="note-edit-status" aria-live="polite">New note</span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="transfer-panel" class="panel" aria-labelledby="transfer-heading" hidden>
+      <h2 id="transfer-heading">Transfer</h2>
+      <label id="transfer-message" for="transfer-progress">Preparing...</label>
+      <progress id="transfer-progress" max="100" value="0"></progress>
+      <div class="toolbar"><button id="cancel-upload" type="button" hidden>Cancel upload</button></div>
+      <ul id="transfer-errors"></ul>
+    </section>
+  </main>
+  <noscript><p>Enable JavaScript to use Frisbee.</p></noscript>
+</body>
+</html>
