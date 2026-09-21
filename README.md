@@ -4,11 +4,11 @@ This repository is a collection of small applications generated end-to-end by AI
 
 ## Applications
 
-| Directory | Description |
-| --- | --- |
-| [`frisbee/`](frisbee/) | A standard-library Python server for LAN file sharing and shared notes. |
-| [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama conversations. |
-| [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. |
+| Directory | Description | AI Agent |
+| --- | --- | --- |
+| [`frisbee/`](frisbee/) | A standard-library Python server for LAN file sharing and shared notes. | Codex + GPT-6 Astra + Ultra |
+| [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama conversations. | Codex + GPT-6 Astra + Ultra |
+| [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. | Claude Code + Opus 5 + Max |
 
 ## Conventions
 
@@ -17,3 +17,9 @@ This repository is a collection of small applications generated end-to-end by AI
 - Each application's `AGENTS.md`/`CLAUDE.md` (when present) is the handoff entry point for an AI coding assistant working on that app, and documents which AI tools were used to create and maintain it.
 - Each application's `prompts/init.md` (when present) keeps the original prompt used to generate it.
 - [`.claude/skills/new-app/SKILL.md`](.claude/skills/new-app/SKILL.md) records the conventions a new application must follow. It is packaged as a Claude Code skill, but the body is plain Markdown with no Claude-specific machinery: any assistant, Codex included, can be pointed at that path and read it as a checklist.
+
+## Developer Comments
+
+Both Frisbee and Guanaco, generated with Codex + GPT-6 Astra in effort Ultra and 20USD suscription, took all the 100% tokens window that restart every 5 hours at least one time and then ~70% of tokens to finish the application.
+
+Pellets was generated using Claude Code + Opus 5 + effort Max on the 20USD suscription and it only took ~55% of tokens.
