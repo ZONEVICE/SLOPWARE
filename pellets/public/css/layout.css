@@ -1,0 +1,261 @@
+/*
+ * APP SHELL + RESPONSIVE LAYOUT
+ *
+ * One column on phones, a two-column room view from 900px up.
+ * The whole shell uses `100dvh` so the composer stays reachable when a mobile
+ * browser's URL bar collapses.
+ */
+
+.app {
+  display: grid;
+  grid-template-rows: var(--header-height) 1fr;
+  height: 100dvh;
+  min-height: 100dvh;
+}
+
+/* --- Header -------------------------------------------------------------- */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 20;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 680;
+  letter-spacing: -0.02em;
+  font-size: 1.02rem;
+  color: var(--text);
+  flex: none;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: linear-gradient(140deg, var(--accent), hsl(265 80% 62%));
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.brand-mark svg {
+  width: 15px;
+  height: 15px;
+}
+
+.header-spacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+}
+
+/* Live connection state. Only calls attention to itself when degraded. */
+.conn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 560;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  transition: color var(--normal), background var(--normal);
+}
+
+.conn-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex: none;
+}
+
+.conn-pill[data-state='online'] .conn-dot {
+  background: var(--success);
+}
+
+.conn-pill[data-state='connecting'] {
+  color: var(--warning);
+}
+
+.conn-pill[data-state='connecting'] .conn-dot {
+  background: var(--warning);
+  animation: pulse 1.1s var(--ease) infinite;
+}
+
+.conn-pill[data-state='offline'] {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.conn-pill[data-state='offline'] .conn-dot {
+  background: var(--danger);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* On narrow screens the label collapses and only the dot remains. */
+@media (max-width: 560px) {
+  .conn-pill[data-state='online'] .conn-label {
+    display: none;
+  }
+}
+
+/* --- Main region ---------------------------------------------------------- */
+
+.app-main {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Scrollable, centred page used by Home and Settings. */
+.page {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-4) var(--space-7);
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
+}
+
+.page-inner {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.page-narrow .page-inner {
+  max-width: 720px;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.page-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.page-subtitle {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* --- Room layout ---------------------------------------------------------- */
+
+.room {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr;
+}
+
+/*
+ * The member rail is hidden by default and revealed from 900px up.
+ * ORDER MATTERS: this base rule must stay ABOVE the media query below, because
+ * both have the same specificity and the later one would otherwise win.
+ */
+.room-side {
+  display: none;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--bg-elevated);
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* From 900px the member list becomes a permanent right rail. */
+@media (min-width: 900px) {
+  .room {
+    grid-template-columns: 1fr var(--sidebar-width);
+    grid-template-areas:
+      'head  head'
+      'list  side'
+      'compose side';
+  }
+
+  .room-head {
+    grid-area: head;
+  }
+
+  .room-scroll {
+    grid-area: list;
+  }
+
+  .room-compose {
+    grid-area: compose;
+  }
+
+  .room-side {
+    grid-area: side;
+    display: flex;
+  }
+}
+
+/* --- Utility -------------------------------------------------------------- */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

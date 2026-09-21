@@ -1,0 +1,7 @@
+# Runtime state. Uploads survive restarts on purpose; certificates are
+# regenerated on every --https run, so neither belongs in version control.
+node_modules/
+uploads/
+cert/
+*.log
+.DS_Store

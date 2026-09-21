@@ -1,0 +1,634 @@
+/*
+ * REUSABLE COMPONENTS
+ * Buttons, fields, cards, avatars, modal, toast, empty states.
+ * Every component here is theme-agnostic: it only reads tokens.css.
+ */
+
+/* --- Buttons -------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0 14px;
+  height: 38px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 560;
+  border: 1px solid var(--border);
+  transition: background var(--fast), border-color var(--fast), transform var(--fast), opacity var(--fast);
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: transparent;
+}
+
+.btn-danger {
+  color: var(--danger);
+  border-color: transparent;
+  background: transparent;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--danger-soft);
+}
+
+.btn-icon {
+  width: 38px;
+  padding: 0;
+  flex: none;
+}
+
+.btn-sm {
+  height: 32px;
+  padding: 0 10px;
+  font-size: 0.82rem;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* Header navigation buttons, with an active state. */
+.nav-btn {
+  position: relative;
+  color: var(--text-muted);
+}
+
+.nav-btn[aria-current='page'] {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+/* --- Fields --------------------------------------------------------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 580;
+  color: var(--text-muted);
+}
+
+.field-hint {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.field-error {
+  font-size: 0.8rem;
+  color: var(--danger);
+  min-height: 1.1em;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  color: var(--text);
+  transition: border-color var(--fast), box-shadow var(--fast);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--text-faint);
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  outline: none;
+}
+
+.textarea {
+  resize: none;
+  min-height: 42px;
+  max-height: 180px;
+  line-height: 1.45;
+}
+
+/* --- Cards ---------------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: 620;
+  margin-bottom: var(--space-1);
+}
+
+/* --- Avatars -------------------------------------------------------------- */
+
+.avatar {
+  --size: 36px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+  font-size: calc(var(--size) * 0.38);
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  color: var(--user-color);
+  background: var(--user-soft);
+  border: 1px solid var(--user-color);
+  user-select: none;
+  overflow: hidden;
+}
+
+.avatar-sm {
+  --size: 26px;
+}
+
+.avatar-lg {
+  --size: 56px;
+}
+
+/* --- Room list ------------------------------------------------------------ */
+
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+
+.room-card {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  text-align: left;
+  transition: border-color var(--fast), transform var(--fast), background var(--fast);
+  position: relative;
+  width: 100%;
+  color: inherit;
+}
+
+.room-card:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-elevated);
+  text-decoration: none;
+}
+
+.room-card:active {
+  transform: translateY(1px);
+}
+
+.room-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.room-card-name {
+  font-weight: 620;
+  font-size: 0.98rem;
+  letter-spacing: -0.005em;
+}
+
+.room-card-topic {
+  color: var(--text-muted);
+  font-size: 0.83rem;
+  margin-top: 1px;
+}
+
+.room-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+}
+
+.room-card-meta .row {
+  gap: 5px;
+}
+
+.room-card-meta svg {
+  width: 13px;
+  height: 13px;
+}
+
+.room-card-preview {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+.room-card-preview b {
+  font-weight: 600;
+  color: var(--text);
+  flex: none;
+}
+
+/* Live occupancy badge. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 580;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.badge svg {
+  width: 13px;
+  height: 13px;
+}
+
+.badge-live {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: transparent;
+}
+
+.badge-owner {
+  background: var(--user-soft);
+  color: var(--user-color);
+  border-color: transparent;
+}
+
+/*
+ * The owner delete control floats over the bottom-right of the card as a
+ * sibling of the anchor, so it never nests inside it and never collides with
+ * the occupancy badge at the top.
+ */
+.room-card-wrap {
+  position: relative;
+  display: flex;
+}
+
+/* Leave room in the last line for the button floating over the card. */
+.room-card.is-owned .room-card-meta {
+  padding-right: 42px;
+}
+
+.room-card-delete {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  opacity: 0;
+  background: var(--surface-2);
+  transition: opacity var(--fast);
+}
+
+.room-card-wrap:hover .room-card-delete,
+.room-card-delete:focus-visible {
+  opacity: 1;
+}
+
+/* Touch devices have no hover, so the control is always visible there. */
+@media (hover: none) {
+  .room-card-delete {
+    opacity: 1;
+  }
+}
+
+/* --- Empty states --------------------------------------------------------- */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+  padding: var(--space-7) var(--space-4);
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  width: 46px;
+  height: 46px;
+  color: var(--text-faint);
+}
+
+.empty-title {
+  font-weight: 620;
+  color: var(--text);
+}
+
+/* --- Modal ---------------------------------------------------------------- */
+
+.modal-root:empty {
+  display: none;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(3, 5, 10, 0.68);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  animation: fade-in var(--normal) var(--ease);
+}
+
+.modal {
+  width: min(460px, 100%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  animation: rise var(--normal) var(--ease);
+  max-height: calc(100dvh - 2 * var(--space-4));
+  overflow-y: auto;
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 640;
+  letter-spacing: -0.01em;
+}
+
+.modal-desc {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  margin-top: 3px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+
+/* --- Colour picker -------------------------------------------------------- */
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
+  gap: var(--space-2);
+}
+
+.swatch {
+  height: 34px;
+  border-radius: var(--radius);
+  background: var(--user-color);
+  border: 2px solid transparent;
+  transition: transform var(--fast), box-shadow var(--fast);
+  position: relative;
+}
+
+.swatch:hover {
+  transform: scale(1.07);
+}
+
+.swatch[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--user-color);
+}
+
+/* --- Toasts --------------------------------------------------------------- */
+
+.toast-root {
+  position: fixed;
+  z-index: 200;
+  bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: center;
+  pointer-events: none;
+  width: min(420px, calc(100vw - 2 * var(--space-4)));
+}
+
+.toast {
+  pointer-events: auto;
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 0.86rem;
+  box-shadow: var(--shadow);
+  animation: rise var(--normal) var(--ease);
+  max-width: 100%;
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.toast[data-tone='error'] {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.toast[data-tone='success'] {
+  border-color: var(--success);
+}
+
+.toast.is-leaving {
+  animation: fade-out var(--normal) var(--ease) forwards;
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* --- Member list ---------------------------------------------------------- */
+
+.side-section {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.side-title {
+  font-size: 0.74rem;
+  font-weight: 640;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-faint);
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 5px 0;
+  min-width: 0;
+}
+
+.member-name {
+  font-size: 0.86rem;
+  font-weight: 540;
+  color: var(--text);
+  min-width: 0;
+}
+
+.member-you {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  flex: none;
+}
+
+/* --- Settings ------------------------------------------------------------- */
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.setting-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.setting-row:first-child {
+  padding-top: 0;
+}
+
+.setting-label {
+  font-weight: 580;
+  font-size: 0.9rem;
+}
+
+.setting-desc {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  word-break: break-all;
+  user-select: all;
+}
+
+/* Segmented control used for the theme switch. */
+.segmented {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  gap: 3px;
+  flex: none;
+}
+
+.segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  font-weight: 560;
+  color: var(--text-muted);
+  transition: background var(--fast), color var(--fast);
+}
+
+.segmented button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}

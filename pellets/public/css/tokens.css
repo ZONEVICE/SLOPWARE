@@ -1,0 +1,147 @@
+/*
+ * DESIGN TOKENS
+ *
+ * Every colour, radius, shadow and spacing step in Pellets comes from here.
+ * Themes are switched by `document.documentElement.dataset.theme`, which
+ * `js/core/theme.js` sets and the inline script in index.html bootstraps.
+ *
+ * Dark is the default, as the specification requires: the `:root` block itself
+ * is the dark theme, and `[data-theme='light']` overrides it.
+ *
+ * USER COLOURS: a user stores a HUE (0-359), never a finished colour. The theme
+ * supplies the saturation and lightness, so the same hue stays readable against
+ * a near-black and a near-white background. Anything that paints a user colour
+ * sets `--hue` on an element and reads `var(--user-color)`.
+ */
+
+:root {
+  /* --- Surfaces (dark theme) ------------------------------------------- */
+  --bg: #0a0d13;
+  --bg-elevated: #10141d;
+  --surface: #141925;
+  --surface-2: #1b2130;
+  --surface-3: #232a3c;
+  --border: #262e40;
+  --border-strong: #35405a;
+
+  /* --- Text ------------------------------------------------------------- */
+  --text: #e8ecf4;
+  --text-muted: #9aa5bb;
+  --text-faint: #6b7589;
+
+  /* --- Accent ----------------------------------------------------------- */
+  --accent: #5b8cff;
+  --accent-hover: #74a0ff;
+  --accent-soft: rgba(91, 140, 255, 0.16);
+  --accent-contrast: #05070c;
+
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 107, 107, 0.14);
+  --success: #47d18b;
+  --warning: #ffc24b;
+
+  /* --- User colour derivation ------------------------------------------- */
+  --hue: 220;
+  --user-sat: 72%;
+  --user-lit: 68%;
+
+  /* --- Own message bubble ----------------------------------------------- */
+  --bubble-self: #23407a;
+  --bubble-self-text: #eaf0ff;
+  --bubble-other: var(--surface-2);
+
+  /* --- Shape ------------------------------------------------------------ */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  /* --- Elevation -------------------------------------------------------- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6);
+
+  /* --- Spacing scale ---------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* --- Layout ----------------------------------------------------------- */
+  --header-height: 56px;
+  --sidebar-width: 248px;
+  --content-max: 1180px;
+
+  /* --- Motion ----------------------------------------------------------- */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --fast: 120ms;
+  --normal: 220ms;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/*
+ * USER COLOUR RESOLUTION.
+ *
+ * `--user-color` is declared on every element rather than on `:root` on
+ * purpose. A custom property is substituted where it is DECLARED, so a
+ * `--user-color` defined on `:root` would freeze `var(--hue)` at the root value
+ * and every avatar would come out the same colour. Declaring it here lets each
+ * element resolve the `--hue` it inherited from `applyHue()`.
+ */
+*,
+*::before,
+*::after {
+  --user-color: hsl(var(--hue) var(--user-sat) var(--user-lit));
+  --user-soft: hsl(var(--hue) var(--user-sat) var(--user-lit) / 0.16);
+}
+
+/* --- Light theme --------------------------------------------------------- */
+:root[data-theme='light'] {
+  --bg: #f2f4f9;
+  --bg-elevated: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #eef1f7;
+  --surface-3: #e3e8f1;
+  --border: #dde3ed;
+  --border-strong: #c3ccdb;
+
+  --text: #0e1420;
+  --text-muted: #59637a;
+  --text-faint: #8a94a8;
+
+  --accent: #2f6bff;
+  --accent-hover: #1f58e8;
+  --accent-soft: rgba(47, 107, 255, 0.12);
+  --accent-contrast: #ffffff;
+
+  --danger: #d33a3a;
+  --danger-soft: rgba(211, 58, 58, 0.1);
+  --success: #17915b;
+  --warning: #a86800;
+
+  /* Darker and less saturated so a hue stays legible on white. */
+  --user-sat: 58%;
+  --user-lit: 40%;
+
+  --bubble-self: #2f6bff;
+  --bubble-self-text: #ffffff;
+  --bubble-other: #eef1f7;
+
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow: 0 8px 24px rgba(16, 24, 40, 0.1);
+  --shadow-lg: 0 24px 60px rgba(16, 24, 40, 0.18);
+}
+
+/* Users who ask for less motion get none of the decorative transitions. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fast: 0ms;
+    --normal: 0ms;
+  }
+}

@@ -8,6 +8,7 @@ This repository is a collection of small applications generated end-to-end by AI
 | --- | --- |
 | [`frisbee/`](frisbee/) | A standard-library Python server for LAN file sharing and shared notes. |
 | [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama conversations. |
+| [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. |
 
 ## Conventions
 
