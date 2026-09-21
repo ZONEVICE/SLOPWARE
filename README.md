@@ -16,3 +16,4 @@ This repository is a collection of small applications generated end-to-end by AI
 - Each application's `README.md` documents its own setup and usage. Start there.
 - Each application's `AGENTS.md`/`CLAUDE.md` (when present) is the handoff entry point for an AI coding assistant working on that app, and documents which AI tools were used to create and maintain it.
 - Each application's `prompts/init.md` (when present) keeps the original prompt used to generate it.
+- [`.claude/skills/new-app/SKILL.md`](.claude/skills/new-app/SKILL.md) records the conventions a new application must follow. It is packaged as a Claude Code skill, but the body is plain Markdown with no Claude-specific machinery: any assistant, Codex included, can be pointed at that path and read it as a checklist.
