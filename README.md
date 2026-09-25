@@ -21,6 +21,12 @@ This repository is a collection of small applications generated end-to-end by AI
 
 ## Developer Comments
 
+> 25 September 2026
+
+Reptile v1.0.0 took 1 hour and 43 minutes to be generated. 768.9k tokens used > 89% of Claude Current Session metter.
+
+> 21 September 2026
+
 Both Frisbee and Guanaco, generated with Codex + GPT-6 Astra in effort Ultra and 20USD suscription, took all the 100% tokens window that restart every 5 hours at least one time and then ~70% of tokens to finish the application.
 
 Pellets was generated using Claude Code + Opus 5 + effort Max on the 20USD suscription and it only took ~55% of tokens.

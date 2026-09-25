@@ -1,6 +1,6 @@
 # Reptile
 
-> **This software was generated 100% using artificial intelligence** — specifically Claude Code + Opus 5.5, Max effort — on September 24, 2026. Generated with the new-app skill. The initial prompt used to create this application can be found in [`prompts/init.md`](prompts/init.md). Post-creation adjustments draw on Claude Code + Opus 5.5, Max effort.
+> **This software was generated 100% using artificial intelligence** — specifically Claude Code + Opus 5.5, Max effort — on September 24, 2026. Generated with the `new-app` skill. The initial prompt used to create this application can be found in [`prompts/init.md`](prompts/init.md).
 
 Reptile keeps one directory identical on two computers of the same local
 network, in real time and in both directions, over HTTP or HTTPS. It is a much
