@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Reptile</title>
+    <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/views.css" />
+    <script type="module" src="/js/main.js"></script>
+  </head>
+  <body>
+    <!-- Always visible: host name, session UUID, LAN address, port, protocol, scan switch. -->
+    <header id="statusbar" class="statusbar" aria-label="Instance status"></header>
+    <div id="offline" class="offline-banner" role="alert" hidden>
+      Lost contact with this Reptile process. Reconnecting…
+    </div>
+    <main id="view" class="view" tabindex="-1">
+      <noscript><p class="page">Reptile's control panel needs JavaScript.</p></noscript>
+    </main>
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+  </body>
+</html>

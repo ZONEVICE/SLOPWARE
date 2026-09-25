@@ -1,0 +1,179 @@
+/*
+ * Design tokens, reset and typography.
+ *
+ * Light and dark themes follow the operating system through
+ * prefers-color-scheme; every colour below is a token so the two stay in step.
+ */
+:root {
+  color-scheme: light dark;
+
+  --bg: #f3f6f2;
+  --surface: #ffffff;
+  --surface-2: #edf2eb;
+  --surface-3: #e3eadf;
+  --border: #d6dfd2;
+  --border-strong: #b9c7b4;
+  --text: #15201a;
+  --muted: #5a695f;
+  --faint: #8a978e;
+
+  --accent: #2b9656;
+  --accent-strong: #1f7442;
+  --accent-soft: #ddf2e4;
+  --accent-contrast: #ffffff;
+
+  --danger: #c13c35;
+  --danger-soft: #fbe4e2;
+  --warning: #a86a12;
+  --warning-soft: #fcefd8;
+  --info: #2c69a8;
+  --info-soft: #e1ecf8;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --radius-xs: 6px;
+  --shadow: 0 1px 2px rgb(20 40 25 / 6%), 0 6px 20px rgb(20 40 25 / 7%);
+  --focus: 0 0 0 3px rgb(43 150 86 / 35%);
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --gutter: clamp(16px, 4vw, 32px);
+  --content: 1080px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1310;
+    --surface: #151c17;
+    --surface-2: #1b241e;
+    --surface-3: #222d25;
+    --border: #28342b;
+    --border-strong: #3a4a3e;
+    --text: #e3ebe5;
+    --muted: #97a69b;
+    --faint: #6d7c71;
+
+    --accent: #47c07a;
+    --accent-strong: #6ad693;
+    --accent-soft: #163424;
+    --accent-contrast: #06140b;
+
+    --danger: #ee6a61;
+    --danger-soft: #3a1a18;
+    --warning: #e3a547;
+    --warning-soft: #372a12;
+    --info: #6aa8e8;
+    --info-soft: #152a40;
+
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
+    --focus: 0 0 0 3px rgb(71 192 122 / 40%);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: clamp(1.5rem, 2.4vw, 1.9rem);
+}
+
+h2 {
+  font-size: 1.2rem;
+}
+
+h3 {
+  font-size: 1rem;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--accent-strong);
+}
+
+code,
+.mono {
+  font-family: var(--mono);
+  font-size: 0.92em;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+/* An author-level display value must never beat [hidden]. */
+[hidden] {
+  display: none !important;
+}
+
+/* Unsized inline SVG icons default to 300x150; give them a sane floor. */
+svg.icon {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+  vertical-align: -0.18em;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.faint {
+  color: var(--faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

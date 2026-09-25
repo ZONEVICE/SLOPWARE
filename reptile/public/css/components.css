@@ -1,0 +1,720 @@
+/*
+ * Reusable components: buttons, fields, panels, badges, lists, the content
+ * tree, toasts and the confirmation dialog.
+ */
+
+/* --- Buttons ------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+  min-height: 40px;
+  padding: 0.5em 1.05em;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 560;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--surface-2);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.btn.danger {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+}
+
+.btn.danger:hover:not(:disabled) {
+  background: var(--danger-soft);
+}
+
+.btn.ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.btn.ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.btn.small {
+  min-height: 32px;
+  padding: 0.25em 0.75em;
+  font-size: 0.9rem;
+}
+
+.btn.busy {
+  position: relative;
+  color: transparent !important;
+}
+
+.btn.busy::after {
+  content: "";
+  position: absolute;
+  width: 1.1em;
+  height: 1.1em;
+  border: 2px solid var(--muted);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.btn.primary.busy::after {
+  border-color: var(--accent-contrast);
+  border-right-color: transparent;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Fields -------------------------------------------------------------- */
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.field > label,
+.field-label {
+  font-weight: 600;
+}
+
+.optional {
+  margin-left: 0.4em;
+  color: var(--muted);
+  font-weight: 450;
+  font-size: 0.88em;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.55em 0.8em;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.input::placeholder {
+  color: var(--faint);
+}
+
+.input:focus-visible {
+  border-color: var(--accent);
+}
+
+.input.mono {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+}
+
+.input.invalid {
+  border-color: var(--danger);
+}
+
+.input-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.input-row > .input {
+  flex: 1 1 12rem;
+  width: auto;
+}
+
+/* Result line under a validated input. */
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45em;
+  min-height: 1.5em;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.check .icon {
+  margin-top: 0.2em;
+}
+
+.check.ok {
+  color: var(--accent-strong);
+}
+
+.check.error {
+  color: var(--danger);
+}
+
+.check.pending::before {
+  content: "";
+  width: 0.9em;
+  height: 0.9em;
+  margin-top: 0.3em;
+  border: 2px solid var(--faint);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex: none;
+}
+
+.form-error {
+  padding: 0.7em 0.9em;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 520;
+}
+
+/* The four PIN digits. */
+.pin-input {
+  width: 8.5ch;
+  min-height: 46px;
+  padding: 0.3em 0.5em;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-family: var(--mono);
+  font-size: 1.45rem;
+  letter-spacing: 0.35em;
+  text-align: center;
+}
+
+.pin-input:focus-visible {
+  border-color: var(--accent);
+}
+
+.pin-input.invalid {
+  border-color: var(--danger);
+}
+
+/* --- Panels -------------------------------------------------------------- */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(16px, 3vw, 24px);
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.notice {
+  display: flex;
+  gap: 0.6em;
+  align-items: flex-start;
+  padding: 0.75em 0.95em;
+  border-radius: var(--radius-sm);
+  background: var(--info-soft);
+  color: var(--text);
+}
+
+.notice .icon {
+  margin-top: 0.15em;
+  color: var(--info);
+}
+
+.notice.warning {
+  background: var(--warning-soft);
+}
+
+.notice.warning .icon {
+  color: var(--warning);
+}
+
+.notice.error {
+  background: var(--danger-soft);
+}
+
+.notice.error .icon {
+  color: var(--danger);
+}
+
+/* --- Badges and status dots --------------------------------------------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.12em 0.55em;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 620;
+  white-space: nowrap;
+}
+
+.badge.accent {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.badge.warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.badge.danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.badge.info {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.dot {
+  display: inline-block;
+  width: 0.62em;
+  height: 0.62em;
+  border-radius: 50%;
+  background: var(--faint);
+  flex: none;
+}
+
+.dot.ok {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.dot.busy {
+  background: var(--info);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.dot.warn {
+  background: var(--warning);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.dot.bad {
+  background: var(--danger);
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* --- Progress ------------------------------------------------------------ */
+
+.progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.25s;
+}
+
+.progress.indeterminate > span {
+  width: 35%;
+  animation: slide 1.2s ease-in-out infinite;
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+/* --- Instance list ------------------------------------------------------- */
+
+.instances {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.instance {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.2rem 0.8rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  text-align: left;
+  width: 100%;
+}
+
+button.instance {
+  cursor: pointer;
+}
+
+button.instance:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.instance:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.instance.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.instance-icon {
+  display: grid;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: var(--radius-xs);
+  background: var(--surface-3);
+  color: var(--muted);
+  grid-row: span 3;
+  align-self: start;
+}
+
+.instance.hosting .instance-icon {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.instance-name {
+  font-weight: 640;
+  overflow-wrap: anywhere;
+}
+
+.instance-meta {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.86rem;
+  overflow-wrap: anywhere;
+}
+
+.instance-badges {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+}
+
+.empty {
+  padding: 1.1rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  text-align: center;
+}
+
+/* --- Activity feed ------------------------------------------------------- */
+
+.activity {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 20rem;
+  overflow: auto;
+}
+
+.activity li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.6rem;
+  align-items: baseline;
+  padding: 0.35rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.activity li:last-child {
+  border-bottom: 0;
+}
+
+.activity .glyph {
+  width: 1.4em;
+  text-align: center;
+  color: var(--muted);
+}
+
+.activity .sent .glyph {
+  color: var(--info);
+}
+
+.activity .received .glyph {
+  color: var(--accent-strong);
+}
+
+.activity .warning .glyph {
+  color: var(--warning);
+}
+
+.activity .error .glyph {
+  color: var(--danger);
+}
+
+.activity .what {
+  overflow-wrap: anywhere;
+}
+
+.activity .when {
+  color: var(--faint);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* --- Content tree -------------------------------------------------------- */
+
+.tree-box {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  max-height: 28rem;
+  overflow: auto;
+  padding: 0.4rem 0;
+}
+
+.tree,
+.tree ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tree ul {
+  padding-left: 1.35rem;
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 34px;
+  padding: 0 0.6rem;
+}
+
+.tree-row:hover {
+  background: var(--surface-2);
+}
+
+.twisty {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  flex: none;
+}
+
+.twisty:hover {
+  background: var(--surface-3);
+}
+
+.twisty .icon {
+  transition: transform 0.15s;
+}
+
+.twisty[aria-expanded="true"] .icon {
+  transform: rotate(90deg);
+}
+
+.twisty-spacer {
+  width: 1.5rem;
+  flex: none;
+}
+
+.tree-row input[type="checkbox"] {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  accent-color: var(--accent);
+  flex: none;
+  cursor: pointer;
+}
+
+.tree-row label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  flex: 1;
+  cursor: pointer;
+}
+
+.tree-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-row .kind-dir {
+  color: var(--accent-strong);
+}
+
+.tree-row .kind-file {
+  color: var(--faint);
+}
+
+.tree-size {
+  margin-left: auto;
+  padding-left: 0.8rem;
+  color: var(--faint);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.tree-row.excluded .tree-name {
+  color: var(--faint);
+  text-decoration: line-through;
+  text-decoration-color: var(--border-strong);
+}
+
+.tree-row.unsyncable {
+  color: var(--faint);
+}
+
+.tree-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.tree-toolbar .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* --- Toasts -------------------------------------------------------------- */
+
+.toasts {
+  position: fixed;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  left: var(--gutter);
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.toast {
+  max-width: min(28rem, 100%);
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: var(--shadow);
+  pointer-events: auto;
+  animation: rise 0.2s ease-out;
+}
+
+.toast.error {
+  background: var(--danger);
+  color: #fff;
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+
+/* --- Dialog -------------------------------------------------------------- */
+
+dialog.confirm {
+  width: min(28rem, calc(100% - 2 * var(--gutter)));
+  padding: 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+dialog.confirm::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+
+dialog.confirm p {
+  margin: 0.6rem 0 1.2rem;
+  color: var(--muted);
+}
+
+dialog.confirm .actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

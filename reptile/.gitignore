@@ -1,0 +1,6 @@
+# Runtime artifacts. cert/ is regenerated on every --https start, so it never
+# belongs in version control; node_modules/ comes from `npm install`.
+node_modules/
+cert/
+*.log
+.DS_Store
