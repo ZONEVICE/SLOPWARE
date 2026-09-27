@@ -1,0 +1,214 @@
+/* The start screen: asking for the directory to open. */
+
+.start {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 32px 16px 48px;
+  background: radial-gradient(900px 480px at 50% -10%, rgb(243 165 60 / 11%), transparent 70%),
+    radial-gradient(700px 500px at 100% 110%, rgb(157 140 255 / 10%), transparent 70%), var(--bg);
+}
+
+.start-card {
+  width: min(640px, 100%);
+  display: grid;
+  gap: 22px;
+}
+
+.start-hero {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.start-hero h1 {
+  font-size: clamp(24px, 4vw, 32px);
+  letter-spacing: -0.01em;
+}
+
+.start-hero p {
+  margin: 0;
+  max-width: 480px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.eye {
+  width: 92px;
+  height: 92px;
+  filter: drop-shadow(0 12px 28px rgb(243 165 60 / 22%));
+}
+
+.eye .lid {
+  transform-origin: 32px 32px;
+  animation: blink 7s infinite;
+}
+
+.eye .pupil-group {
+  transition: transform 0.25s var(--ease);
+}
+
+@keyframes blink {
+  0%,
+  46%,
+  50%,
+  100% {
+    transform: scaleY(1);
+  }
+  48% {
+    transform: scaleY(0.08);
+  }
+}
+
+.notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--text);
+}
+
+.notice .icon {
+  color: var(--danger);
+  margin-top: 1px;
+}
+
+.open-form {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.open-form label {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.path-row {
+  display: flex;
+  gap: 8px;
+  position: relative;
+}
+
+.path-row .input {
+  min-height: 44px;
+  font-family: var(--mono);
+  font-size: 14px;
+}
+
+.path-row .btn {
+  min-height: 44px;
+  padding: 0 20px;
+}
+
+.path-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.path-status.ok {
+  color: var(--ok);
+}
+
+.path-status.bad {
+  color: var(--danger);
+}
+
+.suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--raised);
+  box-shadow: var(--shadow);
+}
+
+.suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  text-align: left;
+}
+
+.suggestions button .icon {
+  color: var(--accent);
+}
+
+.suggestions button[aria-selected='true'],
+.suggestions button:hover {
+  background: var(--surface-2);
+}
+
+.suggestions button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.places {
+  display: grid;
+  gap: 8px;
+}
+
+.places h2 {
+  color: var(--faint);
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.places .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.places .chip .icon {
+  color: var(--accent);
+}
+
+.start-note {
+  margin: 0;
+  color: var(--faint);
+  font-size: 12.5px;
+  text-align: center;
+}
+
+.start-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+  color: var(--faint);
+  font-size: 12px;
+}

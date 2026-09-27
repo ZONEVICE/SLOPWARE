@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Lurker">
+  <defs>
+    <linearGradient id="lurker-bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#2d2254"/>
+      <stop offset="1" stop-color="#0f0b1e"/>
+    </linearGradient>
+    <radialGradient id="lurker-iris" cx="0.5" cy="0.42" r="0.62">
+      <stop offset="0" stop-color="#ffe7a1"/>
+      <stop offset="0.5" stop-color="#f6a93b"/>
+      <stop offset="1" stop-color="#b9531b"/>
+    </radialGradient>
+    <clipPath id="lurker-lids">
+      <path d="M5 32C13 20.5 22.5 15.5 32 15.5S51 20.5 59 32C51 43.5 41.5 48.5 32 48.5S13 43.5 5 32Z"/>
+    </clipPath>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#lurker-bg)"/>
+  <path d="M5 32C13 20.5 22.5 15.5 32 15.5S51 20.5 59 32C51 43.5 41.5 48.5 32 48.5S13 43.5 5 32Z" fill="#f4f0ff"/>
+  <g clip-path="url(#lurker-lids)">
+    <circle cx="32" cy="32" r="14.5" fill="url(#lurker-iris)"/>
+    <circle cx="32" cy="32" r="14.5" fill="none" stroke="#7a3212" stroke-opacity=".45" stroke-width="1.2"/>
+    <ellipse cx="32" cy="32" rx="3.4" ry="11.5" fill="#140e24"/>
+    <circle cx="37" cy="26" r="2.7" fill="#ffffff" fill-opacity=".92"/>
+    <path d="M5 32C13 20.5 22.5 15.5 32 15.5S51 20.5 59 32" fill="none" stroke="#140e24" stroke-opacity=".35" stroke-width="5"/>
+  </g>
+  <path d="M5 32C13 20.5 22.5 15.5 32 15.5S51 20.5 59 32C51 43.5 41.5 48.5 32 48.5S13 43.5 5 32Z" fill="none" stroke="#140e24" stroke-width="2.2" stroke-linejoin="round"/>
+</svg>

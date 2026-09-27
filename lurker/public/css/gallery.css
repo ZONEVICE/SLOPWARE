@@ -1,0 +1,716 @@
+/* Tiles and the views built from them: grid, folders, tree, timeline, list. */
+
+.scroller {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 6px 8px 90px;
+}
+
+.vlist {
+  position: relative;
+  width: 100%;
+}
+
+.vrow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  contain: layout style;
+}
+
+.tile-row {
+  display: flex;
+  gap: var(--gap, 4px);
+}
+
+.view-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+}
+
+.view-empty {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.small-switch {
+  gap: 10px;
+  font-size: 13px;
+}
+
+.small-switch input {
+  transform: scale(0.9);
+}
+
+/* ---- Tiles ---- */
+
+.tile {
+  position: relative;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--tile-radius);
+  overflow: hidden;
+  background: var(--tile);
+  color: var(--muted);
+  cursor: zoom-in;
+  isolation: isolate;
+}
+
+.tile:focus-visible {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  z-index: 1;
+}
+
+.tile-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.25s var(--ease), transform 0.35s var(--ease), filter 0.2s var(--ease);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.tile-img.loaded {
+  opacity: 1;
+}
+
+.tile.contain .tile-img {
+  object-fit: contain;
+}
+
+.tile:hover .tile-img.loaded {
+  transform: scale(1.03);
+  filter: brightness(1.06);
+}
+
+.tile-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  padding: 8px;
+  color: var(--faint);
+  background: linear-gradient(135deg, var(--tile), var(--tile-2));
+}
+
+.tile-placeholder .format {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.tile-placeholder .file-name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tile.loading .tile-placeholder::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 5%) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+.tile-badges {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  z-index: 2;
+  display: flex;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.tile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: rgb(10 8 18 / 72%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  backdrop-filter: blur(4px);
+}
+
+.tile-badge .icon {
+  width: 11px;
+  height: 11px;
+}
+
+.tile-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  padding: 22px 8px 7px;
+  background: linear-gradient(transparent, rgb(8 6 16 / 78%));
+  color: #fff;
+  font-size: 12px;
+  text-align: left;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease);
+  pointer-events: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tile:hover .tile-caption,
+.tile:focus-visible .tile-caption {
+  opacity: 1;
+}
+
+.tile:hover .tile-badges,
+.tile:focus-visible .tile-badges {
+  bottom: 30px;
+}
+
+.tile-play {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.tile-play span {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgb(10 8 18 / 55%);
+  color: #fff;
+  backdrop-filter: blur(4px);
+  opacity: 0.9;
+  transition: transform 0.2s var(--ease);
+}
+
+.tile:hover .tile-play span {
+  transform: scale(1.1);
+}
+
+.tile-play .icon {
+  margin-left: 3px;
+}
+
+/* ---- Section headers (timeline, folders) ---- */
+
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px 8px;
+  height: 100%;
+}
+
+.section-head h2 {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.section-head .meta {
+  color: var(--faint);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.floating-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 16px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  font-weight: 650;
+  pointer-events: none;
+}
+
+.floating-head .meta {
+  color: var(--faint);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+/* The year rail beside the timeline. */
+.rail {
+  position: absolute;
+  top: 44px;
+  right: 6px;
+  bottom: 12px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.rail button {
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rail button:hover,
+.rail button.current {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.timeline-host .scroller {
+  padding-right: 64px;
+}
+
+/* ---- Folders view ---- */
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 10px 14px 4px;
+  flex: none;
+}
+
+.crumbs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 280px;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 550;
+}
+
+.crumbs button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crumbs button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.crumbs button[aria-current='page'] {
+  color: var(--text);
+}
+
+.crumbs .sep {
+  color: var(--faint);
+}
+
+.crumbs .spacer {
+  flex: 1;
+}
+
+.folder-row {
+  display: flex;
+  gap: var(--gap, 12px);
+}
+
+.folder-card {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  transition: border-color 0.15s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.folder-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.folder-cover {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  min-height: 0;
+  background: var(--tile);
+}
+
+.folder-cover.single {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.folder-cover.single > :first-child,
+.folder-cover > :first-child {
+  grid-row: 1 / span 2;
+}
+
+.folder-cover .tile {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.folder-cover .tile-badges,
+.folder-cover .tile-placeholder .file-name {
+  display: none;
+}
+
+.folder-cover .folder-empty {
+  display: grid;
+  place-items: center;
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  color: var(--accent);
+}
+
+.folder-info {
+  display: grid;
+  gap: 1px;
+  padding: 9px 11px 10px;
+}
+
+.folder-info .name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.folder-info .name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-info .name .icon {
+  color: var(--accent);
+}
+
+.folder-info .meta {
+  color: var(--faint);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Tree view ---- */
+
+.tree-host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.tree-pane {
+  width: 300px;
+  flex: none;
+  overflow: auto;
+  padding: 8px 6px 80px;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.tree-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-node {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 30px;
+  padding-right: 6px;
+  border-radius: var(--radius-xs);
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tree-node:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.tree-node[aria-selected='true'] {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.tree-node[aria-selected='true'] .icon.folder-icon {
+  color: var(--accent);
+}
+
+.tree-node .twisty {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--faint);
+  flex: none;
+  transition: transform 0.15s var(--ease);
+}
+
+.tree-node .twisty:hover {
+  color: var(--text);
+}
+
+.tree-node .twisty.open {
+  transform: rotate(90deg);
+}
+
+.tree-node .twisty.leaf {
+  visibility: hidden;
+}
+
+.tree-node .folder-icon {
+  margin-right: 6px;
+  color: var(--faint);
+}
+
+.tree-node .label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-node .count {
+  margin-left: 8px;
+  color: var(--faint);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pane-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 6px;
+  flex: none;
+}
+
+.pane-head h2 {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pane-head .meta {
+  color: var(--faint);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.pane-head .spacer {
+  flex: 1;
+}
+
+.tree-toggle {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .tree-pane {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 45;
+    width: min(86vw, 340px);
+    box-shadow: var(--shadow);
+    transform: translateX(-102%);
+    transition: transform 0.25s var(--ease);
+  }
+  .tree-host.tree-open .tree-pane {
+    transform: none;
+  }
+  .tree-toggle {
+    display: inline-grid;
+  }
+}
+
+/* ---- List view ---- */
+
+.list-host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  --columns: 52px minmax(160px, 2.2fr) minmax(120px, 1.6fr) 90px 88px 150px 76px 150px;
+}
+
+.list-head,
+.list-row {
+  display: grid;
+  grid-template-columns: var(--columns);
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+}
+
+.list-head {
+  min-height: 38px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex: none;
+}
+
+.list-head button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--faint);
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.list-head button:hover,
+.list-head button.sorted {
+  color: var(--text);
+}
+
+.list-host .scroller {
+  padding: 0 0 90px;
+}
+
+.list-row {
+  height: 100%;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.list-row:hover {
+  background: var(--surface-2);
+}
+
+.list-row .tile {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 5px;
+}
+
+.list-row .tile-badges,
+.list-row .tile-caption,
+.list-row .tile-play,
+.list-row .tile-placeholder .file-name,
+.list-row .tile-placeholder .format {
+  display: none;
+}
+
+.list-row .cell {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.list-row .cell.name {
+  color: var(--text);
+  font-weight: 550;
+}
+
+@media (max-width: 1100px) {
+  .list-host {
+    --columns: 52px minmax(140px, 2fr) minmax(100px, 1.4fr) 80px 84px 140px;
+  }
+  .list-host .col-duration,
+  .list-host .col-date {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .list-host {
+    --columns: 44px minmax(0, 1fr) 76px;
+  }
+  .list-host .col-folder,
+  .list-host .col-type,
+  .list-host .col-dims {
+    display: none;
+  }
+}

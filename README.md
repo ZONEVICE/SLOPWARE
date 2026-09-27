@@ -10,6 +10,7 @@ Every application's original generation prompt is kept in its `prompts/init.md` 
 | --- | --- | --- |
 | [`frisbee/`](frisbee/) | A standard-library Python server for LAN file sharing and shared notes. | Codex + GPT-6 Astra + Ultra |
 | [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama conversations. | Codex + GPT-6 Astra + Ultra |
+| [`lurker/`](lurker/) | A standard-library Python gallery that shows every image and video under a directory in one filterable grid, shared over HTTPS on the LAN. | Claude Code + Opus 5.5 + Max |
 | [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. | Claude Code + Opus 5 + Max |
 | [`reptile/`](reptile/) | A Node.js tool that keeps one directory identical on two LAN computers, in real time and both ways, over HTTP or HTTPS. | Claude Code + Opus 5.5 + Max |
 

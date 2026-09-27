@@ -1,0 +1,223 @@
+/*
+ * Design tokens, themes, reset and typography.
+ *
+ * Dark and light themes follow the operating system; the theme button can
+ * force one for the current page (html[data-theme]). Every colour is a token,
+ * so the two themes stay in step. The media viewer is always dark.
+ */
+:root {
+  color-scheme: dark;
+  --bg: #0c0b12;
+  --surface: #14121d;
+  --surface-2: #1b1927;
+  --surface-3: #242134;
+  --raised: #1f1c2d;
+  --border: #2a2740;
+  --border-strong: #3b3757;
+  --text: #ece9f8;
+  --muted: #a4a0bd;
+  --faint: #6f6b89;
+  --accent: #f3a53c;
+  --accent-strong: #ffc46b;
+  --accent-soft: rgb(243 165 60 / 15%);
+  --accent-contrast: #1d1205;
+  --violet: #9d8cff;
+  --danger: #ff7b70;
+  --danger-soft: rgb(255 123 112 / 14%);
+  --ok: #5ed39b;
+  --ok-soft: rgb(94 211 155 / 14%);
+  --tile: #1a1826;
+  --tile-2: #221f31;
+  --overlay: rgb(8 7 14 / 72%);
+  --shadow: 0 2px 6px rgb(0 0 0 / 30%), 0 12px 32px rgb(0 0 0 / 35%);
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 7px;
+  --tile-radius: 6px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  --topbar: 52px;
+  --gutter: 16px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+    --bg: #f5f4fa;
+    --surface: #ffffff;
+    --surface-2: #efedf7;
+    --surface-3: #e5e2f1;
+    --raised: #ffffff;
+    --border: #dfdbee;
+    --border-strong: #c9c3df;
+    --text: #1b1828;
+    --muted: #5d587a;
+    --faint: #8f8aa8;
+    --accent: #c76f0e;
+    --accent-strong: #a45807;
+    --accent-soft: rgb(199 111 14 / 12%);
+    --accent-contrast: #ffffff;
+    --violet: #6a55e8;
+    --danger: #c0352b;
+    --danger-soft: rgb(192 53 43 / 10%);
+    --ok: #1f8a57;
+    --ok-soft: rgb(31 138 87 / 10%);
+    --tile: #e6e3f0;
+    --tile-2: #dcd8ea;
+    --overlay: rgb(20 16 36 / 45%);
+    --shadow: 0 2px 6px rgb(30 20 60 / 8%), 0 12px 32px rgb(30 20 60 / 12%);
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f5f4fa;
+  --surface: #ffffff;
+  --surface-2: #efedf7;
+  --surface-3: #e5e2f1;
+  --raised: #ffffff;
+  --border: #dfdbee;
+  --border-strong: #c9c3df;
+  --text: #1b1828;
+  --muted: #5d587a;
+  --faint: #8f8aa8;
+  --accent: #c76f0e;
+  --accent-strong: #a45807;
+  --accent-soft: rgb(199 111 14 / 12%);
+  --accent-contrast: #ffffff;
+  --violet: #6a55e8;
+  --danger: #c0352b;
+  --danger-soft: rgb(192 53 43 / 10%);
+  --ok: #1f8a57;
+  --ok-soft: rgb(31 138 87 / 10%);
+  --tile: #e6e3f0;
+  --tile-2: #dcd8ea;
+  --overlay: rgb(20 16 36 / 45%);
+  --shadow: 0 2px 6px rgb(30 20 60 / 8%), 0 12px 32px rgb(30 20 60 / 12%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 var(--font);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+
+/* An author display value would beat the hidden attribute without this. */
+[hidden] {
+  display: none !important;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img,
+video,
+svg {
+  display: block;
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.icon {
+  flex: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.noscript {
+  padding: 2rem;
+  text-align: center;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.92em;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* Scrollbars that do not shout. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

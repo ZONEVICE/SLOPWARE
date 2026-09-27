@@ -1,0 +1,7 @@
+# Runtime artifacts. cert/ is regenerated on every HTTPS start, so it never
+# belongs in version control (and holds a private key).
+cert/
+__pycache__/
+*.py[cod]
+*.log
+.DS_Store
