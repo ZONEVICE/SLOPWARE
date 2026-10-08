@@ -1,0 +1,69 @@
+[package]
+name = "reptile"
+# Must match ../version.txt; build.rs refuses to build when they differ.
+version = "1.1.0"
+edition = "2021"
+rust-version = "1.83"
+description = "Real-time two-way directory synchronisation between two computers on a LAN, over HTTP or HTTPS."
+license = "MIT"
+readme = "README.md"
+publish = false
+build = "build.rs"
+default-run = "reptile"
+
+[lib]
+name = "reptile"
+path = "src/lib.rs"
+
+[[bin]]
+name = "reptile"
+path = "src/main.rs"
+
+[dependencies]
+# TLS for --https, client and server. The ring backend cross-compiles to
+# Windows with nothing but a C compiler (zig cc), unlike aws-lc-rs.
+rustls = { version = "0.23.45", default-features = false, features = ["ring", "std", "tls12"] }
+# Already pulled in by rustls: SHA-256, randomness and the ECDSA key that
+# signs the self-signed certificate.
+ring = "0.17.14"
+serde_json = "1.0.151"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.190"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = [
+  "Win32_Foundation",
+  "Win32_NetworkManagement_IpHelper",
+  "Win32_NetworkManagement_Ndis",
+  "Win32_Networking_WinSock",
+  "Win32_Security",
+  "Win32_Storage_FileSystem",
+  "Win32_System_Console",
+  "Win32_System_IO",
+  "Win32_System_SystemInformation",
+] }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true
+
+[package.metadata.deb]
+name = "reptile"
+maintainer = "ZONEVICE"
+copyright = "2026, ZONEVICE"
+license-file = ["../LICENCE.txt", "0"]
+extended-description = """\
+Reptile keeps one directory identical on two computers of the same local \
+network, in real time and in both directions, over HTTP or HTTPS. One \
+instance hosts a directory, another syncs it; the control panel is a web page \
+served by the program itself. Wire-compatible with the Node.js implementation."""
+section = "net"
+priority = "optional"
+depends = "$auto"
+assets = [
+  ["target/release/reptile", "usr/bin/", "755"],
+  ["README.md", "usr/share/doc/reptile/README.md", "644"],
+]

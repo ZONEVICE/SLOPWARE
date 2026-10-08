@@ -1,0 +1,16 @@
+{
+  "name": "reptile",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Real-time two-way directory synchronisation between two computers on a LAN, over HTTP or HTTPS. Node's standard library only, with a plain HTML/CSS/JS client.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  }
+}

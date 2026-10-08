@@ -13,7 +13,7 @@ Every application's original generation prompt is kept in its `prompts/init.md` 
 | [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama conversations. | Linux Mint + Codex + GPT-6 Astra + Ultra |
 | [`lurker/`](lurker/) | A standard-library Python gallery that shows every image and video under a directory in one filterable grid, shared over HTTPS on the LAN. | Linux Mint + Claude Code + Opus 5.5 + Max |
 | [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. | Linux Mint + Claude Code + Opus 5 + Max |
-| [`reptile/`](reptile/) | A Node.js tool that keeps one directory identical on two LAN computers, in real time and both ways, over HTTP or HTTPS. | Linux Mint + Claude Code + Opus 5.5 + Max |
+| [`reptile/`](reptile/) | Keeps one directory identical on two LAN computers, in real time and both ways, over HTTP or HTTPS, in two wire-compatible implementations: Node.js, and Rust built for Debian and Windows 10/11. | Linux Mint + Claude Code + Opus 5.5 + Max |
 
 ## Conventions
 

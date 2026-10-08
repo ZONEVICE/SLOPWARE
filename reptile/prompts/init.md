@@ -1,4 +1,4 @@
-The live maintenance guide for this application is [`../CLAUDE.md`](../CLAUDE.md). This file only keeps the original prompt, as history: it is not a specification to re-execute.
+The live maintenance guide for this application is [`../CLAUDE.md`](../CLAUDE.md). This file only keeps the prompts that produced it, as history: they are not a specification to re-execute.
 
 Prompt used to create this application:
 
@@ -73,4 +73,24 @@ Estás en un host Linux Mint con Node.js instalado. Úsalo para todo lo que nece
 Para probar, levanta dos instancias en la misma máquina, con puertos y directorios distintos, tanto en HTTP como en HTTPS. Escribe pruebas automatizadas con `node:test` (sin dependencias adicionales) que cubran, como mínimo: la búsqueda de puerto libre, la generación del certificado, el endpoint ping-pong y el descubrimiento, la validación de rutas, el PIN (correcto, incorrecto y cambio con conexión activa), la selección de contenido, la sincronización en ambas direcciones (crear, modificar, renombrar y borrar), el rechazo de una segunda conexión y el rechazo entre protocolos distintos. Haz todas las demás pruebas que consideres relevantes.
 
 No te detengas hasta que todos los puntos, características y funcionalidades de este documento estén programados y probados.
+```
+
+Second prompt, after a conversation about how feasible and worthwhile a Rust rewrite would be and a benchmark of the Node.js implementation: keep both implementations, port Reptile to Rust (wire-compatible with Node.js, with Debian and Windows 10/11 builds), and try `fs` instead of chokidar in a copy of the Node.js implementation, keeping it if it improves anything.
+
+```
+Conservamos ambas versiones.
+
+Quiero que muevas todo el código de `reptile` a `reptile/node`.
+
+Mueve el fichero `version.txt` a `reptile/version.txt` y cambia su contenido a la version Semver v2 que consideres correcto.
+
+Escribe el port completo en Rust en `reptile/rust`. Debe ser compatible con una instancia NodeJS como dijiste.
+
+Prepara la versión de Rust para que pueda generar un binario Linux Debian y Windows 10/11.
+
+Instala las dependencias que necesites para la versión de Rust.
+
+Con respecto al experimento de la versión de Node, haz un Copy Paste de `reptile/node` a `reptile/node-upgrade` y escribe ahí la mejora donde se usaria `fs` en lugar de chokidar en donde hayas determinado sea necesario. Si resulta en una mejoria de cualquier tipo, entonces nos quedamos con esa versión mejorada. Ese código se integra a `reptile/node` base.
+
+No pares hasta que todos los puntos y el port esten completos.
 ```
