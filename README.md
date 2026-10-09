@@ -1,18 +1,19 @@
 # SLOPWARE
 
-This repository is a collection of small applications generated end-to-end by AI coding assistants — specifically **Codex + GPT-6 Astra** and **Claude Code Opus 5**. Even this README.md is AI Generated. Each subdirectory is a self-contained application with its own README, license, and documentation.
+This repository is a collection of small applications generated end-to-end by AI coding assistants — specifically **Claude Code Opus 5.5** and **Codex + GPT-6 Astra**. Even this README.md is AI Generated. Each subdirectory is a self-contained application with its own README, license, and documentation.
 
 Every application's original generation prompt is kept in its `prompts/init.md` (when present) and is available for anyone reading this README to inspect.
 
 ## Applications
 
-| Directory | Description | AI Agent |
+| Directory | Description | Environment |
 | --- | --- | --- |
-| [`frisbee/`](frisbee/) | A standard-library Python server for LAN file sharing and shared notes. | Codex + GPT-6 Astra + Ultra |
-| [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama conversations. | Codex + GPT-6 Astra + Ultra |
-| [`lurker/`](lurker/) | A standard-library Python gallery that shows every image and video under a directory in one filterable grid, shared over HTTPS on the LAN. | Claude Code + Opus 5.5 + Max |
-| [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. | Claude Code + Opus 5 + Max |
-| [`reptile/`](reptile/) | A Node.js tool that keeps one directory identical on two LAN computers, in real time and both ways, over HTTP or HTTPS. | Claude Code + Opus 5.5 + Max |
+| [`allyswally/`](allyswally/) | A single-binary Rust server that turns a phone into a trackpad, keyboard and power-user command surface for a Windows handheld, over the LAN. | Windows 10 + Claude Code + Opus 4.8 + Max |
+| [`frisbee/`](frisbee/) | A standard-library Python server for LAN file sharing and shared notes. | Linux Mint + Codex + GPT-6 Astra + Ultra |
+| [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama conversations. | Linux Mint + Codex + GPT-6 Astra + Ultra |
+| [`lurker/`](lurker/) | A standard-library Python gallery that shows every image and video under a directory in one filterable grid, shared over HTTPS on the LAN. | Linux Mint + Claude Code + Opus 5.5 + Max |
+| [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. | Linux Mint + Claude Code + Opus 5 + Max |
+| [`reptile/`](reptile/) | A Node.js tool that keeps one directory identical on two LAN computers, in real time and both ways, over HTTP or HTTPS. | Linux Mint + Claude Code + Opus 5.5 + Max |
 
 ## Conventions
 
@@ -22,6 +23,10 @@ Every application's original generation prompt is kept in its `prompts/init.md` 
 - [`.claude/skills/new-app/SKILL.md`](.claude/skills/new-app/SKILL.md) records the conventions a new application must follow. It is packaged as a Claude Code skill, but the body is plain Markdown with no Claude-specific machinery: any assistant, Codex included, can be pointed at that path and read it as a checklist.
 
 ## Developer Comments
+
+> 8 October 2026
+
+AllySwally was coded on Opus 4.8 because Opus 5.5 refused to create the application claiming safewards.
 
 > 25 September 2026
 

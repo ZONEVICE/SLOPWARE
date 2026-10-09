@@ -1,0 +1,6 @@
+# Rust build output
+/target
+
+# Runtime data lives in %USERPROFILE%\.allyswally, never in the repo, but a
+# stray temp script directory could appear here during development.
+/tmp

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#111318">
+  <meta name="color-scheme" content="dark light">
+  <title>AllySwally</title>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <script>
+    // Apply the saved theme and scale before first paint to avoid a flash.
+    (function () {
+      try {
+        var t = localStorage.getItem('allyswally.theme');
+        if (t) document.documentElement.setAttribute('data-theme', t);
+        var s = localStorage.getItem('allyswally.scale');
+        if (s) document.documentElement.style.setProperty('--scale', s);
+        if (localStorage.getItem('allyswally.reduceMotion') === '1')
+          document.documentElement.setAttribute('data-reduce-motion', '1');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <!-- RGB theme animated backdrop (only visible under [data-theme=rgb]) -->
+  <div id="rgb-backdrop" aria-hidden="true"></div>
+
+  <!-- ====================== PIN GATE ====================== -->
+  <section id="pin-screen" class="pin-screen" aria-label="Enter access PIN">
+    <div class="pin-card">
+      <img class="pin-logo" src="/icon.svg" alt="" width="72" height="72">
+      <h1 class="pin-title">AllySwally</h1>
+      <p class="pin-sub">Enter the 6-character PIN shown on the host console.</p>
+      <form id="pin-form" autocomplete="off">
+        <input id="pin-input" class="pin-input" type="text" inputmode="text"
+               maxlength="6" autocapitalize="characters" autocorrect="off"
+               spellcheck="false" aria-label="PIN" placeholder="••••••">
+        <button id="pin-submit" class="btn btn-primary pin-submit" type="submit">Unlock</button>
+      </form>
+      <p id="pin-message" class="pin-message" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- ====================== APP SHELL ====================== -->
+  <div id="app" class="app" hidden>
+    <header class="topbar">
+      <nav class="tabs" role="tablist" aria-label="Sections">
+        <button class="tab" data-tab="mouse" role="tab" aria-label="Mouse" title="Mouse">
+          <svg viewBox="0 0 24 24" class="icon"><rect x="6" y="2" width="12" height="20" rx="6" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="3" x2="12" y2="10" stroke="currentColor" stroke-width="2"/></svg>
+          <span class="tab-label">Mouse</span>
+        </button>
+        <button class="tab" data-tab="keyboard" role="tab" aria-label="Keyboard" title="Keyboard">
+          <svg viewBox="0 0 24 24" class="icon"><rect x="2" y="6" width="20" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="7" y1="14" x2="17" y2="14" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="10" r="1" fill="currentColor"/><circle cx="10" cy="10" r="1" fill="currentColor"/><circle cx="14" cy="10" r="1" fill="currentColor"/><circle cx="18" cy="10" r="1" fill="currentColor"/></svg>
+          <span class="tab-label">Keys</span>
+        </button>
+        <button class="tab" data-tab="masked" role="tab" aria-label="Commands" title="Commands">
+          <svg viewBox="0 0 24 24" class="icon"><path d="M4 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="17" x2="20" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span class="tab-label">Masked</span>
+        </button>
+        <button class="tab" data-tab="settings" role="tab" aria-label="Settings" title="Settings">
+          <svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span class="tab-label">Settings</span>
+        </button>
+      </nav>
+      <div class="topbar-status">
+        <button id="band-toggle" class="icon-btn" aria-label="Toggle shortcut band" title="Shortcut band">
+          <svg viewBox="0 0 24 24" class="icon"><rect x="3" y="8" width="5" height="8" rx="1" fill="currentColor"/><rect x="10" y="8" width="5" height="8" rx="1" fill="currentColor" opacity="0.6"/><rect x="17" y="8" width="4" height="8" rx="1" fill="currentColor" opacity="0.3"/></svg>
+        </button>
+        <span id="latency" class="latency" title="Round-trip latency" aria-live="off">—</span>
+      </div>
+    </header>
+
+    <!-- Shortcut band (shared by Mouse and Keyboard tabs) -->
+    <div id="band" class="band" aria-label="Shortcut band"></div>
+
+    <main class="panels">
+      <!-- ===== MOUSE ===== -->
+      <section id="tab-mouse" class="panel" role="tabpanel" aria-label="Mouse">
+        <div class="mouse-wrap">
+          <div id="trackpad" class="trackpad" aria-label="Trackpad. Drag to move the pointer, tap to click.">
+            <span class="trackpad-hint">trackpad</span>
+          </div>
+          <div class="mouse-side">
+            <input id="scroll-pot" class="scroll-pot" type="range" min="-100" max="100" value="0"
+                   orient="vertical" aria-label="Scroll wheel" title="Scroll">
+          </div>
+        </div>
+        <div class="mouse-buttons">
+          <button class="mbtn" data-button="left" aria-label="Left click">Left</button>
+          <button class="mbtn" data-button="middle" aria-label="Middle click">Middle</button>
+          <button class="mbtn" data-button="right" aria-label="Right click">Right</button>
+          <button id="drag-lock" class="mbtn mbtn-toggle" aria-pressed="false" aria-label="Drag lock" title="Hold left button for dragging">Drag</button>
+        </div>
+        <div class="mouse-options">
+          <button id="mouse-opts-toggle" class="btn btn-ghost" aria-expanded="false">More options</button>
+          <div id="mouse-opts" class="mouse-opts-body" hidden>
+            <label class="slider-row">
+              <span>Pointer speed</span>
+              <input id="dpi-slider" type="range" min="20" max="300" value="100" aria-label="Pointer speed">
+              <output id="dpi-out">1.0×</output>
+            </label>
+            <label class="slider-row">
+              <span>Scroll speed</span>
+              <input id="scroll-speed" type="range" min="1" max="20" value="8" aria-label="Scroll speed">
+              <output id="scroll-out">8</output>
+            </label>
+            <div class="chips" role="group" aria-label="Movement mode">
+              <button class="chip" id="mode-abs" aria-pressed="true">Absolute</button>
+              <button class="chip" id="mode-rel" aria-pressed="false">Relative (games)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== KEYBOARD ===== -->
+      <section id="tab-keyboard" class="panel" role="tabpanel" aria-label="Keyboard" hidden>
+        <div class="kb-toolbar">
+          <div class="chips kb-layouts" id="kb-layouts" role="group" aria-label="Keyboard layout"></div>
+          <div class="kb-tools">
+            <button id="kb-landscape" class="icon-btn" aria-pressed="false" aria-label="Landscape keyboard" title="Landscape">
+              <svg viewBox="0 0 24 24" class="icon"><rect x="2" y="6" width="20" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+            <button id="kb-native" class="icon-btn" aria-label="Device keyboard" title="Use the device keyboard">
+              <svg viewBox="0 0 24 24" class="icon"><path d="M12 4v10m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="18" width="16" height="2" rx="1" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="kb-command" class="kb-command" aria-label="Command keys"></div>
+        <div id="keyboard" class="keyboard-stage" aria-label="Virtual keyboard"></div>
+        <textarea id="native-buffer" class="native-buffer" aria-hidden="true" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+      </section>
+
+      <!-- ===== MASKED ===== -->
+      <section id="tab-masked" class="panel" role="tabpanel" aria-label="Commands" hidden>
+        <nav class="masked-nav" id="masked-nav" role="tablist" aria-label="Command categories"></nav>
+        <div class="masked-body" id="masked-body"></div>
+      </section>
+
+      <!-- ===== SETTINGS ===== -->
+      <section id="tab-settings" class="panel" role="tabpanel" aria-label="Settings" hidden>
+        <div class="settings" id="settings"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ====================== GESTURE GUIDE OVERLAY ====================== -->
+  <div id="gestures" class="overlay" hidden aria-label="Gesture guide"></div>
+
+  <!-- ====================== MODAL HOST ====================== -->
+  <div id="modal" class="overlay" hidden></div>
+
+  <!-- ====================== TOASTS ====================== -->
+  <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

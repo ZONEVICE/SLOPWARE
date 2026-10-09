@@ -1,0 +1,17 @@
+[package]
+name = "allyswally"
+version = "1.0.0"
+edition = "2021"
+
+[[bin]]
+name = "AllySwally"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+# panic = "unwind" (the default). A panic in a client thread must be caught per
+# connection (std::panic::catch_unwind) so one client never tears down the
+# server; "abort" would make that impossible, so it is deliberately not set.
