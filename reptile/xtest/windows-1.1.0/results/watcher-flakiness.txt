@@ -1,0 +1,205 @@
+﻿=== watcher flakiness: 6 full runs (default parallel) ===
+run 1: test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.64s  test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.64s
+
+running 17 tests
+test a_file_replaced_by_a_directory_is_removal_first_then_creation ... ok
+test a_modification_is_a_write_carrying_the_previous_state ... ok
+test a_file_still_being_written_is_reported_once_it_settles ... ok
+test a_new_file_is_a_write_and_a_new_directory_a_mkdir_parents_first ... ok
+test a_renamed_directory_is_still_watched_at_its_new_location ... ok
+test bursts_are_batched ... ok
+test a_directory_recorded_in_the_index_first_is_watched_too ... ok
+test deleted_directories_release_their_watches ... ok
+test a_change_already_recorded_in_the_index_is_not_reported ... ok
+test a_vanished_root_is_never_read_as_everything_was_deleted ... ok
+test deleting_a_file_is_reported_after_the_rename_window ... ok
+test moving_a_file_into_another_directory_is_a_rename_too ... ok
+test ignored_paths_are_never_reported ... ok
+test deleting_a_tree_is_one_rmdir_not_one_operation_per_file ... ok
+test the_inside_of_an_ignore_inside_directory_is_never_watched ... ok
+test renaming_a_file_is_one_rename_not_a_deletion_and_an_upload ... ok
+test renaming_a_directory_moves_its_whole_content_in_one_operation ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.64s
+
+
+run 2: test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.02s  test a_file_replaced_by_a_directory_is_removal_first_then_creation ... FAILED ; test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.02s
+
+running 17 tests
+test a_file_still_being_written_is_reported_once_it_settles ... ok
+test a_modification_is_a_write_carrying_the_previous_state ... ok
+test a_new_file_is_a_write_and_a_new_directory_a_mkdir_parents_first ... ok
+test a_directory_recorded_in_the_index_first_is_watched_too ... ok
+test a_renamed_directory_is_still_watched_at_its_new_location ... ok
+test a_change_already_recorded_in_the_index_is_not_reported ... ok
+test deleted_directories_release_their_watches ... ok
+test bursts_are_batched ... ok
+test a_vanished_root_is_never_read_as_everything_was_deleted ... ok
+test deleting_a_file_is_reported_after_the_rename_window ... ok
+test moving_a_file_into_another_directory_is_a_rename_too ... ok
+test deleting_a_tree_is_one_rmdir_not_one_operation_per_file ... ok
+test ignored_paths_are_never_reported ... ok
+test the_inside_of_an_ignore_inside_directory_is_never_watched ... ok
+test renaming_a_directory_moves_its_whole_content_in_one_operation ... ok
+test renaming_a_file_is_one_rename_not_a_deletion_and_an_upload ... ok
+test a_file_replaced_by_a_directory_is_removal_first_then_creation ... FAILED
+
+failures:
+
+---- a_file_replaced_by_a_directory_is_removal_first_then_creation stdout ----
+
+thread 'a_file_replaced_by_a_directory_is_removal_first_then_creation' (6908) panicked at tests\watcher.rs:119:13:
+timed out waiting for mkdir thing; saw []
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_file_replaced_by_a_directory_is_removal_first_then_creation
+
+test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.02s
+
+
+run 3: test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s  test a_file_replaced_by_a_directory_is_removal_first_then_creation ... FAILED ; test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s
+
+running 17 tests
+test a_file_still_being_written_is_reported_once_it_settles ... ok
+test a_modification_is_a_write_carrying_the_previous_state ... ok
+test a_new_file_is_a_write_and_a_new_directory_a_mkdir_parents_first ... ok
+test a_directory_recorded_in_the_index_first_is_watched_too ... ok
+test a_renamed_directory_is_still_watched_at_its_new_location ... ok
+test a_change_already_recorded_in_the_index_is_not_reported ... ok
+test deleted_directories_release_their_watches ... ok
+test bursts_are_batched ... ok
+test a_vanished_root_is_never_read_as_everything_was_deleted ... ok
+test deleting_a_file_is_reported_after_the_rename_window ... ok
+test moving_a_file_into_another_directory_is_a_rename_too ... ok
+test deleting_a_tree_is_one_rmdir_not_one_operation_per_file ... ok
+test ignored_paths_are_never_reported ... ok
+test the_inside_of_an_ignore_inside_directory_is_never_watched ... ok
+test renaming_a_directory_moves_its_whole_content_in_one_operation ... ok
+test renaming_a_file_is_one_rename_not_a_deletion_and_an_upload ... ok
+test a_file_replaced_by_a_directory_is_removal_first_then_creation ... FAILED
+
+failures:
+
+---- a_file_replaced_by_a_directory_is_removal_first_then_creation stdout ----
+
+thread 'a_file_replaced_by_a_directory_is_removal_first_then_creation' (14932) panicked at tests\watcher.rs:119:13:
+timed out waiting for mkdir thing; saw []
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_file_replaced_by_a_directory_is_removal_first_then_creation
+
+test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s
+
+
+run 4: test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s  test a_file_replaced_by_a_directory_is_removal_first_then_creation ... FAILED ; test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s
+
+running 17 tests
+test a_file_still_being_written_is_reported_once_it_settles ... ok
+test a_modification_is_a_write_carrying_the_previous_state ... ok
+test a_new_file_is_a_write_and_a_new_directory_a_mkdir_parents_first ... ok
+test a_directory_recorded_in_the_index_first_is_watched_too ... ok
+test a_renamed_directory_is_still_watched_at_its_new_location ... ok
+test a_change_already_recorded_in_the_index_is_not_reported ... ok
+test deleted_directories_release_their_watches ... ok
+test bursts_are_batched ... ok
+test a_vanished_root_is_never_read_as_everything_was_deleted ... ok
+test deleting_a_file_is_reported_after_the_rename_window ... ok
+test moving_a_file_into_another_directory_is_a_rename_too ... ok
+test deleting_a_tree_is_one_rmdir_not_one_operation_per_file ... ok
+test ignored_paths_are_never_reported ... ok
+test the_inside_of_an_ignore_inside_directory_is_never_watched ... ok
+test renaming_a_directory_moves_its_whole_content_in_one_operation ... ok
+test renaming_a_file_is_one_rename_not_a_deletion_and_an_upload ... ok
+test a_file_replaced_by_a_directory_is_removal_first_then_creation ... FAILED
+
+failures:
+
+---- a_file_replaced_by_a_directory_is_removal_first_then_creation stdout ----
+
+thread 'a_file_replaced_by_a_directory_is_removal_first_then_creation' (5236) panicked at tests\watcher.rs:119:13:
+timed out waiting for mkdir thing; saw []
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_file_replaced_by_a_directory_is_removal_first_then_creation
+
+test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s
+
+
+run 5: test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s  test a_file_replaced_by_a_directory_is_removal_first_then_creation ... FAILED ; test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s
+
+running 17 tests
+test a_file_still_being_written_is_reported_once_it_settles ... ok
+test a_modification_is_a_write_carrying_the_previous_state ... ok
+test a_new_file_is_a_write_and_a_new_directory_a_mkdir_parents_first ... ok
+test a_directory_recorded_in_the_index_first_is_watched_too ... ok
+test a_renamed_directory_is_still_watched_at_its_new_location ... ok
+test a_change_already_recorded_in_the_index_is_not_reported ... ok
+test deleted_directories_release_their_watches ... ok
+test bursts_are_batched ... ok
+test a_vanished_root_is_never_read_as_everything_was_deleted ... ok
+test deleting_a_file_is_reported_after_the_rename_window ... ok
+test moving_a_file_into_another_directory_is_a_rename_too ... ok
+test deleting_a_tree_is_one_rmdir_not_one_operation_per_file ... ok
+test ignored_paths_are_never_reported ... ok
+test the_inside_of_an_ignore_inside_directory_is_never_watched ... ok
+test renaming_a_directory_moves_its_whole_content_in_one_operation ... ok
+test renaming_a_file_is_one_rename_not_a_deletion_and_an_upload ... ok
+test a_file_replaced_by_a_directory_is_removal_first_then_creation ... FAILED
+
+failures:
+
+---- a_file_replaced_by_a_directory_is_removal_first_then_creation stdout ----
+
+thread 'a_file_replaced_by_a_directory_is_removal_first_then_creation' (14024) panicked at tests\watcher.rs:119:13:
+timed out waiting for mkdir thing; saw []
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_file_replaced_by_a_directory_is_removal_first_then_creation
+
+test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s
+
+
+run 6: test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s  test a_file_replaced_by_a_directory_is_removal_first_then_creation ... FAILED ; test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s
+
+running 17 tests
+test a_file_still_being_written_is_reported_once_it_settles ... ok
+test a_modification_is_a_write_carrying_the_previous_state ... ok
+test a_new_file_is_a_write_and_a_new_directory_a_mkdir_parents_first ... ok
+test a_directory_recorded_in_the_index_first_is_watched_too ... ok
+test a_renamed_directory_is_still_watched_at_its_new_location ... ok
+test a_change_already_recorded_in_the_index_is_not_reported ... ok
+test deleted_directories_release_their_watches ... ok
+test bursts_are_batched ... ok
+test a_vanished_root_is_never_read_as_everything_was_deleted ... ok
+test deleting_a_file_is_reported_after_the_rename_window ... ok
+test moving_a_file_into_another_directory_is_a_rename_too ... ok
+test deleting_a_tree_is_one_rmdir_not_one_operation_per_file ... ok
+test ignored_paths_are_never_reported ... ok
+test the_inside_of_an_ignore_inside_directory_is_never_watched ... ok
+test renaming_a_directory_moves_its_whole_content_in_one_operation ... ok
+test renaming_a_file_is_one_rename_not_a_deletion_and_an_upload ... ok
+test a_file_replaced_by_a_directory_is_removal_first_then_creation ... FAILED
+
+failures:
+
+---- a_file_replaced_by_a_directory_is_removal_first_then_creation stdout ----
+
+thread 'a_file_replaced_by_a_directory_is_removal_first_then_creation' (6204) panicked at tests\watcher.rs:119:13:
+timed out waiting for mkdir thing; saw []
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_file_replaced_by_a_directory_is_removal_first_then_creation
+
+test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.01s
+
+

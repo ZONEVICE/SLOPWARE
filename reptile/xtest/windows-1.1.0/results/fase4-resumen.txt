@@ -1,0 +1,59 @@
+# Fase 4 - Pruebas cruzadas Windows <-> Linux por la LAN
+
+Linux 192.168.0.241 (T14), Windows 192.168.0.246 (ATUN). PIN 4242. Enlace Wi-Fi (RTT ~37-195 ms).
+Receta: populate(300,8MB) -> host -> sync -> wait live + converge r0 -> churn r1 + converge -> churn r2 + converge.
+Resultados "ok=True" = convergencia byte a byte (SHA-256).
+
+| Esc | Host -> Peer | Proto | live_s | r0 | r1 | r2 | Veredicto |
+|-----|--------------|-------|--------|----|----|----|-----------|
+| M1  | Linux Rust -> Win Rust (hostile) | HTTP | 32.6 | ver nota | ok | - | OK (asimetria de nombres esperada) |
+| M2  | Win Rust -> Linux Rust  | HTTP | 19.7 | ok | ok | ok(55s) | OK |
+| M3  | Linux Node -> Win Rust  | HTTP | 53.9 | ok | ok | ok | OK |
+| M4  | Win Rust -> Linux Node  | HTTP | 15.7 | ok | ok | ok | OK |
+| M5  | Linux Rust -> Win Node  | HTTP | 21.4 | ok | ok | ok | OK |
+| M6  | Win Node -> Linux Rust  | HTTP | 11.2 | ok | ok | ok | OK |
+| M7a | Linux Rust -> Win Rust  | HTTPS| 20.5 | ok | ok | ok | OK |
+| M7b | Win Rust -> Linux Rust  | HTTPS| 18.0 | ok | ok | ok | OK |
+| M8a | Linux Node -> Win Rust  | HTTPS| 32.8 | ok | ok | ok | OK (Rust acepta cert de Node) |
+| M8b | Win Rust -> Linux Node  | HTTPS| 16.5 | ok | ok | ok | OK (Node acepta cert de Rust) |
+
+W3 cruzado (en M1): file id de archivo y de directorio IDENTICOS en el peer Windows antes/despues del
+renombrado -> renombrado en el sitio tambien Linux->Windows (w3_file_same=True, w3_dir_same=True).
+
+M1 nota (asimetria ESPERADA de nombres, documentada en las instrucciones):
+  - r0 "ok=False" por 1 "extra": Windows RECORTA el punto final de "trailing." -> queda "trailing"
+    (contenido presente, nombre distinto). 8 nombres hostiles tolerados.
+  - r2 "ok=False": Linux conserva los 6 nombres que Windows no puede tener (a:b.txt, aux.txt, case.txt,
+    pipe|name.txt, quote".txt, what?.txt); el peer Windows nunca los tuvo. Asimetria permanente esperada.
+  - OBSERVACION: con nombres incompatibles presentes, el log del peer muestra un CICLO
+    "synchronising -> live: identical" cada ~2-3 s (reconciliacion que nunca se estabiliza). No hay caida
+    ni error; es el "ciclo de reconciliacion" a vigilar. En los escenarios limpios (M2-M6) no se observa.
+
+M9  CAMBIO DE PIN ..... OK
+   Cambio de PIN en host -> peer a pin_required INSTANTANEO (0.0s). PIN erroneo 1111 -> 403 pin_invalid.
+   PIN correcto 7777 -> live en 0.4s. Cambio hecho en el peer durante la pausa LLEGA al host al reconectar
+   (intercambio bidireccional reanudado).
+
+M10 CAIDA BRUSCA ..... OK
+   Parte A (matar peer Windows, host Linux): el host libera la sesion en 22.8s (~20s esperado); al
+     rearrancar el peer, re-sync 201 y re-live 1.0s, reconverge ok.
+   Parte B (matar host Windows, peer Linux): el peer pasa a "reconnecting" al instante. Al rearrancar el
+     host (UUID NUEVO) el peer pasa a "stopped" -> comportamiento POR DISENO (UUID distinto = host
+     reiniciado = parar; no es especifico de Windows). Re-sync explicito -> live 0.9s.
+
+M11 DESCUBRIMIENTO ... OK
+   Windows ve las 4 instancias de Linux: [(55667,http,true),(55668,http,true),(55669,https,false),
+     (55670,https,false)] en <=1s. Linux ve las 4 de Windows igual. compatible=true en HTTP, false en
+     HTTPS (desde instancia HTTP). Windows hospeda -> Linux ve el hosting ("m11pub") en 2.3s.
+   (El bug de connect_timeout de Rust NO rompe el descubrimiento de instancias reales: los puertos
+    ABIERTOS conectan rapido. Solo afecta a la clasificacion/velocidad de puertos CERRADOS en el sweep.)
+
+M12 RENDIMIENTO ...... OK (referencia)
+   5000 files + 64MB (10019 archivos + 128MB). Linux->Windows: r0 ok, total 248s. Windows->Linux: r0 ok,
+   total 214s. Dominado por Wi-Fi (~72 Mbps) + Defender en el lado Windows. Convergencia byte a byte.
+
+CIERRE LIMPIO (fase 2.5) ..... OK (ambas vias)
+   Ctrl+C real (CTRL_C_EVENT) a un host Windows en consola: el host envia "bye host_stopped" y SALE; el
+   peer Linux pasa a "stopped" (no "reconnecting") en 4.5s.
+   Cerrar la ventana (WM_CLOSE / CTRL_CLOSE_EVENT): igual, peer -> "stopped" en 3.7s. SetConsoleCtrlHandler
+   funciona en Windows real; el aviso llega dentro del margen de ~5s.

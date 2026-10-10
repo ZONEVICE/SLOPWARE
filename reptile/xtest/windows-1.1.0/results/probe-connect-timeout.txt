@@ -1,0 +1,6 @@
+﻿connect_timeout(700ms):   703ms  kind=Some(TimedOut) os=None
+connect() blocking:       2030ms  kind=Some(ConnectionRefused) os=Some(10061)
+connect_timeout(700ms):   714ms  kind=Some(TimedOut) os=None
+connect() blocking:       2028ms  kind=Some(ConnectionRefused) os=Some(10061)
+connect_timeout(700ms):   714ms  kind=Some(TimedOut) os=None
+connect() blocking:       2036ms  kind=Some(ConnectionRefused) os=Some(10061)

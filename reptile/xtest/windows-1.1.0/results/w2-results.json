@@ -1,0 +1,162 @@
+[
+  {
+    "name": "w2a-rr",
+    "host": "http://127.0.0.1:55667",
+    "peer": "http://127.0.0.1:55671",
+    "host_dir": "D:\\reptile-xtest-scratch\\w2a-rr-host",
+    "peer_dir": "D:\\reptile-xtest-scratch\\w2a-rr-peer",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 1.1,
+    "r0": {
+      "ok": true,
+      "seconds": 1.0,
+      "tolerated": []
+    },
+    "r1": {
+      "ok": true,
+      "seconds": 1.2,
+      "tolerated": []
+    },
+    "r2": {
+      "ok": true,
+      "seconds": 1.2,
+      "tolerated": []
+    },
+    "summary": {
+      "live_s": 1.1,
+      "r0": {
+        "ok": true,
+        "s": 1.0
+      },
+      "r1": {
+        "ok": true,
+        "s": 1.2
+      },
+      "r2": {
+        "ok": true,
+        "s": 1.2
+      }
+    }
+  },
+  {
+    "name": "w2b-rn",
+    "host": "http://127.0.0.1:55667",
+    "peer": "http://127.0.0.1:55668",
+    "host_dir": "D:\\reptile-xtest-scratch\\w2b-rn-host",
+    "peer_dir": "D:\\reptile-xtest-scratch\\w2b-rn-peer",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 2.1,
+    "r0": {
+      "ok": true,
+      "seconds": 1.4,
+      "tolerated": []
+    },
+    "r1": {
+      "ok": true,
+      "seconds": 1.3,
+      "tolerated": []
+    },
+    "r2": {
+      "ok": true,
+      "seconds": 1.3,
+      "tolerated": []
+    },
+    "summary": {
+      "live_s": 2.1,
+      "r0": {
+        "ok": true,
+        "s": 1.4
+      },
+      "r1": {
+        "ok": true,
+        "s": 1.3
+      },
+      "r2": {
+        "ok": true,
+        "s": 1.3
+      }
+    }
+  },
+  {
+    "name": "w2c-nr",
+    "host": "http://127.0.0.1:55668",
+    "peer": "http://127.0.0.1:55671",
+    "host_dir": "D:\\reptile-xtest-scratch\\w2c-nr-host",
+    "peer_dir": "D:\\reptile-xtest-scratch\\w2c-nr-peer",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 1.0,
+    "r0": {
+      "ok": true,
+      "seconds": 0.5,
+      "tolerated": []
+    },
+    "r1": {
+      "ok": true,
+      "seconds": 1.2,
+      "tolerated": []
+    },
+    "r2": {
+      "ok": true,
+      "seconds": 1.3,
+      "tolerated": []
+    },
+    "summary": {
+      "live_s": 1.0,
+      "r0": {
+        "ok": true,
+        "s": 0.5
+      },
+      "r1": {
+        "ok": true,
+        "s": 1.2
+      },
+      "r2": {
+        "ok": true,
+        "s": 1.3
+      }
+    }
+  },
+  {
+    "name": "w2d-nn",
+    "host": "http://127.0.0.1:55668",
+    "peer": "http://127.0.0.1:55672",
+    "host_dir": "D:\\reptile-xtest-scratch\\w2d-nn-host",
+    "peer_dir": "D:\\reptile-xtest-scratch\\w2d-nn-peer",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 2.1,
+    "r0": {
+      "ok": true,
+      "seconds": 1.5,
+      "tolerated": []
+    },
+    "r1": {
+      "ok": true,
+      "seconds": 1.3,
+      "tolerated": []
+    },
+    "r2": {
+      "ok": true,
+      "seconds": 1.4,
+      "tolerated": []
+    },
+    "summary": {
+      "live_s": 2.1,
+      "r0": {
+        "ok": true,
+        "s": 1.5
+      },
+      "r1": {
+        "ok": true,
+        "s": 1.3
+      },
+      "r2": {
+        "ok": true,
+        "s": 1.4
+      }
+    }
+  }
+]

@@ -146,6 +146,40 @@ pub fn temp_name() -> String {
     format!(".reptile-{}.tmp", random_hex(8))
 }
 
+/// Can the local filesystem store this wire path as-is? Linux holds any byte;
+/// Windows cannot store a segment with a reserved character, a trailing dot or
+/// space, or a reserved device base name (CON, AUX, COM1…). A peer there skips
+/// such a path instead of retrying a download that can never succeed, or that
+/// Windows would silently munge (e.g. "x." -> "x") into an endless round-trip.
+pub fn is_os_representable(wire_path: &str) -> bool {
+    #[cfg(windows)]
+    {
+        const RESERVED: [&str; 22] = [
+            "con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "lpt1",
+            "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
+        ];
+        for segment in wire_path.split('/').filter(|segment| !segment.is_empty()) {
+            if segment.ends_with('.') || segment.ends_with(' ') {
+                return false;
+            }
+            if segment.bytes().any(|b| b < 0x20 || matches!(b, b'<' | b'>' | b':' | b'"' | b'\\' | b'|' | b'?' | b'*'))
+            {
+                return false;
+            }
+            let base = segment.split('.').next().unwrap_or(segment).to_ascii_lowercase();
+            if RESERVED.contains(&base.as_str()) {
+                return false;
+            }
+        }
+        true
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = wire_path;
+        true
+    }
+}
+
 // --- Reading states ---------------------------------------------------------------
 
 fn absent(error: &io::Error) -> bool {
@@ -424,6 +458,19 @@ mod tests {
         assert!(!is_temp_name(".reptile-0123.tmp"));
         assert!(!is_temp_name("reptile-0123abcd.tmp"));
         assert!(is_temp_path("a/b/.reptile-0123abcd.tmp"));
+    }
+
+    #[test]
+    fn os_representable_names() {
+        // Plain names are storable everywhere.
+        assert!(is_os_representable("docs/readme.txt"));
+        assert!(is_os_representable("a/b/c.bin"));
+        // Windows cannot store reserved chars/names, a trailing dot or a device name.
+        let unstorable =
+            ["weird/a:b.txt", "weird/what?.txt", "weird/pipe|name.txt", "weird/trailing.", "weird/aux.txt"];
+        for path in unstorable {
+            assert_eq!(is_os_representable(path), !cfg!(windows), "{path}");
+        }
     }
 
     #[test]

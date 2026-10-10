@@ -737,7 +737,11 @@ impl Engine {
     }
 
     fn is_rejected(&self, path: &str) -> bool {
-        self.st().rejected.iter().any(|rejected| is_same_or_inside(rejected, path))
+        // A name the local OS cannot store (Windows reserved chars/names) is
+        // skipped like an unshared path, so the planner never keeps retrying a
+        // download that can never land, nor lets a munged name round-trip.
+        !crate::fs::entry::is_os_representable(path)
+            || self.st().rejected.iter().any(|rejected| is_same_or_inside(rejected, path))
     }
 
     /// A queue task.
@@ -1131,9 +1135,24 @@ impl Engine {
                 self.schedule_reconcile(400);
                 return Ok(false);
             }
-            self.index.locked().set(path, staged.state);
+            let base = {
+                let mut index = self.index.locked();
+                let base = index.get(path).copied();
+                index.set(path, staged.state);
+                base
+            };
             if let Err(error) = staged.commit() {
-                self.index.locked().delete(path);
+                // Put the base back (a locked target fails here on Windows).
+                // Forgetting it would leave the next reconciliation deciding by
+                // mtime alone, and a host that just restored an older copy
+                // would get the stale local one uploaded over it.
+                {
+                    let mut index = self.index.locked();
+                    match base {
+                        Some(state) => index.set(path, state),
+                        None => index.delete(path),
+                    }
+                }
                 staged.discard();
                 return Err(error.to_string());
             }
@@ -1361,7 +1380,12 @@ impl Engine {
                         return Ok(());
                     }
                 }
-                self.download(&path, current);
+                // A failed download (e.g. the target is locked on Windows) must not
+                // be dropped silently, or the two sides diverge while reporting
+                // "live": reconcile so the file is retried once the obstacle clears.
+                if !self.download(&path, current) {
+                    self.schedule_reconcile(400);
+                }
                 Ok(())
             }
             "unlink" => {
@@ -1714,5 +1738,164 @@ impl SyncingService {
         if let Some(engine) = self.engine() {
             engine.settle();
         }
+    }
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::*;
+    use crate::domain::transport::{Download, OnClose, OnMessage, PeerResult};
+    use crate::fs::entry::read_state;
+    use crate::util::ids::random_hex;
+    use crate::util::logger::Level;
+    use std::fs;
+    use std::io::{self, Read};
+    use std::os::unix::fs::PermissionsExt;
+
+    /// A body that turns its directory read-only once fully read, so the
+    /// commit's rename fails after staging, as a locked target does on Windows.
+    struct LockAtEnd {
+        data: io::Cursor<Vec<u8>>,
+        dir: PathBuf,
+    }
+
+    impl Read for LockAtEnd {
+        fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+            let read = self.data.read(buf)?;
+            if read == 0 {
+                fs::set_permissions(&self.dir, fs::Permissions::from_mode(0o555))?;
+            }
+            Ok(read)
+        }
+    }
+
+    /// A host that only serves downloads.
+    struct DownloadOnly {
+        content: Vec<u8>,
+        mtime_ms: i64,
+        dir: PathBuf,
+    }
+
+    impl PeerApi for DownloadOnly {
+        fn address(&self) -> &str {
+            "127.0.0.1"
+        }
+        fn port(&self) -> u16 {
+            1
+        }
+        fn protocol(&self) -> &str {
+            "http"
+        }
+        fn token(&self) -> Option<String> {
+            None
+        }
+        fn set_token(&self, _: Option<String>) {}
+        fn ping(&self) -> PeerResult<Value> {
+            unimplemented!()
+        }
+        fn connect(&self, _: &str, _: &str) -> PeerResult<Value> {
+            unimplemented!()
+        }
+        fn open_stream(&self, _: OnMessage, _: OnClose) -> PeerResult<Arc<dyn StreamHandle>> {
+            unimplemented!()
+        }
+        fn manifest(&self) -> PeerResult<Value> {
+            unimplemented!()
+        }
+        fn hashes(&self, _: &[String]) -> PeerResult<HashMap<String, String>> {
+            unimplemented!()
+        }
+        fn download(&self, _: &str) -> PeerResult<Download> {
+            let body = LockAtEnd { data: io::Cursor::new(self.content.clone()), dir: self.dir.clone() };
+            Ok(Download { body: Box::new(body), size: self.content.len() as u64, mtime_ms: self.mtime_ms })
+        }
+        fn upload(&self, _: &str, _: &Path, _: u64, _: i64, _: Option<&State>) -> PeerResult<Value> {
+            unimplemented!()
+        }
+        fn ops(&self, _: &[Value]) -> PeerResult<Vec<Value>> {
+            unimplemented!()
+        }
+        fn heartbeat(&self, _: &Value) -> PeerResult<()> {
+            unimplemented!()
+        }
+        fn disconnect(&self) -> PeerResult<()> {
+            Ok(())
+        }
+        fn close(&self) {}
+    }
+
+    /// An engine that was never started: no stream, no watcher, no timers.
+    fn idle_engine(peer: Arc<dyn PeerApi>, root: PathBuf) -> Arc<Engine> {
+        let bus = EventBus::new(|_| {});
+        Arc::new_cyclic(|myself| Engine {
+            peer,
+            share: Value::Null,
+            host: Value::Null,
+            root,
+            activity: Arc::new(ActivityLog::new(bus.clone(), "syncing")),
+            bus,
+            logger: Logger::new("test", Level::Silent),
+            timing: Timing::default(),
+            watcher_timing: WatcherTiming::default(),
+            queue: SerialQueue::new("test-sync-queue"),
+            disk: Mutex::new(()),
+            index: Mutex::new(FileIndex::new()),
+            st: Mutex::new(EngineState {
+                state: "live",
+                state_since: 0,
+                progress: None,
+                notice: None,
+                rejected: BTreeSet::new(),
+                conflicts: Vec::new(),
+                generation: 0,
+                stopped: false,
+                pin: String::new(),
+                reconnect_attempt: 0,
+                reconnect_timer: None,
+                reconnect_at: None,
+                reconcile_timer: None,
+                reconcile_generation: 0,
+                reconcile_retries: 0,
+                reconciling: false,
+                reconciling_generation: 0,
+                last_synced_at: None,
+                timer_ids: 0,
+            }),
+            watcher: Mutex::new(None),
+            stream: Mutex::new(None),
+            heartbeat: Mutex::new(None),
+            myself: myself.clone(),
+        })
+    }
+
+    #[test]
+    fn a_failed_commit_keeps_the_base_it_was_decided_against() {
+        // Root ignores directory permissions, so nothing would fail.
+        // SAFETY: geteuid has no preconditions.
+        if unsafe { libc::geteuid() } == 0 {
+            return;
+        }
+        let root = std::env::temp_dir().join(format!("reptile-commit-{}", random_hex(4)));
+        fs::create_dir_all(&root).unwrap();
+        let target = root.join("a.txt");
+        fs::write(&target, b"local copy").unwrap();
+        let base = read_state(&target).unwrap().unwrap();
+
+        // The host restored an older copy: its mtime is earlier than the base's,
+        // so without a base the next reconciliation would upload the local one.
+        let host =
+            DownloadOnly { content: b"restored".to_vec(), mtime_ms: base.mtime_ms - 3_600_000, dir: root.clone() };
+        let engine = idle_engine(Arc::new(host), root.clone());
+        engine.index.locked().set("a.txt", base);
+
+        let committed = engine.download("a.txt", Some(base));
+        fs::set_permissions(&root, fs::Permissions::from_mode(0o755)).unwrap();
+        let kept = engine.index.locked().get("a.txt").copied();
+        let content = fs::read(&target).unwrap();
+        fs::remove_dir_all(&root).unwrap();
+
+        assert!(!committed);
+        assert_eq!(content, b"local copy");
+        assert_eq!(kept, Some(base));
     }
 }

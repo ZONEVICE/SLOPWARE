@@ -13,7 +13,7 @@ Every application's original generation prompt is kept in its `prompts/init.md` 
 | [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama conversations. | Linux Mint + Codex + GPT-6 Astra + Ultra |
 | [`lurker/`](lurker/) | A standard-library Python gallery that shows every image and video under a directory in one filterable grid, shared over HTTPS on the LAN. | Linux Mint + Claude Code + Opus 5.5 + Max |
 | [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. | Linux Mint + Claude Code + Opus 5 + Max |
-| [`reptile/`](reptile/) | Keeps one directory identical on two LAN computers, in real time and both ways, over HTTP or HTTPS, in two wire-compatible implementations: Node.js, and Rust built for Debian and Windows 10/11. | Linux Mint + Claude Code + Opus 5.5 + Max |
+| [`reptile/`](reptile/) | Keeps one directory identical on two LAN computers, in real time and both ways, over HTTP or HTTPS, in two wire-compatible implementations: Node.js, and Rust built for Debian and Windows 10/11. | Windows 10 + Linux Mint + Claude Code + Opus 5.5 + Max |
 
 ## Conventions
 
@@ -23,6 +23,10 @@ Every application's original generation prompt is kept in its `prompts/init.md` 
 - [`.claude/skills/new-app/SKILL.md`](.claude/skills/new-app/SKILL.md) records the conventions a new application must follow. It is packaged as a Claude Code skill, but the body is plain Markdown with no Claude-specific machinery: any assistant, Codex included, can be pointed at that path and read it as a checklist.
 
 ## Developer Comments
+
+> 9 October 2026
+
+For some reason, Claude Code Opus 5.5 **on Windows** always refused to work on Reptile and AllySwally projects and fell on Opus 4.8
 
 > 8 October 2026
 

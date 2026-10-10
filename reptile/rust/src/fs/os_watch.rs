@@ -365,9 +365,16 @@ mod platform {
             let handle = std::sync::Arc::new(Handle(handle));
             let closed = std::sync::Arc::new(AtomicBool::new(false));
             let (thread_handle, thread_closed) = (handle.clone(), closed.clone());
+            // Wait until the reader thread is live and about to issue its first
+            // ReadDirectoryChangesW, so a change made right after start() is not
+            // lost while the thread waits to be scheduled (it was, under many
+            // concurrent watchers in tests). inotify arms synchronously; here only
+            // the instant between the signal and the call remains.
+            let (ready_tx, ready_rx) = std::sync::mpsc::channel::<()>();
             let reader = std::thread::Builder::new()
                 .name("rdcw".into())
-                .spawn(move || read_loop(&thread_handle, &thread_closed, &sink))?;
+                .spawn(move || read_loop(&thread_handle, &thread_closed, &sink, ready_tx))?;
+            let _ = ready_rx.recv();
             Ok((OsWatch { handle, closed, reader: Mutex::new(Some(reader)) }, Vec::new()))
         }
 
@@ -411,7 +418,7 @@ mod platform {
         }
     }
 
-    fn read_loop(handle: &Handle, closed: &AtomicBool, sink: &Sender<Hint>) {
+    fn read_loop(handle: &Handle, closed: &AtomicBool, sink: &Sender<Hint>, ready: Sender<()>) {
         let mut buffer = vec![0u32; 16 * 1024];
         let filter = FILE_NOTIFY_CHANGE_FILE_NAME
             | FILE_NOTIFY_CHANGE_DIR_NAME
@@ -419,6 +426,8 @@ mod platform {
             | FILE_NOTIFY_CHANGE_SIZE
             | FILE_NOTIFY_CHANGE_LAST_WRITE
             | FILE_NOTIFY_CHANGE_CREATION;
+        // Unblock start(): the next statement is the first ReadDirectoryChangesW.
+        let _ = ready.send(());
         while !closed.load(Ordering::SeqCst) {
             let mut returned = 0u32;
             // SAFETY: synchronous call into our DWORD-aligned buffer.

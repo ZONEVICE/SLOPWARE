@@ -156,13 +156,46 @@ impl Staged {
             }
             _ => {}
         }
-        fs::rename(&self.temp_path, &self.target_path)?;
+        if let Err(error) = fs::rename(&self.temp_path, &self.target_path) {
+            // Windows refuses to replace a read-only file (POSIX replaces it as
+            // long as the directory is writable). Clear the attribute and retry
+            // once; otherwise a read-only file on the peer would never update.
+            if clear_readonly(&self.target_path) {
+                fs::rename(&self.temp_path, &self.target_path)?;
+            } else {
+                return Err(error.into());
+            }
+        }
         Ok(())
     }
 
     pub fn discard(&self) {
         let _ = fs::remove_file(&self.temp_path);
     }
+}
+
+/// Clear a file's read-only attribute. Returns true only when it was set and is
+/// now cleared, so the caller retries the rename exactly once. Windows only: on
+/// POSIX a file in a writable directory can be replaced regardless, so the rename
+/// never fails for this reason and the retry is never needed.
+#[cfg(windows)]
+fn clear_readonly(path: &Path) -> bool {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Storage::FileSystem::{GetFileAttributesW, SetFileAttributesW, FILE_ATTRIBUTE_READONLY};
+    let wide: Vec<u16> = path.as_os_str().encode_wide().chain(std::iter::once(0)).collect();
+    // SAFETY: a NUL-terminated wide path; both calls only read it.
+    unsafe {
+        let attrs = GetFileAttributesW(wide.as_ptr());
+        if attrs == u32::MAX || attrs & FILE_ATTRIBUTE_READONLY == 0 {
+            return false;
+        }
+        SetFileAttributesW(wide.as_ptr(), attrs & !FILE_ATTRIBUTE_READONLY) != 0
+    }
+}
+
+#[cfg(not(windows))]
+fn clear_readonly(_path: &Path) -> bool {
+    false
 }
 
 /// Receive a file into `.reptile-<hex>.tmp` next to its destination, check the
@@ -471,6 +504,24 @@ mod tests {
         let short = stage_file(&root, "a/x.txt", &mut &b"hey"[..], Some(5), 1);
         assert!(matches!(short, Err(FsError::Code("size_mismatch", _))));
         assert_eq!(remove_stale_temp_files(&root), 0);
+        fs::remove_dir_all(&root).unwrap();
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn commit_replaces_a_read_only_file() {
+        // On Windows a read-only target makes the rename fail; commit must clear
+        // the attribute and retry, or a read-only file would never be updated.
+        let root = temp_root();
+        let target = root.join("readme.txt");
+        fs::write(&target, b"old").unwrap();
+        let mut perms = fs::metadata(&target).unwrap().permissions();
+        perms.set_readonly(true);
+        fs::set_permissions(&target, perms).unwrap();
+
+        let staged = stage_file(&root, "readme.txt", &mut &b"new content"[..], Some(11), 1_600_000_000_000).unwrap();
+        staged.commit().unwrap();
+        assert_eq!(fs::read(&target).unwrap(), b"new content");
         fs::remove_dir_all(&root).unwrap();
     }
 

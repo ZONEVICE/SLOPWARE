@@ -1,0 +1,58 @@
+# Fase 3 - Pruebas locales de Windows (NTFS, por 127.0.0.1)
+
+Instancias locales: Rust 55667 (pkg), Node 55668, y 2as instancias Rust 55671 / Node 55672.
+Identidad Rust vs Node IDENTICA en esta PC (address 192.168.111.10, addresses [192.168.111.10,192.168.0.246],
+hostname ATUN) -> la huella de maquina coincide entre implementaciones.
+
+W1  HUELLA + same_directory .......... OK (ambos sentidos)
+    Rust hospeda w1-host, Node sync a w1-host\dentro -> 400 same_directory. Y al reves (Node hospeda,
+    Rust sync) -> 400 same_directory. Las dos implementaciones calculan la misma huella en la misma PC.
+
+W2  Rust<->Rust y Rust<->Node local .. OK (4 combinaciones x rondas 0,1,2)
+    w2a host Rust/peer Rust:  live 1.1s  r0 1.0  r1 1.2  r2 1.2
+    w2b host Rust/peer Node:  live 2.1s  r0 1.4  r1 1.3  r2 1.3
+    w2c host Node/peer Rust:  live 1.0s  r0 0.5  r1 1.2  r2 1.3
+    w2d host Node/peer Node:  live 2.1s  r0 1.5  r1 1.3  r2 1.4
+    Convergencia por SHA-256 en todas. El churn incluye "replaced a file by a directory": funciona en la
+    sincronizacion real con UN watcher (confirma que el fallo del test unitario del watcher es de concurrencia).
+
+W3  RENOMBRADOS EN EL SITIO (file ids) OK
+    Archivo spaces in name.txt -> renamed n.txt: file id NTFS identico antes/despues (...08d06d).
+    Directorio project -> project-renamed: file id identico (...08b88f). Reptile aplica renombrados reales
+    (no borra+recrea). Nombre unicode con n sincroniza. fsutil queryfileid vale tambien para directorios.
+
+W4  ARCHIVO BLOQUEADO ................. HALLAZGO (importante, especifico de Windows)
+    Peer abre readme.txt en exclusiva (FileShare.None) mientras el host lo modifica.
+    - No hay caida (peer ping 200, state live durante y despues).
+    - Tras soltar NO converge (probado hasta 121s). El peer informa "live: both copies are identical"
+      siendo FALSO (divergencia silenciosa). El log del peer no registra nada.
+    - Un cambio en OTRO archivo sincroniza pero NO repara el readme divergente.
+    - Solo se repara cuando ese MISMO archivo vuelve a cambiar en el host.
+    Causa probable: el peer actualiza su indice/base al estado recibido, pero el rename del temporal sobre
+    el archivo bloqueado falla (sharing violation de Windows) de forma silenciosa, dejando indice != disco
+    sin reintento. En Linux no ocurre (POSIX permite reemplazar un archivo abierto).
+
+W5  SOLO LECTURA (attrib +R) .......... HALLAZGO (misma raiz que W4)
+    Peer con readme.txt en +R; el host lo modifica -> NO converge en 30s, attrib sigue +R, sin caida,
+    state "live" (erroneo), log vacio. En Windows no se puede reemplazar un archivo de solo lectura;
+    el fallo es silencioso. (En Linux el rename sobre un archivo +R en un directorio escribible si funciona.)
+    => W4 y W5 son el MISMO fallo: destino no reemplazable en Windows -> divergencia silenciosa sin reintento.
+
+W6  NOMBRES Y RUTAS (Windows host) .... OK (sin fallos graves: ni caida ni bucle; CPU ~0.09s)
+    - Mayus.txt (mayuscula+acento): sincroniza.
+    - nombre de 200 caracteres: sincroniza.
+    - directorios de ruta larga (total 278 car.): se CREAN en el peer.
+    - con.txt / aux.txt (reservados, creados con \\?\): el host los indexa pero el peer no puede crearlos
+      -> omitidos (son "windows-unfriendly", tolerados). Reptile NO se cae con los nombres de dispositivo
+      (que si rompieron os.walk de Python).
+    - leaf.txt dentro de la ruta >~280 car.: el HOST no lo indexa (conto files=5 de 6) -> no se sincroniza,
+      en silencio. LIMITACION de MAX_PATH (no usa \\?\ para abrir archivos muy profundos). No es caida.
+
+W7  RUTAS CON / Y \\ ................. OK
+    POST /api/sync con localPath "D:/reptile-xtest-scratch/w7-fwd" y con "D:\\...\\w7-bwd": ambas 201 en
+    Rust y en Node; ambas implementaciones normalizan a backslashes. Directorios creados.
+
+W8  RENDIMIENTO con Defender activo ... OK funcional; rendimiento informativo
+    populate 10019 archivos + 2x16MB: 84.4s (Defender escanea cada escritura).
+    host indexa 10019 archivos/218 dirs/~57MB. sync+converge r0: 36.3s (converge=7.7s). Peer recibe 10019.
+    Referencia Linux ~2s/20k -> Windows+Defender ~18x mas lento por archivo (sobrecarga de Defender/NTFS).

@@ -17,9 +17,14 @@ import { hostname as osHostname, networkInterfaces } from 'node:os';
  * and can never find another computer on the LAN, which is what discovery is
  * for. An instance on the same machine is still found through the LAN address
  * and through loopback.
+ *
+ * Both the short names Linux reports (zt, vboxnet, vmnet) and the longer adapter
+ * friendly names Windows reports for the same software ("ZeroTier One [...]",
+ * "VirtualBox Host-Only ...", "VMware Network Adapter ...") are listed; Hyper-V
+ * and WSL already match through `veth` ("vEthernet (...)").
  */
 export const VIRTUAL_INTERFACE =
-  /^(lo|docker|br-|veth|virbr|vmnet|vboxnet|lxc|lxd|cni|flannel|cali|weave|tun|tap|utun|zt|tailscale|wg|kube|podman|dummy|ham|nordlynx)/i;
+  /^(lo|docker|br-|veth|virbr|vmnet|vboxnet|lxc|lxd|cni|flannel|cali|weave|tun|tap|utun|zt|zerotier|tailscale|wg|kube|podman|dummy|ham|nordlynx|virtualbox|vmware)/i;
 
 /**
  * IPv4 dotted quad to an unsigned 32-bit integer.

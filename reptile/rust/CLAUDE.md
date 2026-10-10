@@ -129,16 +129,37 @@ deadlocks, not wrong answers.
   directory, on Linux; one recursive `ReadDirectoryChangesW` on the root on
   Windows; elsewhere none, and the watcher rescans every 2 s instead. The diff
   in `fs/watcher.rs` is the Node.js implementation's, phase for phase.
+  **On Windows `start` waits for the reader thread**: it blocks (on a channel)
+  until the thread is live and about to issue its first
+  `ReadDirectoryChangesW`, so a change made right after `start` returns is not
+  lost while the thread waits to be scheduled; without this Windows missed
+  early changes under load (section 5). inotify arms synchronously; a fully
+  synchronous arm on Windows would need overlapped I/O.
 - **Windows file identity**: `fs/entry.rs` opens a handle per lookup for the
   volume serial and file id (the inode), and lists directories with
   `FileIdBothDirectoryInfo` (one handle per directory); FILETIME is converted
-  to milliseconds exactly as libuv and Node.js do.
+  to milliseconds exactly as libuv and Node.js do. `is_os_representable`
+  (`fs/entry.rs`) decides whether the local OS can store a wire path as-is
+  (always true off Windows); the engine skips names it cannot (section 5).
 - **Interfaces and host name** (`util/net.rs`, `util/sys.rs`): `getifaddrs`
   on Unix, `GetAdaptersAddresses` on Windows, both filtered like libuv, so the
-  machine fingerprint matches Node.js's on the same computer.
+  machine fingerprint matches Node.js's on the same computer. `VIRTUAL_PREFIXES`
+  holds both the short names Linux reports (`zt`, `vboxnet`, `vmnet`) and the
+  longer adapter *friendly names* Windows reports for the same software
+  (`zerotier`, `virtualbox`, `vmware`; Hyper-V/WSL match through `veth`). It must
+  stay in sync with Node's `VIRTUAL_INTERFACE`. The fingerprint uses **every**
+  MAC, not this filter, so changing the list never changes the fingerprint.
+- **Discovery probe** (`peer/probe.rs`): `tcp_check` has a Windows-only body
+  that uses WinSock directly: a non-blocking `connect`, `select` on the write
+  and exception sets, then `getsockopt(SO_ERROR)`, so a refusal is `Closed` and
+  silence `Timeout` (on real Windows 10, `connect_timeout` reported refusals as
+  timeouts). Windows takes ~2 s to refuse a connection, which limits sweeps
+  (section 5).
 - **Shutdown**: SIGINT/SIGTERM (a `sigwait` thread, set up before any other
   thread exists) or the console's Ctrl+C/close (`SetConsoleCtrlHandler`) run
-  `App::close`, which says `bye host_stopped` to a connected peer.
+  `App::close`, which says `bye host_stopped` to a connected peer. Verified on
+  real Windows 10: both Ctrl+C and closing the console window reach the peer as
+  `stopped` within the ~5 s the OS allows a `CTRL_CLOSE_EVENT` handler.
 
 ---
 
@@ -175,6 +196,60 @@ deadlocks, not wrong answers.
    Node.js for timestamps right on a half-millisecond, and the two sides would
    see different states for the same file.
 
+The next five were found testing on **real Windows 10** (Wine could not catch
+them). Each is `#[cfg(windows)]` or windows-only in effect; none change Linux.
+
+8. **Refused ports on Windows** (`peer/probe.rs`). `connect_timeout` reported a
+   refused connection as `TimedOut`, so a closed port looked `Unreachable`. The
+   Windows `tcp_check` does a non-blocking `connect` + `select` +
+   `getsockopt(SO_ERROR)` and classifies the refusal. **Trap within the fix:**
+   read `WSAGetLastError()` *immediately* after `connect`; any later call, even
+   freeing memory, resets the thread's last-error and hides the
+   `WSAEWOULDBLOCK` that means "connecting". **Still open:** Windows retries the
+   SYN after a reset, so a refusal arrives after ~2 s (a blocking `connect`
+   measured it), later than the sweep's 700 ms. To a Windows scanner a closed
+   port still looks like a silent host. As a result, a host whose first scanned
+   port is closed is not swept further, and an instance on another of its ports
+   goes unnoticed until it is entered by hand. Node.js has the same limitation.
+   `tests/discovery.rs` gives Windows a longer budget. A candidate fix is
+   `SIO_TCP_INITIAL_RTO` with no SYN retransmissions; it must be measured on
+   real Windows first.
+9. **The Windows watcher must arm before `start` returns** (`fs/os_watch.rs`).
+   The first `ReadDirectoryChangesW` is issued inside the reader thread; if
+   `start` returned before the thread ran, a change made right away was lost.
+   Under many parallel watchers (the test suite) this dropped *all* events for a
+   watcher. `start` now waits on a channel the thread signals just before its
+   first read, which leaves only the instant between the signal and the call
+   (inotify arms synchronously).
+10. **Windows cannot replace a locked or read-only file, silently diverging**
+    (`fs/mutate.rs`, `domain/syncing.rs`). `commit`'s `rename` fails on a
+    read-only or exclusively-locked target (POSIX replaces it if the directory
+    is writable). The peer used to update its index and move on, so the two
+    sides diverged while reporting "live". Now: `commit` clears the read-only
+    attribute (`SetFileAttributesW`, Windows only) and retries; if the rename
+    still fails, the index gets back the **base** the download was decided
+    against (Rust used to forget it and Node to keep the new state; without the
+    base the next reconciliation goes by mtime, and a host that had just
+    restored an older copy got the stale local one uploaded over it); and a
+    failed live `write` schedules a reconciliation, so a locked file converges
+    once the lock is released. Shared rule, fixed in both implementations;
+    `domain::syncing::tests` covers the base (Unix: the commit is made to fail
+    with directory permissions).
+11. **Names one OS cannot store cause an endless reconcile loop**
+    (`fs/entry.rs::is_os_representable`, used by `domain/syncing.rs::is_rejected`).
+    Syncing a directory with names Windows cannot create (`a:b.txt`, `aux.txt`,
+    a trailing dot, …) made the peer re-reconcile every 2-3 s forever, and
+    `trailing.` round-tripped because Windows silently stores it as `trailing`.
+    Such paths are now skipped like unshared ones. Shared rule (Node:
+    `fs/entry.js::isOsRepresentable`); on Linux it is always representable, so
+    nothing is skipped there. It complements the character filter already in
+    `wire`/`normalizeWirePath`, adding trailing dot/space and reserved names.
+12. **Windows silently blocks the listener in the firewall** (deployment, not
+    code). On first run Windows created inbound *Block* rules ("Query User…")
+    for `reptile.exe` instead of showing the allow prompt, so no peer could
+    reach it until the app was allowed. Worth a note in the README/installer, or
+    sign the executable.
+
 ---
 
 ## 6. Tests
@@ -187,20 +262,25 @@ REPTILE_TEST_LOG=debug cargo test --test sync -- --nocapture
 
 | Where | Tests | Covers |
 | --- | --- | --- |
-| unit tests in `src/` | 49 | wire paths, IPv4 math and interface filtering, the machine fingerprint, URL encoding, DER and the certificate, queues and timers, the event bus, entry states, the index and its scaling, the planner, the PIN, the selection, HTTP framing, the guard, configuration, the embedded panel |
-| `tests/watcher.rs` | 17 | operations derived from real filesystem changes, watch bookkeeping |
+| unit tests in `src/` | 52 | wire paths, IPv4 math and interface filtering (incl. Windows adapter names, `windows_adapter_friendly_names_are_virtual`), the machine fingerprint, URL encoding, DER and the certificate, queues and timers, the event bus, entry states and `is_os_representable`, the index and its scaling, the planner, the PIN, the selection, HTTP framing, the guard, configuration, the embedded panel, the engine keeping its base when a commit fails (Unix only). Plus one Windows-only: `fs::mutate::commit_replaces_a_read_only_file`. |
+| `tests/watcher.rs` | 17 | operations derived from real filesystem changes, watch bookkeeping. Relies on `start` waiting for the Windows reader thread (section 5 item 9); without it this file is flaky on Windows under parallelism. |
 | `tests/sync.rs` | 21 | initial sync, live sync both ways, conflicts, hashes, safety |
 | `tests/connection.rs` | 25 | one peer, busy, timeouts, protocols, stopping, crashes, reconnection, modes, the PIN |
 | `tests/selection.rs` | 10 | unchecked items on every peer operation and in a live sync |
 | `tests/http.rs` | 10 | panel files, API, SSE, peer authentication, guard, keep-alive hint, port walk |
 | `tests/https.rs` | 5 | HTTPS end to end, pinning, a new certificate on every start |
-| `tests/discovery.rs` | 6 | ping, probe, discovery, incompatible protocols, the scan switch |
+| `tests/discovery.rs` | 6 | ping, probe, discovery, incompatible protocols, the scan switch. The closed-port probe case uses a longer budget on Windows, which takes ~2 s to refuse a connection. |
 | `tests/interop.rs` | 7 | Rust peer of a Node.js host and the reverse, HTTP and HTTPS; PIN change; same-directory refusal across implementations; mutual discovery |
 
-150 in total. `tests/common/mod.rs` starts isolated in-process instances on
+153 in total on Linux, 152 on Windows (a few tests are platform-only).
+`tests/common/mod.rs` starts isolated in-process instances on
 ephemeral ports with temporary certificate directories, discovery off, fast
 watcher timings and fast heartbeats. **When you change behaviour, add a test
 that would have failed before**, and check that it does fail without the fix.
+Windows-only tests are `#[cfg(windows)]`; a Windows-specific assertion inside a
+shared test keys off `cfg!(windows)` so Linux keeps the strict version. The
+whole suite is green on real Windows 10 (built with MSVC — see section 7),
+`cargo clippy --all-targets` included.
 
 ---
 
@@ -217,6 +297,25 @@ with `zig cc -shared -target x86_64-windows-gnu ... -ladvapi32`) next to
 `reptile.exe`. `../bench/bench.mjs --host-cmd "wine reptile.exe"
 --host-windows` then syncs it against a Linux instance; this is how the
 Windows watcher, file ids and FILETIME handling were checked.
+
+### Building and testing on real Windows
+
+`cargo` needs a linker. The MSVC toolchain
+(`cargo +stable-x86_64-pc-windows-msvc`) is the simplest: `rustc` finds the
+Visual Studio tools by itself, no "Developer Command Prompt" needed. The GNU
+toolchain works only if a MinGW `gcc` is on `PATH` (a default
+`x86_64-pc-windows-gnu` install does not ship one, so it fails to link —
+watch for that). Note `ring` compiles a little C and so needs the chosen C
+toolchain.
+
+The whole product and both test suites were validated on **real Windows 10**
+(not just Wine) in this repository's history: all of `cargo test`, `npm test`
+and `cargo clippy` pass. The traps that only real Windows exposes are in
+section 5 items 8-12. When you touch any Windows path (`os_watch.rs`,
+`probe.rs`, `entry.rs` file ids / `is_os_representable`, `net.rs` interface
+filtering, `mutate.rs` `commit`), re-run on a real Windows box if you can:
+Wine does not reproduce the firewall, the slow refusals (SYN retries after a
+reset), the locked / read-only file semantics, or the name munging.
 
 ---
 

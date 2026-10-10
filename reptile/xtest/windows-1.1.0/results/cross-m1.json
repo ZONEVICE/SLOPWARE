@@ -1,0 +1,58 @@
+[
+  {
+    "scenario": "m1",
+    "mode": "host=Linux peer=Windows",
+    "host": "http://192.168.0.241:55667",
+    "peer": "http://127.0.0.1:55667",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 32.6,
+    "r0": {
+      "ok": false,
+      "s": 180,
+      "counts": {
+        "missing": 0,
+        "extra": 1,
+        "changed": 0,
+        "tolerated": 8
+      },
+      "missing": [],
+      "extra": [
+        "r1/weird/trailing"
+      ],
+      "changed": [],
+      "tolerated_n": 8
+    },
+    "w3_before_file": "El identificador de archivo es 0x000000000000000000020000000995e1",
+    "w3_before_dir": "El identificador de archivo es 0x00000000000000000002000000099499",
+    "r1": {
+      "ok": true,
+      "s": 13.2,
+      "tolerated_n": 7
+    },
+    "w3_after_file": "El identificador de archivo es 0x000000000000000000020000000995e1",
+    "w3_after_dir": "El identificador de archivo es 0x00000000000000000002000000099499",
+    "w3_file_same": true,
+    "w3_dir_same": true,
+    "r2_linux": {
+      "ok": false,
+      "s": 150,
+      "counts": {
+        "missing": 0,
+        "extra": 6,
+        "changed": 0,
+        "tolerated": 0
+      },
+      "missing": [],
+      "extra": [
+        "r1/weird/a:b.txt",
+        "r1/weird/aux.txt",
+        "r1/weird/case.txt",
+        "r1/weird/pipe|name.txt",
+        "r1/weird/quote\".txt",
+        "r1/weird/what?.txt"
+      ],
+      "changed": []
+    }
+  }
+]

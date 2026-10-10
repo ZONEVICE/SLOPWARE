@@ -1,0 +1,3 @@
+Reptile-xtest Inbound TCP 55667-55690 Allow Any (creada 2026-10-08T20:14:46.2785361-06:00)
+Auto-block reptile.exe borrada: Name=TCP Query User{53166C48-5FD1-4FD2-8110-8F6800C14CEA}D:\reptile-xtest-scratch\pkg\reptile-1.1.0-windows-x86_64\reptile.exe DisplayName=reptile Inbound Block Profile=Private, Public
+Auto-block reptile.exe borrada: Name=UDP Query User{B7D820D3-E9E0-41A6-8D9B-B4ECC13580B7}D:\reptile-xtest-scratch\pkg\reptile-1.1.0-windows-x86_64\reptile.exe DisplayName=reptile Inbound Block Profile=Private, Public

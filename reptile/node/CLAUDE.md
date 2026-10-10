@@ -97,6 +97,12 @@ protocol, the real port (set after the port walk), live LAN addresses
 (`src/lib/net.js` skips Docker/VPN/VM interfaces), and a machine fingerprint
 (host name + MACs, `../CLAUDE.md` 4.2) used only to refuse syncing a directory
 into itself on the same computer, whichever implementation the other side runs.
+`VIRTUAL_INTERFACE` (`src/lib/net.js`) matches by name; on Windows
+`os.networkInterfaces()` is keyed by the adapter *friendly name*, so the regex
+lists `zerotier|virtualbox|vmware` (Hyper-V/WSL match through `veth`) on top of
+the Linux short names. Keep it in sync with Rust's `VIRTUAL_PREFIXES`. The
+fingerprint uses every MAC, not this filter, so editing the list never changes
+the fingerprint.
 
 ### 3.2 Discovery
 
@@ -342,6 +348,32 @@ note is so nobody reintroduces it.
     entries themselves); removals are grouped under their top-most ancestor in
     one pass; paths are sorted with `sortWirePaths` (one key per path).
 
+The next two were found testing on **real Windows 10**; both are shared rules,
+fixed in Rust too (see `../rust/CLAUDE.md` section 5 items 10-11). They are
+no-ops on Linux.
+
+18. **Windows cannot replace a locked or read-only file, diverging silently**
+    (`src/fs/mutate.js` `commit`, `src/domain/syncing.js` `download` /
+    `applyRemoteOne`). `rename` over a read-only or exclusively-locked target
+    fails on Windows (POSIX replaces it if the directory is writable). The peer
+    used to set the index and move on, so the two sides diverged while reporting
+    "live". Now `commit` clears the read-only attribute (`chmod … | 0o200`,
+    Windows only: on POSIX the rename failed for another reason, and the file's
+    permissions are left alone) and retries; if the commit still fails,
+    `download` puts back the **base** the decision was made against and discards
+    the temp file (keeping the new state, or forgetting the base, left the next
+    reconciliation to go by mtime, which uploaded a stale local copy over an
+    older one the host had just restored); and a failed live `write` calls
+    `scheduleReconcile`, so a locked file converges once the lock is released.
+19. **Names one OS cannot store loop the reconciler** (`src/fs/entry.js`
+    `isOsRepresentable`, used by `src/domain/syncing.js` `isRejected`). A
+    directory with names Windows cannot create (`a:b.txt`, `aux.txt`, a trailing
+    dot, …) made the Windows peer re-reconcile every 2-3 s forever, and
+    `trailing.` round-tripped (Windows stores it as `trailing`). Such paths are
+    now skipped like unshared ones. It is Windows-only in effect (on Linux every
+    name is representable) and complements the character filter already in
+    `normalizeWirePath` (adds trailing dot/space and reserved device names).
+
 ---
 
 ## 6. Tests
@@ -355,27 +387,34 @@ REPTILE_TEST_LOG=debug npm test           # show the instances' logs
 
 | File | Tests | Covers |
 | --- | --- | --- |
-| `lib.test.js` | 41 | IPv4 math, subnets, interface filtering, wire paths and their fast sort, NDJSON, queues, event bus, PIN rules, entry states, the index and its scaling, reporters |
+| `lib.test.js` | 43 | IPv4 math, subnets, interface filtering (incl. Windows adapter friendly names), wire paths and their fast sort, NDJSON, queues, event bus, PIN rules, entry states and `isOsRepresentable`, the index and its scaling, reporters |
 | `startup.test.js` | 13 | flags, default port 55667, the free-port walk and its limits |
-| `cert.test.js` | 7 | openssl output, names, key match, TLS handshake, replacement on every start |
+| `cert.test.js` | 7 | openssl output, names, key match, TLS handshake, replacement on every start (the 0o600 key-mode check runs off Windows only) |
 | `discovery.test.js` | 14 | ping endpoint, probe, discovery, self-exclusion, incompatible protocols, the scan switch, manual check |
-| `paths.test.js` | 17 | host and sync path validation, the content tree |
+| `paths.test.js` | 17 | host and sync path validation, the content tree (casing compared case-insensitively on Windows; the `chmod`-based permission cases skip on Windows) |
 | `selection.test.js` | 16 | selection rules, enforcement on every peer operation, renames on the host |
 | `planner.test.js` | 21 | every reconciliation rule |
 | `watcher.test.js` | 17 | the operations derived from real filesystem changes; watches follow renamed and owner-created directories, are released, skip unshared insides; no retry busy loop |
-| `sync.test.js` | 30 | initial sync, live sync both ways (create, modify, rename, delete, files and directories), conflicts, safety |
+| `sync.test.js` | 31 | initial sync, live sync both ways (create, modify, rename, delete, files and directories), conflicts, safety (including a commit that fails keeping its base; POSIX only) |
 | `pin.test.js` | 9 | right/wrong PIN, unlimited retries, change while connected and resume |
 | `connection.test.js` | 19 | one peer, busy, timeouts, protocol mismatch, stop hosting, reconnection, mode rules |
 | `https.test.js` | 4 | HTTPS end to end, PIN flow, certificate pinning |
 | `http.test.js` | 13 | static files, API, SSE, peer authentication, the guard |
+| `mutate.test.js` | 2 | `commit` replaces a read-only file (Windows only), and leaves the file's permissions alone when it fails (POSIX only) |
 | `browser.test.js` | 3 | the whole control panel flow in headless Chromium, HTTPS, phone layout |
 
-224 in total. `tests/helpers/instances.js` starts isolated instances on
+229 in total. `tests/helpers/instances.js` starts isolated instances on
 ephemeral ports with temporary certificate directories, discovery off (or
 limited to loopback and explicit ports), fast watcher timings and fast
 heartbeats (`config.timing`). `tests/helpers/browser.js` is the
 dependency-free Chromium driver. Interoperability with Rust is tested from
 `../rust/tests/interop.rs`.
+
+Platform-specific assertions key off `process.platform` so a shared test keeps
+its strict form on Linux; a few cases that cannot exist on Windows (POSIX
+`chmod` making a directory unreadable/non-writable) are `skip`ped there with a
+reason. The suite is green on real Windows 10 (`REPTILE_SKIP_BROWSER_TESTS=1`
+when there is no Chromium): 0 failures, the POSIX-only cases skipped.
 
 **When you change behaviour, add a test that would have failed before.** Check
 that it does fail without the fix: two layers of protection can make a test

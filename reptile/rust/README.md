@@ -32,8 +32,11 @@ chmod +x reptile-1.1.0-linux-x86_64
 
 **Windows 10 and 11** (x86_64): unzip `reptile-1.1.0-windows-x86_64.zip` and
 run `reptile.exe` from a terminal (or double-click it). The first time, Windows
-Firewall asks whether to allow it on private networks: allow it, or other
-computers cannot reach it.
+Firewall asks whether to allow it: allow it for the network you are on
+(Windows calls many home networks "Public"), or other computers cannot reach
+it. A dismissed prompt leaves a rule that blocks `reptile.exe`, and a block
+rule wins over any allow rule. Check *Windows Defender Firewall → Allow an app
+through Windows Firewall* if peers cannot connect.
 
 These files are built by `scripts/package.sh` (below) into `dist/`.
 
@@ -94,10 +97,10 @@ cargo install --locked cargo-zigbuild cargo-deb
 ```
 
 The `.deb` also needs `dpkg-dev`, present on any Debian-family system. The
-Windows build is cross-compiled for the `x86_64-pc-windows-gnu` target and was
-checked under Wine; building natively on Windows with the MSVC toolchain should
-work as well (nothing in the code is toolchain-specific), but it has not been
-tried.
+Windows build is cross-compiled for the `x86_64-pc-windows-gnu` target. On
+Windows itself, the MSVC toolchain (`cargo +stable-x86_64-pc-windows-msvc`)
+builds it and passes the whole test suite; the GNU toolchain needs a MinGW
+`gcc` on `PATH`.
 
 ## Tests
 

@@ -41,7 +41,7 @@ import {
 } from '../src/lib/wirePath.js';
 import { assertPin, generatePin, pinMatches } from '../src/domain/pin.js';
 import { AppError, toAppError } from '../src/domain/errors.js';
-import { identityKey, isTempName, roundMtime, sameState, tempName } from '../src/fs/entry.js';
+import { identityKey, isOsRepresentable, isTempName, roundMtime, sameState, tempName } from '../src/fs/entry.js';
 import { commitOp, FileIndex } from '../src/fs/fileIndex.js';
 
 /** A fake `os.networkInterfaces()` with a LAN card, Docker and loopback. */
@@ -107,6 +107,31 @@ describe('local interfaces', () => {
     assert.equal(primaryAddress(fakeInterfaces), '192.168.0.246');
   });
 
+  test('Windows adapter friendly names (ZeroTier, VMware, VirtualBox, vEthernet) are not the LAN', () => {
+    // On Windows os.networkInterfaces() is keyed by the adapter friendly name.
+    const windows = () => ({
+      'ZeroTier One [8bd5124fd689aad3]': [
+        { address: '192.168.111.10', netmask: '255.255.255.0', family: 'IPv4', internal: false, mac: 'd2:c8:22:0d:cd:5f', cidr: '192.168.111.10/24' },
+      ],
+      'vEthernet (Default Switch)': [
+        { address: '172.23.128.1', netmask: '255.255.240.0', family: 'IPv4', internal: false, mac: '00:15:5d:b1:0b:73', cidr: '172.23.128.1/20' },
+      ],
+      'VMware Network Adapter VMnet1': [
+        { address: '192.168.80.1', netmask: '255.255.255.0', family: 'IPv4', internal: false, mac: '00:50:56:c0:00:01', cidr: '192.168.80.1/24' },
+      ],
+      'VirtualBox Host-Only Ethernet Adapter': [
+        { address: '192.168.56.1', netmask: '255.255.255.0', family: 'IPv4', internal: false, mac: '0a:00:27:00:00:1b', cidr: '192.168.56.1/24' },
+      ],
+      'Wi-Fi': [
+        { address: '192.168.0.246', netmask: '255.255.255.0', family: 'IPv4', internal: false, mac: 'c0:06:c3:91:29:f1', cidr: '192.168.0.246/24' },
+      ],
+    });
+    assert.deepEqual(lanAddresses(windows), ['192.168.0.246']);
+    assert.equal(primaryAddress(windows), '192.168.0.246');
+    // The fingerprint still depends on every MAC, so it keeps matching Rust on the same PC.
+    assert.notEqual(machineFingerprint(windows), machineFingerprint(() => ({ 'Wi-Fi': windows()['Wi-Fi'] })));
+  });
+
   test('with no LAN at all, loopback is the primary address', () => {
     assert.equal(primaryAddress(() => ({ lo: fakeInterfaces().lo })), '127.0.0.1');
   });
@@ -159,11 +184,17 @@ describe('wire paths', () => {
   });
 
   test('joining onto the root re-checks containment', () => {
-    assert.equal(resolveWirePath('/srv/share', 'a/b'), '/srv/share/a/b');
-    assert.equal(resolveWirePath('/srv/share', ''), '/srv/share');
-    assert.throws(() => resolveWirePath('/srv/share', '../x'), /escapes/);
-    assert.equal(wirePathOf('/srv/share', '/srv/share/a/b'), 'a/b');
-    assert.equal(wirePathOf('/srv/share', '/srv/other'), null);
+    // resolveWirePath builds a LOCAL filesystem path, so the fixtures are
+    // Windows-shaped on Windows (a POSIX root resolves against the current drive).
+    const win = process.platform === 'win32';
+    const root = win ? 'C:\\srv\\share' : '/srv/share';
+    const joined = win ? 'C:\\srv\\share\\a\\b' : '/srv/share/a/b';
+    const other = win ? 'C:\\srv\\other' : '/srv/other';
+    assert.equal(resolveWirePath(root, 'a/b'), joined);
+    assert.equal(resolveWirePath(root, ''), root);
+    assert.throws(() => resolveWirePath(root, '../x'), /escapes/);
+    assert.equal(wirePathOf(root, joined), 'a/b');
+    assert.equal(wirePathOf(root, other), null);
   });
 
   test('family relations', () => {
@@ -349,6 +380,15 @@ describe('entry states and the file index', () => {
     assert.ok(sameState(null, undefined));
     assert.ok(!sameState(file, null));
     assert.ok(!sameState(file, { kind: 'dir', size: 0, mtimeMs: 1000 }));
+  });
+
+  test('names the local OS cannot store are detected (Windows reserved chars/names)', () => {
+    assert.ok(isOsRepresentable('docs/readme.txt'));
+    assert.ok(isOsRepresentable('a/b/c.bin'));
+    const unstorable = ['weird/a:b.txt', 'weird/what?.txt', 'weird/pipe|name.txt', 'weird/trailing.', 'weird/aux.txt'];
+    for (const path of unstorable) {
+      assert.equal(isOsRepresentable(path), process.platform !== 'win32', path);
+    }
   });
 
   test('mtimes are rounded, not truncated', () => {

@@ -1,0 +1,449 @@
+npm warn Unknown global config "msvs_version". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> reptile@1.1.0 test
+> node --test
+
+﹣ control panel in a browser (0.7455ms) # no Chromium/Chrome found
+▶ self-signed certificate
+  ✖ is written to the directory as key.pem and cert.pem (48.4408ms)
+  ✔ is a real X.509 server certificate with the right names (38.8144ms)
+  ✔ every run replaces the previous certificate with a new one (86.2172ms)
+  ✔ serves TLS: a client completes a handshake with it (69.9344ms)
+  ✔ a missing openssl binary gives an actionable message (5.0629ms)
+  ✔ the OpenSSL configuration is not injectable through host names (0.3179ms)
+  ✔ an HTTPS instance generates its certificate at startup and serves with it (104.658ms)
+✖ self-signed certificate (355.6392ms)
+▶ one connection per hosted directory
+  ✔ a second instance is refused with a clear message, even with the right PIN (142.5252ms)
+  ✔ the discovery answer says the directory is busy (78.5475ms)
+  ✔ once the peer leaves, another instance can connect (102.4999ms)
+  ✔ a peer that vanishes without saying goodbye frees the slot after a timeout (1705.4727ms)
+  ✔ the same instance reconnecting replaces its own previous session (14.0306ms)
+✔ one connection per hosted directory (2044.8627ms)
+▶ protocols must match
+  ✔ an HTTP instance cannot sync from an HTTPS one (74.2911ms)
+  ✔ an HTTPS instance cannot sync from an HTTP one (62.4814ms)
+  ✔ the host refuses a peer that declares another protocol (9.2372ms)
+✔ protocols must match (146.5328ms)
+▶ ending a session
+  ✔ stopping hosting disconnects the peer and tells it why (595.1448ms)
+  ✔ a host process that shuts down cleanly says goodbye (106.4955ms)
+  ✔ a peer notices a host that crashes and keeps trying to reconnect (1102.6699ms)
+  ✔ a reconciliation pending from before a drop does not stall the new connection (1105.9788ms)
+  ✔ a peer resumes on its own after a network interruption (1230.3154ms)
+✔ ending a session (4141.2624ms)
+▶ one mode at a time
+  ✔ an instance cannot sync from itself (13.797ms)
+  ✔ switching to sync stops hosting, but only after the PIN was accepted (27.4197ms)
+  ✔ hosting while syncing stops syncing first (68.865ms)
+  ✔ hosting another directory requires cancelling the current one first (14.3484ms)
+  ✔ a directory cannot be synced into itself on the same computer (17.8796ms)
+  ✔ syncing needs a target that is actually hosting (14.9009ms)
+✔ one mode at a time (157.7327ms)
+▶ ping endpoint
+  ✔ identifies the instance as Reptile, with hostname, UUID and protocol (39.2778ms)
+  ✔ says whether it is hosting, and which directory, never where it is on disk (16.8509ms)
+  ✔ every process has its own session UUID (16.8788ms)
+✔ ping endpoint (74.7806ms)
+▶ probe
+  ✔ a closed port is recognised as such, quickly (9.4466ms)
+  ✔ an HTTP server that is not Reptile is ignored (7.1606ms)
+  ✔ finds an instance whatever protocol it speaks (77.5996ms)
+✔ probe (94.8665ms)
+▶ discovery
+  ✔ finds the other instances on the scanned ports (68.979ms)
+  ✔ an instance never lists itself, even when it scans its own port (390.6903ms)
+  ✔ shows which directory an instance hosts, and updates it quickly (346.2951ms)
+  ✔ instances of the other protocol are listed as incompatible (140.5537ms)
+  ✔ an instance that stops is forgotten (1287.2111ms)
+  ✔ the scan can be switched off and on from the status bar (1066.9997ms)
+  ✔ scanning can start switched off (--no-scan) (18.6829ms)
+  ✔ a manual address is verified on request (33.6502ms)
+✔ discovery (3354.2283ms)
+▶ control panel files
+  ✔ the page, its styles and its scripts are served (52.9566ms)
+  ✔ unknown paths are 404, API ones as JSON (12.8436ms)
+  ✔ a wrong method is 405 (9.7231ms)
+✔ control panel files (76.9408ms)
+▶ control panel API
+  ✔ the state snapshot has everything the status bar needs (14.8174ms)
+  ✔ state changes are pushed over server-sent events (178.3217ms)
+  ✔ bodies must be JSON objects (11.6636ms)
+✔ control panel API (205.5134ms)
+▶ peer API authentication
+  ✔ everything but ping and connect needs a session token (19.329ms)
+  ✔ connect needs the PIN, and hands out a token that works (14.2808ms)
+✔ peer API authentication (34.1357ms)
+▶ control panel guard
+  ✔ requests from this computer are allowed, from elsewhere refused (0.5523ms)
+  ✔ --remote-ui opens the panel to the network (0.2023ms)
+  ✔ a foreign Host header is refused (DNS rebinding) (0.1761ms)
+  ✔ cross-site writes are refused (0.2755ms)
+  ✔ the running server applies the guard to the panel but not to peers (9.6634ms)
+✔ control panel guard (11.2637ms)
+▶ synchronisation over HTTPS
+  ✔ initial and live synchronisation work in both directions (668.4912ms)
+  ✔ the PIN change flow works over HTTPS too (372.4694ms)
+  ✔ the host certificate is pinned for the whole session (53.5469ms)
+  ✔ a certificate change mid-session is refused (81.2388ms)
+✔ synchronisation over HTTPS (1177.4051ms)
+▶ IPv4 arithmetic
+  ✔ dotted quads convert both ways (0.9382ms)
+  ✔ netmasks become prefix lengths (0.1978ms)
+  ✔ a /24 lists its 254 usable hosts (0.3295ms)
+  ✔ wider subnets are narrowed to the /24 around the address (0.2128ms)
+  ✔ narrower subnets are respected (1.2033ms)
+  ✔ private ranges and loopback are recognised (0.3658ms)
+✔ IPv4 arithmetic (4.7959ms)
+▶ local interfaces
+  ✔ virtual interfaces (Docker, VPNs) are not the LAN (0.7613ms)
+  ✔ with no LAN at all, loopback is the primary address (0.1939ms)
+  ✔ scan targets are the LAN /24 plus loopback, never the Docker /16 (0.44ms)
+  ✔ every own address is recognised, IPv6 included (0.3778ms)
+  ✔ the machine fingerprint is stable and depends on the hardware (4.7661ms)
+  ✔ port lists are described as ranges (0.2544ms)
+  ✔ host and port specifications expand (0.5257ms)
+✔ local interfaces (7.8753ms)
+▶ wire paths
+  ✔ valid paths are canonicalised (0.3486ms)
+  ✔ anything that could escape the root is refused (0.1487ms)
+  ✖ joining onto the root re-checks containment (1.2748ms)
+  ✔ family relations (0.3031ms)
+  ✔ sorting keeps every parent before its children (0.1515ms)
+  ✔ the fast sort agrees with the comparator (0.2187ms)
+✖ wire paths (2.8094ms)
+▶ NDJSON framing
+  ✔ messages survive arbitrary chunking (0.3758ms)
+  ✔ a malformed line is reported and skipped (0.1781ms)
+✔ NDJSON framing (0.6772ms)
+▶ concurrency primitives
+  ✔ a serial queue runs one task at a time, in order (65.9659ms)
+  ✔ clearing a queue drops tasks that have not started (31.2265ms)
+  ✔ a failing task rejects its own promise only (0.6446ms)
+  ✔ a mutex serialises sections (77.6782ms)
+  ✔ a pool bounds concurrency and collects failures (47.1662ms)
+  ✔ backoff grows and is capped (0.2808ms)
+✔ concurrency primitives (223.589ms)
+▶ event bus
+  ✔ delivers in order and survives a throwing listener (0.3758ms)
+✔ event bus (0.4668ms)
+▶ PIN rules
+  ✔ generated PINs are four digits, zero padded (0.7793ms)
+  ✔ only exactly four digits are accepted (0.6ms)
+  ✔ comparison is exact (0.1796ms)
+✔ PIN rules (1.7664ms)
+▶ errors
+  ✔ unknown errors become opaque 500s (0.2212ms)
+✔ errors (0.3047ms)
+▶ entry states and the file index
+  ✔ states compare by kind, size and mtime (0.2402ms)
+  ✔ mtimes are rounded, not truncated (0.1046ms)
+  ✔ temporary names are recognised (0.298ms)
+  ✔ the index follows renames with every descendant and keeps identities (0.6397ms)
+  ✔ committing operations updates the index like the disk (0.2835ms)
+✔ entry states and the file index (1.7931ms)
+▶ reporters
+  ✔ the console reporter narrates events and detaches cleanly (2.369ms)
+✔ reporters (2.4719ms)
+▶ file index structure
+  ✔ descendants are found even when intermediate directories are not indexed (0.2735ms)
+  ✔ deleting a directory entry keeps its children reachable until they go too (0.2072ms)
+  ✔ subtree operations scale with the subtree, not the index (49.3334ms)
+✔ file index structure (51.0075ms)
+▶ directory to host
+  ✔ an empty value asks for a path (1.1303ms)
+  ✔ a relative path is refused (0.2857ms)
+  ✔ a path that does not exist is reported (2.0415ms)
+  ✔ a file is not a directory (0.5892ms)
+  ✖ a readable directory is accepted, with its size (2.4883ms)
+  ✖ a directory whose content cannot be read is refused (2.6143ms)
+  ✔ the check is available to the control panel while typing (38.4576ms)
+✖ directory to host (56.1514ms)
+▶ directory to sync into
+  ✔ a missing directory will be created when its parent is writable (2.9636ms)
+  ✔ an empty existing directory is fine (1.5386ms)
+  ✔ a non-empty directory is accepted with a merge warning (2.1828ms)
+  ✔ a file, a relative path and the filesystem root are refused (1.9355ms)
+  ✖ a directory that cannot be written is refused (1.9366ms)
+  ✔ overlapping paths are detected (0.4977ms)
+✖ directory to sync into (11.7176ms)
+▶ content tree
+  ✔ lists everything, directories first, in natural order, flagging links (21.2895ms)
+  ✖ an unreadable subdirectory is listed with an error instead of failing (4.7117ms)
+  ✔ the walk never reports symlinks or temporary transfer files (3.9068ms)
+  ✔ the control panel receives the tree of a verified directory (13.1983ms)
+✖ content tree (43.5846ms)
+▶ connecting with a PIN
+  ✔ the correct PIN connects (120.4541ms)
+  ✔ a wrong PIN is refused, and can be retried without limit (145.7217ms)
+  ✔ a PIN must be exactly four digits (25.7217ms)
+  ✔ hosting generates a PIN when none is given, and suggests one (9.2526ms)
+✔ connecting with a PIN (302.8928ms)
+▶ changing the PIN
+  ✔ without a peer connected, it simply changes (11.1508ms)
+  ✔ a random new PIN is always different from the current one (21.8128ms)
+  ✔ the old PIN stops working, the new one works (27.821ms)
+  ✔ with a peer connected: it is cut off at once, asked for the new PIN, and resumes with it (1004.1811ms)
+  ✔ a PIN is only asked for when one is needed (78.2095ms)
+✔ changing the PIN (1144.0286ms)
+▶ first synchronisation (no base): a merge that never deletes
+  ✔ everything the host has is downloaded into an empty directory (2.2213ms)
+  ✔ what only the peer has is uploaded to the host (0.2784ms)
+  ✔ identical files are left alone and become the base (0.2021ms)
+  ✔ different versions: the newer one wins (0.2377ms)
+  ✔ a tie goes to the host (0.2119ms)
+  ✔ same bytes with different mtimes are not copied, the mtime is aligned (0.225ms)
+  ✔ a file on one side and a directory on the other is a conflict, left alone with its content (0.4418ms)
+  ✔ paths the host refused are not pushed again (0.2669ms)
+✔ first synchronisation (no base): a merge that never deletes (5.6863ms)
+▶ resynchronisation (with a base): deletions are understood
+  ✔ nothing changed: nothing to do (0.5405ms)
+  ✔ deleted here while disconnected: deleted on the host (0.2785ms)
+  ✔ deleted on the host while disconnected: deleted here (0.2905ms)
+  ✔ modified on one side only: that side wins (0.2166ms)
+  ✔ modified on both sides: the newer wins (0.1457ms)
+  ✔ a modification beats a deletion, in both directions (0.1621ms)
+  ✔ a directory deleted on the host keeps living here if it received a new file (0.1436ms)
+  ✔ a directory deleted here is recreated here if the host added a file to it (0.1534ms)
+  ✔ a whole tree deleted on one side is deleted on the other (0.1586ms)
+  ✔ both sides deleted: the base entry is forgotten (0.1201ms)
+  ✔ a directory replaced by a file on the host, untouched here, becomes a file here (0.1179ms)
+  ✔ ...but not when something here must stay inside it (0.1476ms)
+✔ resynchronisation (with a base): deletions are understood (3.0387ms)
+▶ hash candidates
+  ✔ only same-size files whose difference the base cannot explain (0.2098ms)
+✔ hash candidates (0.3118ms)
+▶ selection rules
+  ✔ nested exclusions collapse into their ancestor (1.7703ms)
+  ✔ the root cannot be excluded and bad paths are refused (0.6008ms)
+  ✔ unchecking a directory unchecks everything inside it, including future content (0.3481ms)
+  ✔ five files, three unchecked: two are shared (0.2073ms)
+  ✔ exclusions follow a rename of the item or of a directory containing it (0.2894ms)
+  ✔ an unchecked item that shows up elsewhere (same inode) stays unchecked (0.2586ms)
+✔ selection rules (4.954ms)
+▶ the host enforces the selection on the peer API
+  ✔ the manifest lists only checked items (44.4169ms)
+  ✔ an unchecked file cannot be downloaded (18.9479ms)
+  ✔ unchecked items cannot be written, deleted, renamed or created from the other side (21.7853ms)
+  ✔ deleting a checked directory leaves its unchecked content in place (17.5705ms)
+  ✔ renaming a checked directory moves only its checked content (21.3809ms)
+  ✔ a checked file can be uploaded next to unchecked ones (26.3573ms)
+✔ the host enforces the selection on the peer API (151.4222ms)
+▶ selection in a live synchronisation
+  ✔ unchecked items never reach the other side, before or after connecting (746.2847ms)
+  ✔ an unchecked file renamed on the host stays unchecked (1061.2459ms)
+  ✔ an unchecked directory renamed on the host stays unchecked, content included (1029.5155ms)
+  ✔ a file the peer creates where the host has an unchecked directory is not synced, and the peer is told (233.5213ms)
+✔ selection in a live synchronisation (3071.5377ms)
+▶ command line
+  ✔ HTTP is the default, --http and --https select the protocol (1.4013ms)
+  ✔ the default port is 55667 and --port changes it (0.4949ms)
+  ✔ npm passes flags after "--" untouched, in any order (0.8227ms)
+  ✔ discovery scans the default port and the following ones (0.2236ms)
+  ✔ an instance started on another port also scans that neighbourhood (0.295ms)
+  ✔ scan targets can be given explicitly (0.5677ms)
+  ✔ the control panel is local-only unless --remote-ui (0.2543ms)
+✔ command line (5.6266ms)
+▶ free port search
+  ✔ a busy port moves the server to the next one (59.9309ms)
+  ✔ it keeps walking while consecutive ports are busy (16.1238ms)
+  ✔ starting twice on the same port gives two instances (22.4786ms)
+  ✔ the walk is bounded and says which range it searched (5.7864ms)
+  ✔ port 0 means "any free port" and is never incremented (8.5743ms)
+  ✔ a failure other than a busy port is reported as is (0.5948ms)
+✔ free port search (114.1459ms)
+▶ initial synchronisation
+  ✔ the host’s content is copied into an empty local directory (117.6716ms)
+  ✔ modification times travel with the content (222.5321ms)
+  ✔ what only the peer has is sent to the host (the two copies are merged) (104.823ms)
+  ✔ when both have a different version, the newer one wins (81.4945ms)
+  ✔ identical content with different mtimes is compared by hash, not copied (74.2534ms)
+  ✔ large and binary files arrive intact, and odd names too (210.2377ms)
+✔ initial synchronisation (813.1911ms)
+▶ live synchronisation
+  ▶ creating a file
+    ✔ host -> peer (210.8517ms)
+    ✔ peer -> host (200.4917ms)
+  ✔ creating a file (411.7948ms)
+  ▶ creating nested directories with files
+    ✔ host -> peer (252.28ms)
+    ✔ peer -> host (234.3693ms)
+  ✔ creating nested directories with files (487.0189ms)
+  ▶ modifying a file
+    ✔ host -> peer (357.8715ms)
+    ✔ peer -> host (357.0704ms)
+  ✔ modifying a file (715.2504ms)
+  ▶ renaming a file
+    ✔ host -> peer (176.6145ms)
+    ✔ peer -> host (208.5362ms)
+  ✔ renaming a file (385.9989ms)
+  ▶ moving a file to another directory
+    ✔ host -> peer (223.8454ms)
+    ✔ peer -> host (206.3261ms)
+  ✔ moving a file to another directory (430.8207ms)
+  ▶ renaming a directory
+    ✔ host -> peer (206.6838ms)
+    ✔ peer -> host (209.0247ms)
+  ✔ renaming a directory (416.2258ms)
+  ▶ deleting a file
+    ✔ host -> peer (535.2357ms)
+    ✔ peer -> host (518.3851ms)
+  ✔ deleting a file (1054.1354ms)
+  ▶ deleting a directory tree
+    ✔ host -> peer (574.7577ms)
+    ✔ peer -> host (567.0843ms)
+  ✔ deleting a directory tree (1142.32ms)
+  ▶ replacing a file with a directory of the same name
+    ✔ host -> peer (204.0227ms)
+    ✔ peer -> host (232.9366ms)
+  ✔ replacing a file with a directory of the same name (437.2416ms)
+  ✔ a burst of changes on both sides at once converges (376.627ms)
+  ✔ both sides editing the same file end with the same, newer, version (671.4053ms)
+  ✔ nothing bounces back: a change produces one transfer, not a loop (1451.5976ms)
+✔ live synchronisation (7981.9708ms)
+▶ safety
+  ✔ if the local copy disappears, syncing stops and nothing is deleted on the host (1232.1627ms)
+  ✔ if the hosted directory disappears, hosting stops and nothing is deleted on the peer (437.9508ms)
+  ✔ temporary transfer files never show up on either side (91.6209ms)
+✔ safety (1762.4123ms)
+▶ change detection
+  ✔ a new file is a write, a new directory a mkdir (parents first) (149.2725ms)
+  ✔ a modification is a write carrying the previous state (141.6072ms)
+  ✔ renaming a file is ONE rename, not a deletion and an upload (673.3494ms)
+  ✔ renaming a directory moves its whole content in one operation (764.6087ms)
+  ✔ moving a file into another directory is a rename too (94.6594ms)
+  ✔ deleting a file is reported after the rename window (419.825ms)
+  ✔ deleting a tree is one rmdir, not one operation per file (641.7033ms)
+  ✔ a file replaced by a directory: removal first, then creation (94.8596ms)
+  ✔ a change already recorded in the index is not reported (no echo) (700.6254ms)
+  ✔ ignored paths are never reported (466.7677ms)
+  ✔ a vanished root is never read as "everything was deleted" (897.0747ms)
+  ✔ a renamed directory is still watched at its new location (253.5925ms)
+  ✔ a directory recorded in the index first (made for the peer) is watched too (561.2586ms)
+  ✔ deleted directories release their watchers (6.9977ms)
+  ✔ the inside of an ignoreInside directory is never watched (101.9143ms)
+  ✔ a file still being written is looked at again after a pause, not in a busy loop (387.0437ms)
+  ✔ bursts are batched (172.9233ms)
+✔ change detection (6532.2194ms)
+ℹ tests 221
+ℹ suites 51
+ℹ pass 215
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 27781.4952
+
+✖ failing tests:
+
+test at tests\cert.test.js:32:3
+✖ is written to the directory as key.pem and cert.pem (48.4408ms)
+  AssertionError [ERR_ASSERTION]: the private key is private
+  
+  438 !== 384
+  
+      at TestContext.<anonymous> (file:///D:/Documentos/sync/git/SLOPWARE/reptile/node/tests/cert.test.js:37:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1905:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 438,
+    expected: 384,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\lib.test.js:161:3
+✖ joining onto the root re-checks containment (1.2748ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'D:\\srv\\share\\a\\b'
+  - '/srv/share/a/b'
+  
+      at TestContext.<anonymous> (file:///D:/Documentos/sync/git/SLOPWARE/reptile/node/tests/lib.test.js:162:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'D:\\srv\\share\\a\\b',
+    expected: '/srv/share/a/b',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\paths.test.js:48:3
+✖ a readable directory is accepted, with its size (2.4883ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'C:\\Windows\\Temp\\reptile-test-kH7LKL'
+  - 'C:\\Windows\\TEMP\\reptile-test-kH7LKL'
+                   ^
+  
+      at TestContext.<anonymous> (file:///D:/Documentos/sync/git/SLOPWARE/reptile/node/tests/paths.test.js:53:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'C:\\Windows\\Temp\\reptile-test-kH7LKL',
+    expected: 'C:\\Windows\\TEMP\\reptile-test-kH7LKL',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\paths.test.js:56:3
+✖ a directory whose content cannot be read is refused (2.6143ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///D:/Documentos/sync/git/SLOPWARE/reptile/node/tests/paths.test.js:62:14)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\paths.test.js:115:3
+✖ a directory that cannot be written is refused (1.9366ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'empty_directory'
+  - 'not_writable'
+  
+      at TestContext.<anonymous> (file:///D:/Documentos/sync/git/SLOPWARE/reptile/node/tests/paths.test.js:119:14)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'empty_directory',
+    expected: 'not_writable',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\paths.test.js:156:3
+✖ an unreadable subdirectory is listed with an error instead of failing (4.7117ms)
+  AssertionError [ERR_ASSERTION]: The "string" argument must be of type string. Received type undefined (undefined)
+      at TestContext.<anonymous> (file:///D:/Documentos/sync/git/SLOPWARE/reptile/node/tests/paths.test.js:163:14)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Permission denied/,
+    operator: 'match',
+    diff: 'simple'
+  }

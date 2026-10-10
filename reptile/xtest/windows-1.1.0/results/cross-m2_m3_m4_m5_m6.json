@@ -1,0 +1,107 @@
+[
+  {
+    "scenario": "m2",
+    "mode": "host=Windows peer=Linux",
+    "host": "http://127.0.0.1:55667",
+    "peer": "http://192.168.0.241:55667",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 19.7,
+    "r0_linux": {
+      "ok": true,
+      "s": 0.1
+    },
+    "r1_linux": {
+      "ok": true,
+      "s": 7.1
+    },
+    "r2": {
+      "ok": true,
+      "s": 55.0
+    }
+  },
+  {
+    "scenario": "m3",
+    "mode": "host=Linux peer=Windows",
+    "host": "http://192.168.0.241:55668",
+    "peer": "http://127.0.0.1:55667",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 53.9,
+    "r0": {
+      "ok": true,
+      "s": 0.5
+    },
+    "r1": {
+      "ok": true,
+      "s": 32.2
+    },
+    "r2_linux": {
+      "ok": true,
+      "s": 15.1
+    }
+  },
+  {
+    "scenario": "m4",
+    "mode": "host=Windows peer=Linux",
+    "host": "http://127.0.0.1:55667",
+    "peer": "http://192.168.0.241:55668",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 15.7,
+    "r0_linux": {
+      "ok": true,
+      "s": 0.1
+    },
+    "r1_linux": {
+      "ok": true,
+      "s": 1.1
+    },
+    "r2": {
+      "ok": true,
+      "s": 14.5
+    }
+  },
+  {
+    "scenario": "m5",
+    "mode": "host=Linux peer=Windows",
+    "host": "http://192.168.0.241:55667",
+    "peer": "http://127.0.0.1:55668",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 21.4,
+    "r0": {
+      "ok": true,
+      "s": 1.7
+    },
+    "r1": {
+      "ok": true,
+      "s": 14.4
+    },
+    "r2_linux": {
+      "ok": true,
+      "s": 3.1
+    }
+  },
+  {
+    "scenario": "m6",
+    "mode": "host=Windows peer=Linux",
+    "host": "http://127.0.0.1:55668",
+    "peer": "http://192.168.0.241:55667",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 11.2,
+    "r0_linux": {
+      "ok": true,
+      "s": 0.1
+    },
+    "r1_linux": {
+      "ok": true,
+      "s": 1.1
+    },
+    "r2": {
+      "ok": true,
+      "s": 31.4
+    }
+  }
+]

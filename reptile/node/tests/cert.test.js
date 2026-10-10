@@ -34,7 +34,11 @@ describe('self-signed certificate', { skip: !hasOpenssl && 'openssl is not insta
     const result = generateCertificate({ directory, dns: ['localhost', 'reptile.test'], ip: ['127.0.0.1', '::1', '10.9.8.7'] });
     assert.deepEqual((await readdir(directory)).sort(), ['cert.pem', 'key.pem'], 'no temporary files are left behind');
     assert.equal(readFileSync(result.certPath, 'utf8'), result.cert);
-    assert.equal(statSync(result.keyPath).mode & 0o777, 0o600, 'the private key is private');
+    // Windows has no POSIX mode bits (fs.chmod only toggles read-only), so the
+    // 0o600 restriction only holds on Unix; the key is still a throw-away cert.
+    if (process.platform !== 'win32') {
+      assert.equal(statSync(result.keyPath).mode & 0o777, 0o600, 'the private key is private');
+    }
   });
 
   test('is a real X.509 server certificate with the right names', async () => {

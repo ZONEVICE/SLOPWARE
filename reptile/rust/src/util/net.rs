@@ -42,6 +42,11 @@ pub struct Ipv4Interface {
 /// Interface names that belong to containers, VMs and VPN tunnels rather than
 /// to the physical local network. Docker alone creates several /16 bridges;
 /// scanning those is slow and can never find another computer on the LAN.
+///
+/// Both the short names Linux reports (`zt`, `vboxnet`, `vmnet`) and the longer
+/// adapter friendly names Windows reports for the same software (`ZeroTier One
+/// [...]`, `VirtualBox Host-Only ...`, `VMware Network Adapter ...`) are listed;
+/// Hyper-V and WSL already match through `veth` (`vEthernet (...)`).
 const VIRTUAL_PREFIXES: &[&str] = &[
     "lo",
     "docker",
@@ -60,6 +65,7 @@ const VIRTUAL_PREFIXES: &[&str] = &[
     "tap",
     "utun",
     "zt",
+    "zerotier",
     "tailscale",
     "wg",
     "kube",
@@ -67,6 +73,8 @@ const VIRTUAL_PREFIXES: &[&str] = &[
     "dummy",
     "ham",
     "nordlynx",
+    "virtualbox",
+    "vmware",
 ];
 
 pub fn is_virtual_name(name: &str) -> bool {
@@ -545,6 +553,31 @@ mod tests {
         let scan = default_scan_hosts(&table);
         assert_eq!(scan[0], "127.0.0.1");
         assert_eq!(scan.len(), 1 + 254 + 254);
+    }
+
+    #[test]
+    fn windows_adapter_friendly_names_are_virtual() {
+        // GetAdaptersAddresses reports friendly names, not the short Linux names.
+        assert!(is_virtual_name("ZeroTier One [8bd5124fd689aad3]"));
+        assert!(is_virtual_name("vEthernet (Default Switch)"));
+        assert!(is_virtual_name("VirtualBox Host-Only Ethernet Adapter"));
+        assert!(is_virtual_name("VMware Network Adapter VMnet1"));
+        assert!(!is_virtual_name("Wi-Fi"));
+        assert!(!is_virtual_name("Ethernet"));
+        // A ZeroTier address must not be chosen as the LAN address or scanned.
+        let table = vec![
+            entry("ZeroTier One [abc]", "192.168.111.10", 24, false, "d2:c8:22:0d:cd:5f"),
+            entry("Wi-Fi", "192.168.0.246", 24, false, "c0:06:c3:91:29:f1"),
+        ];
+        assert_eq!(primary_address(&table), "192.168.0.246");
+        assert_eq!(lan_addresses(&table), vec!["192.168.0.246"]);
+        // The fingerprint still includes every MAC, ZeroTier's among them.
+        assert!(
+            machine_fingerprint(&table, "box") == {
+                let joined = "c0:06:c3:91:29:f1,d2:c8:22:0d:cd:5f";
+                hex(digest(&SHA256, format!("box|{joined}").as_bytes()).as_ref())[..32].to_string()
+            }
+        );
     }
 
     #[test]

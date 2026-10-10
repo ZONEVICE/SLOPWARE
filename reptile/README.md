@@ -1,6 +1,6 @@
 # Reptile
 
-> **This software was generated 100% using artificial intelligence** — specifically Claude Code + Opus 5.5, Max effort — on September 24, 2026. Generated with the `new-app` skill. The initial prompt used to create this application can be found in [`prompts/init.md`](prompts/init.md). Post-creation adjustments draw on Claude Code + Opus 5.5, Max effort: the Rust implementation and the Node.js watcher rewrite were made on October 8, 2026, from the second prompt in the same file.
+> **This software was generated 100% using artificial intelligence** — specifically Claude Code + Opus 5.5, Max effort — on September 24, 2026. Generated with the `new-app` skill. The initial prompt used to create this application can be found in [`prompts/init.md`](prompts/init.md). Post-creation adjustments draw on Claude Code + Opus 5.5, Max effort: the Rust implementation and the Node.js watcher rewrite were made on October 8, 2026, from the second prompt in the same file, and were tested on a real Windows 10 PC the same day and the next.
 
 Reptile keeps one directory identical on two computers of the same local
 network, in real time and in both directions, over HTTP or HTTPS. It is a much
@@ -122,6 +122,11 @@ either side in the meantime. If the host stops hosting, you are told so.
   everything on the other side.
 - **Not synchronised:** symbolic links and special files (listed in the tree,
   never sent), and Reptile's own temporary files (`.reptile-<hex>.tmp`).
+- **With Windows on one side.** Names Windows cannot store (`a:b.txt`,
+  `aux.txt`, a name ending in a dot or a space) stay out of a Windows peer's
+  copy instead of arriving under a different name. Avoid names that differ
+  only in case (`README` and `readme`) and paths longer than 260 characters:
+  Windows cannot keep them apart, or reach them.
 
 ## Security
 
@@ -202,6 +207,7 @@ node/           the Node.js implementation, and the control panel (node/public)
 rust/           the Rust implementation (embeds node/public at build time)
 bench/          the black-box benchmark, for either implementation or a mix
 prompts/        the prompts that produced Reptile, as history
+xtest/          cross-machine interoperability tests and the real-Windows results
 ```
 
 [`CLAUDE.md`](CLAUDE.md) is the maintenance guide, with the wire protocol both
@@ -210,8 +216,8 @@ implementations share; each implementation has its own guide next to its code.
 ## Tests
 
 ```bash
-cd node && npm test        # 224 tests, about 15 s (includes a headless Chromium pass)
-cd rust && cargo test      # 150 tests, about 15 s (includes Rust <-> Node.js interoperability)
+cd node && npm test        # 229 tests, about 20 s (includes a headless Chromium pass)
+cd rust && cargo test      # 153 tests, about 15 s (includes Rust <-> Node.js interoperability)
 ```
 
 ## Licence

@@ -1,0 +1,20 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\discovery.rs (D:\reptile-xtest-scratch\target\debug\deps\discovery-48f3c339adb82d32.exe)
+
+running 1 test
+test the_probe_tells_closed_ports_strangers_and_instances_of_either_protocol ... 
+thread 'the_probe_tells_closed_ports_strangers_and_instances_of_either_protocol' (392) panicked at tests\discovery.rs:63:5:
+assertion `left == right` failed
+  left: Unreachable
+ right: Closed
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    the_probe_tells_closed_ports_strangers_and_instances_of_either_protocol
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.72s
+
+error: test failed, to rerun pass `--test discovery`

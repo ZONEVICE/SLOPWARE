@@ -13,8 +13,9 @@
 import { test, describe, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
-import { appendFile, mkdir, readdir, readFile, rename, rm, stat, utimes, writeFile } from 'node:fs/promises';
+import { appendFile, chmod, mkdir, readdir, readFile, rename, rm, stat, utimes, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { Readable } from 'node:stream';
 import { cleanup, connectedPair, sleep, snapshotTree, waitFor, waitForSameTrees } from './helpers/instances.js';
 
 after(cleanup);
@@ -290,6 +291,51 @@ describe('safety', () => {
     await waitFor(() => client.syncState() === 'stopped', { message: 'the peer to be told' });
     assert.equal(await readFile(join(syncDir, 'precious.txt'), 'utf8'), 'keep me');
   });
+
+  test(
+    'a write the peer cannot commit keeps its base, so an older copy restored on the host is not reverted',
+    {
+      skip:
+        process.platform === 'win32'
+          ? 'fails the commit with POSIX directory permissions'
+          : process.getuid?.() === 0
+            ? 'root ignores directory permissions'
+            : false,
+    },
+    async () => {
+      const { client, hostDir, syncDir } = await connectedPair({ hostFiles: { 'report.txt': 'current version' } });
+      await waitForSameTrees(hostDir, syncDir);
+      const { peer } = client.app.syncing.engine;
+      const download = peer.download.bind(peer);
+      // The peer's directory turns read-only once a download's bytes are in, so
+      // the commit fails after staging, as a target locked by another program
+      // makes it fail on Windows.
+      peer.download = async (path) => {
+        const remote = await download(path);
+        const stream = Readable.from(
+          (async function* () {
+            for await (const chunk of remote.stream) yield chunk;
+            await chmod(syncDir, 0o555);
+          })(),
+        );
+        return { ...remote, stream };
+      };
+      try {
+        // A copy restored from a backup keeps its older mtime.
+        const older = new Date(Date.now() - 3_600_000);
+        await writeFile(join(hostDir, 'report.txt'), 'restored from backup');
+        await utimes(join(hostDir, 'report.txt'), older, older);
+        await sleep(1500);
+        assert.equal(await readFile(join(hostDir, 'report.txt'), 'utf8'), 'restored from backup');
+      } finally {
+        peer.download = download;
+        await chmod(syncDir, 0o755);
+      }
+      client.app.syncing.engine.scheduleReconcile(0);
+      await waitForSameTrees(hostDir, syncDir);
+      assert.equal(await readFile(join(syncDir, 'report.txt'), 'utf8'), 'restored from backup');
+    },
+  );
 
   test('temporary transfer files never show up on either side', async () => {
     const { hostDir, syncDir } = await connectedPair({ hostFiles: { 'big.bin': randomBytes(2 * 1024 * 1024) } });

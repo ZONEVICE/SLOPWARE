@@ -68,6 +68,7 @@ node/              Node.js implementation; node/public is THE control panel
 rust/              Rust implementation; embeds ../node/public at build time
 bench/bench.mjs    black-box benchmark and end-to-end check, either implementation
 prompts/           the prompts that produced Reptile
+xtest/           cross-machine test helper, playbook and the Windows 10 results (see its README)
 ```
 
 Both implementations have the same layers, with the same names where the
@@ -156,6 +157,19 @@ only and the two stop understanding each other.
 7. **HTTP is spoken to HTTP and TLS to TLS.** Discovery tells them apart by
    trying the instance's own protocol first and the other one when the error
    smells of a mismatch (a reset, or a failed handshake).
+8. **The two OS-specific lists must agree between implementations**, because each
+   decides what a peer advertises and syncs:
+   - *Virtual interfaces* — `VIRTUAL_PREFIXES` (`rust/src/util/net.rs`) and
+     `VIRTUAL_INTERFACE` (`node/src/lib/net.js`): which adapters are skipped when
+     choosing the LAN address and scan range. Includes Windows adapter friendly
+     names (`zerotier`, `virtualbox`, `vmware`); `veth` already covers Hyper-V/WSL.
+   - *Names the local OS cannot store* — `is_os_representable`
+     (`rust/src/fs/entry.rs`) and `isOsRepresentable` (`node/src/fs/entry.js`): a
+     peer skips a wire path it cannot create (Windows reserved chars/names, a
+     trailing dot or space), so it neither retries forever nor lets a munged name
+     round-trip. Both are no-ops off Windows. If the two implementations disagree,
+     a Rust and a Node instance on the same OS would sync a shared directory
+     differently — change them together.
 
 ### 4.3 The control panel's API
 
@@ -187,14 +201,50 @@ peer routes and `/api/ping` are not.
 Before declaring anything done:
 
 ```bash
-cd node && npm test           # 224 tests
-cd rust && cargo test         # 150 tests, including interop with node/
+cd node && npm test           # 229 tests (3 are Chromium; set REPTILE_SKIP_BROWSER_TESTS=1 without it)
+cd rust && cargo test         # 153 tests on Linux, including interop with node/
 cd rust && cargo clippy --all-targets   # clean, Linux and Windows targets
 ```
 
+All three pass on Linux and on **real Windows 10**. Windows-only behaviour was
+validated on a real machine, not Wine; anything touching a Windows code path
+(file watching, the discovery probe, interface filtering, file ids, locked /
+read-only / unrepresentable names, the firewall) is worth re-checking there. See
+each implementation guide's section 5 for the Windows-specific traps.
+
 ---
 
-## 6. Deliberate non-goals
+## 6. Known gaps
+
+Found testing on real Windows 10, or reviewing those results, and left open on
+purpose: each needs a Windows machine to fix and to verify. Do not mistake them
+for settled behaviour.
+
+- **Paths longer than 260 characters** are not indexed on Windows (the file
+  layer does not use `\\?\` extended paths), so such files are silently left
+  out. Fixing it means extended-length paths throughout the file layer of both
+  implementations.
+- **Names that differ only in case** (`README` and `readme`) are one file on
+  Windows. A Windows peer receiving both keeps one and keeps reconciling. A fix
+  would skip the colliding ones on the peer: a rule over the whole set of
+  paths, unlike `is_os_representable`.
+- **A Windows host accepts names it cannot store as given**: a trailing dot or
+  space, or a device name (`aux.c`). There, `normalizeWirePath` /
+  `wire::normalize` refuse only the reserved characters. Windows strips the
+  trailing dot or space, the stripped name travels back, and the peer's file
+  ends up renamed. The peer side is covered by `is_os_representable` (4.2); the
+  host side should refuse the same names.
+- **A host whose upload fails to commit keeps the new state in its index**
+  (both implementations), so it later announces a change that did not happen.
+  Harmless (the manifest is read from disk and the peer keeps its base), but
+  untidy; the peer side was fixed to put the base back.
+- **Discovery from Windows** misses an instance on a host whose first scanned
+  port is closed: Windows takes ~2 s to refuse a connection
+  (`rust/CLAUDE.md` section 5, item 8).
+
+---
+
+## 7. Deliberate non-goals
 
 Do not add these without being asked. Each contradicts something above.
 

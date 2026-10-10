@@ -1,0 +1,57 @@
+# Fase 1 - Compilacion y pruebas automaticas en Windows
+
+## Compilacion Rust
+- Toolchain por defecto: stable-x86_64-pc-windows-gnu, pero NO hay gcc de MinGW -> no enlaza.
+- Se compila con MSVC: `cargo +stable-x86_64-pc-windows-msvc build --release` (VS18 Community autodetectado).
+  reptile.exe --version -> 1.1.0   (OK, EXIT=0, ~1m32s)
+- Nota: el crate Rust usa dependencias (rustls, ring, serde_json, windows-sys...), segun rust/CLAUDE.md
+  estan permitidas. ring compila codigo C con el cl.exe de MSVC: funciona.
+
+## cargo test  (149 pruebas; 147 OK, 2 FALLAN)   log: cargo-test.txt
+Binarios: lib(48 ok), connection(25 ok), discovery(5 ok/1 FAIL), http(10 ok), https(5 ok),
+          interop(7 ok con Node), selection(10 ok), sync(21 ok), watcher(16 ok/1 FAIL).
+
+FALLO 1 (REAL, especifico de Windows):
+  tests/discovery.rs:63  the_probe_tells_closed_ports_strangers_and_instances_of_either_protocol
+  left=Unreachable, right(esperado)=Closed.
+  Causa: en Windows, std TcpStream::connect_timeout a un puerto CERRADO de 127.0.0.1 devuelve
+    kind=TimedOut (raw_os_error=None, sintetizado por Rust) y consume el timeout COMPLETO (~703 ms),
+    en vez de ConnectionRefused. Un connect() bloqueante si da ConnectionRefused (os=10061) pero tarda ~2 s.
+  Efecto en src/peer/probe.rs::tcp_check: un puerto cerrado se clasifica Timeout->Unreachable (no Closed),
+    y cada puerto cerrado cuesta el timeout entero en los sweeps de descubrimiento (lentitud).
+  Es limitacion conocida de connect_timeout en Windows. El probe de Node NO tiene el problema
+    (discovery.test.js de Node pasa en Windows). => arreglo SOLO en Rust (no es regla compartida).
+  Evidencia: fail-discovery.txt, probe-connect-timeout.txt.
+
+FALLO 2 (artefacto de concurrencia del test, NO del producto):
+  tests/watcher.rs  a_file_replaced_by_a_directory_is_removal_first_then_creation
+  Con la suite completa (17 watchers ReadDirectoryChangesW en paralelo) el watcher no entrega
+    NINGUN evento (panic "timed out waiting for mkdir thing; saw []") ~5 de cada 6 veces.
+  Con --test-threads=1 (serializado) pasan 17/17 de forma fiable (3/3). En aislamiento tambien pasa.
+  La app real usa UN solo watcher por proceso; sync.rs (21) e interop.rs (7) -que usan un watcher real-
+    pasan. Es contencion entre muchos ReadDirectoryChangesW simultaneos en Windows.
+  Evidencia: watcher-flakiness.txt (run1 ok 1.6s; run2-6 FAIL ~10s; serializado 3/3 ok 5.5s).
+
+## npm test (Node)  (221 pruebas; 215 OK, 6 FALLAN; browser.test.js omitido: sin Chromium)
+  log: npm-test.txt.  Variables: REPTILE_SKIP_BROWSER_TESTS=1, REPTILE_CERT_DIR=scratch\cert-node,
+       REPTILE_OPENSSL=C:\Program Files\Git\ucrt64\bin\openssl.exe
+  Los 6 fallos son de PLATAFORMA / portabilidad del test, no del nucleo de sincronizacion:
+  1. cert.test.js:32  key.pem modo 438(0o666) vs 384(0o600) esperado. Windows no aplica permisos POSIX;
+       Node no puede dejar la clave privada en 0o600. (nota menor de seguridad: la clave efimera del
+       cert autofirmado no queda restringida a propietario en Windows).
+  2. lib.test.js:161  resolveWirePath('/srv/share','a/b') -> 'D:\srv\share\a\b' (ruta LOCAL del SO en
+       Windows) vs '/srv/share/a/b' (fixture POSIX del test). La funcion construye la ruta local;
+       las wire paths de red (con '/') funcionan: interop.rs (Rust<->Node en Windows) sincroniza 7/7.
+  3. paths.test.js:48  result.path 'C:\Windows\Temp\...' vs 'C:\Windows\TEMP\...' (casing que Windows
+       normaliza en el realpath). Portabilidad del test.
+  4. paths.test.js:56  chmod(dir,0o000) -> esperaba code 'unreadable'; Windows deja leer -> no se da.
+  5. paths.test.js:115 directorio no-escribible -> esperaba 'not_writable'; en Windows es escribible ->
+       'empty_directory'.
+  6. paths.test.js:156 subdirectorio no-legible -> esperaba /Permission denied/; en Windows undefined.
+  (4,5,6: el modelo de permisos de Windows no reproduce chmod de POSIX. Son limitaciones de los tests
+   en Windows, no fallos del producto. A confirmar que el producto no depende de esos codigos en uso real.)
+
+## Conclusion fase 1
+- Rust: compila y pasa 147/149. 1 fallo real y especifico de Windows (probe/connect_timeout) + 1 artefacto
+  de concurrencia del test del watcher.
+- Node: 215/221; los 6 fallos son de plataforma/portabilidad del test. Nucleo de sync sin fallos aqui.

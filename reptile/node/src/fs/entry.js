@@ -42,6 +42,32 @@ export function tempName() {
   return `.reptile-${randomHex(8)}.tmp`;
 }
 
+const WINDOWS_RESERVED = new Set([
+  'con', 'prn', 'aux', 'nul',
+  'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
+  'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9',
+]);
+
+/**
+ * Can the local filesystem store this wire path as-is? Linux holds any byte;
+ * Windows cannot store a segment with a reserved character, a trailing dot or
+ * space, or a reserved device base name (CON, AUX, COM1…). A peer there skips
+ * such a path instead of retrying a download that can never succeed, or that
+ * Windows would silently munge (e.g. "x." -> "x") into an endless round-trip.
+ * @param {string} wirePath
+ * @returns {boolean}
+ */
+export function isOsRepresentable(wirePath) {
+  if (process.platform !== 'win32') return true;
+  for (const segment of wirePath.split('/')) {
+    if (segment === '') continue;
+    if (segment.endsWith('.') || segment.endsWith(' ')) return false;
+    if (/[<>:"\\|?*\u0000-\u001f]/.test(segment)) return false;
+    if (WINDOWS_RESERVED.has(segment.split('.')[0].toLowerCase())) return false;
+  }
+  return true;
+}
+
 /**
  * Round an mtime to whole milliseconds.
  *

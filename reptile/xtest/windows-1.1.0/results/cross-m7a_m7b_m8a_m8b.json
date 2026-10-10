@@ -1,0 +1,86 @@
+[
+  {
+    "scenario": "m7a",
+    "mode": "host=Linux peer=Windows",
+    "host": "https://192.168.0.241:55669",
+    "peer": "https://127.0.0.1:55669",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 20.5,
+    "r0": {
+      "ok": true,
+      "s": 0.5
+    },
+    "r1": {
+      "ok": true,
+      "s": 27.2
+    },
+    "r2_linux": {
+      "ok": true,
+      "s": 3.1
+    }
+  },
+  {
+    "scenario": "m7b",
+    "mode": "host=Windows peer=Linux",
+    "host": "https://127.0.0.1:55669",
+    "peer": "https://192.168.0.241:55669",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 18.0,
+    "r0_linux": {
+      "ok": true,
+      "s": 0.1
+    },
+    "r1_linux": {
+      "ok": true,
+      "s": 19.1
+    },
+    "r2": {
+      "ok": true,
+      "s": 24.5
+    }
+  },
+  {
+    "scenario": "m8a",
+    "mode": "host=Linux peer=Windows",
+    "host": "https://192.168.0.241:55670",
+    "peer": "https://127.0.0.1:55669",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 32.8,
+    "r0": {
+      "ok": true,
+      "s": 0.5
+    },
+    "r1": {
+      "ok": true,
+      "s": 9.2
+    },
+    "r2_linux": {
+      "ok": true,
+      "s": 8.2
+    }
+  },
+  {
+    "scenario": "m8b",
+    "mode": "host=Windows peer=Linux",
+    "host": "https://127.0.0.1:55669",
+    "peer": "https://192.168.0.241:55670",
+    "host_status": 201,
+    "sync_status": 201,
+    "live_s": 16.5,
+    "r0_linux": {
+      "ok": true,
+      "s": 0.1
+    },
+    "r1_linux": {
+      "ok": true,
+      "s": 15.1
+    },
+    "r2": {
+      "ok": true,
+      "s": 15.6
+    }
+  }
+]

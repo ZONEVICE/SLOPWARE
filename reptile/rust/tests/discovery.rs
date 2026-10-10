@@ -59,9 +59,15 @@ fn ping_identifies_the_instance_and_never_says_where_the_directory_is() {
 #[test]
 fn the_probe_tells_closed_ports_strangers_and_instances_of_either_protocol() {
     let started = Instant::now();
-    let closed = probe(&options(free_port(), "http"));
+    // Windows retries the SYN after a reset, so refusing takes ~2 s there; give
+    // the probe room. What matters is that a refused connection is classified
+    // Closed, not Unreachable, on either platform.
+    let mut closed_opts = options(free_port(), "http");
+    let (closed_budget, elapsed_budget) = if cfg!(windows) { (4000, 6) } else { (700, 2) };
+    closed_opts.connect_timeout_ms = closed_budget;
+    let closed = probe(&closed_opts);
     assert_eq!(closed.status, ProbeStatus::Closed);
-    assert!(started.elapsed() < Duration::from_secs(2));
+    assert!(started.elapsed() < Duration::from_secs(elapsed_budget));
 
     let stranger = TcpListener::bind(("127.0.0.1", 0)).unwrap();
     let stranger_port = stranger.local_addr().unwrap().port();

@@ -1,0 +1,40 @@
+# Fase 2 - Ejecutable empaquetado y Cortafuegos
+
+## Paquete
+- Zip: reptile-1.1.0-windows-x86_64.zip -> reptile.exe (3.07 MB), README.md, LICENCE.txt
+- reptile.exe --version -> 1.1.0 ; --help correcto (flags --http/--https/--port/--host/--no-scan/
+  --scan-hosts/--scan-ports/--remote-ui/--log-level, y variables REPTILE_*).
+
+## Cortafuegos de Windows (HALLAZGO de despliegue)
+- Antes de arrancar: no habia reglas "*reptile*".
+- Al arrancar reptile.exe --port 55667 (perfil LAN = Wi-Fi = Publico), Windows NO mostro dialogo
+  visible; creo SILENCIOSAMENTE dos reglas entrantes de BLOQUEO ("Query User{GUID}...") para
+  la ruta del exe, perfiles Private+Public, una TCP y una UDP (accion Block, por defecto).
+    TCP Query User{53166C48-...}D:\reptile-xtest-scratch\pkg\...\reptile.exe  Inbound Block Private,Public
+    UDP Query User{B7D820D3-...}D:\reptile-xtest-scratch\pkg\...\reptile.exe  Inbound Block Private,Public
+- Prueba inversa Linux->Windows:55667 SIN instancia -> timeout (firewall descarta).
+  CON instancia pero con las reglas Block presentes -> timeout (Block gana a Allow).
+  Mi regla "Reptile-xtest" (Inbound TCP 55667-55690 Allow Any) NO basto mientras existian los Block.
+- Tras BORRAR las dos reglas Block de reptile.exe (anotadas), la prueba inversa -> status 200
+  {app:reptile...} en 13 ms. (Las reglas Block borradas y mi Allow quedan anotadas en system-changes.txt.)
+- Interpretacion: un usuario interactivo normal veria el dialogo "Permitir acceso"; en esta sesion
+  automatica con privilegios, Windows dejo reglas "Query User" en Block (sin alguien que pulse).
+  Reptile no recibe peers por la LAN hasta que se permite la app en el cortafuegos. Es comportamiento
+  de Windows, no un fallo de Reptile; conviene documentarlo para el usuario final (p.ej. en el README/
+  instalador, instruir a permitir la app, o firmar el ejecutable).
+
+## Identidad / direcciones LAN (HALLAZGO importante: adaptadores virtuales)
+GET /api/state .identity (instancia Rust HTTP 55667):
+  hostname: ATUN
+  address:   192.168.111.10          <- ZeroTier (VPN virtual). Es la direccion PRINCIPAL anunciada.
+  addresses: [192.168.111.10, 192.168.0.246]   <- incluye ZeroTier ademas de la IP LAN real.
+  port: 55667  protocol: http
+Banner en consola: "peers connect  192.168.111.10:55667"  <- muestra la IP de ZeroTier, NO la LAN real.
+Contraste con ipconfig: Reptile SI excluye bien vEthernet (Hyper-V 172.23.128.1) y las 169.254 de
+  "Microsoft Wi-Fi Direct Virtual Adapter"; pero NO excluye ZeroTier (192.168.111.10) y ademas la
+  coloca como address principal.
+Impacto: el banner y la direccion anunciada apuntan a una IP que un peer de la LAN real no puede
+  alcanzar. La sincronizacion manual (dando IP_WINDOWS=192.168.0.246 a mano) no se ve afectada; el
+  descubrimiento y la "direccion para conectar" si. Es el candidato de la fase 5.8 (ampliar
+  VIRTUAL_PREFIXES / VIRTUAL_INTERFACE para "ZeroTier"), a confirmar que Rust y Node coinciden (W1).
+Evidencia: state-fase2-rust-http.json, inst-rust-http-55667.log.

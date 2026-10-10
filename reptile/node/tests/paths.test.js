@@ -50,10 +50,13 @@ describe('directory to host', () => {
     assert.equal(result.ok, true);
     assert.equal(result.entries, 3);
     assert.match(result.message, /3 items/);
-    assert.equal(result.path, root);
+    // Windows realpath normalises drive/dir casing (e.g. TEMP -> Temp), so the
+    // returned path matches the input only case-insensitively there.
+    if (process.platform === 'win32') assert.equal(result.path.toLowerCase(), root.toLowerCase());
+    else assert.equal(result.path, root);
   });
 
-  test('a directory whose content cannot be read is refused', { skip: isRoot && 'root can read anything' }, async () => {
+  test('a directory whose content cannot be read is refused', { skip: (isRoot && 'root can read anything') || (process.platform === 'win32' && 'chmod cannot make a directory unreadable on Windows') }, async () => {
     const locked = join(root, 'locked');
     await mkdir(locked);
     await chmod(locked, 0o000);
@@ -112,7 +115,7 @@ describe('directory to sync into', () => {
     assert.equal((await checkSyncDirectory('/')).code, 'root');
   });
 
-  test('a directory that cannot be written is refused', { skip: isRoot && 'root can write anything' }, async () => {
+  test('a directory that cannot be written is refused', { skip: (isRoot && 'root can write anything') || (process.platform === 'win32' && 'chmod cannot make a directory read-only on Windows') }, async () => {
     const directory = await tempDir();
     await chmod(directory, 0o555);
     try {
@@ -153,7 +156,7 @@ describe('content tree', () => {
     assert.equal(tree.children[0].children[0].size, 3);
   });
 
-  test('an unreadable subdirectory is listed with an error instead of failing', { skip: isRoot && 'root can read anything' }, async () => {
+  test('an unreadable subdirectory is listed with an error instead of failing', { skip: (isRoot && 'root can read anything') || (process.platform === 'win32' && 'chmod cannot make a directory unreadable on Windows') }, async () => {
     const root = await tempDir();
     await writeTree(root, { 'open/x': 'x', 'closed/y': 'y' });
     await chmod(join(root, 'closed'), 0o000);

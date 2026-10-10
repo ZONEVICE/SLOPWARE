@@ -1,0 +1,71 @@
+# Fase 0 - Reconocimiento del entorno Windows
+fecha: 2026-10-08
+
+## Sistema operativo
+OSVersion: Microsoft Windows NT 10.0.19045.0
+Producto: Windows 10 Pro   DisplayVersion: 22H2   Build: 19045.7725
+Arquitectura: AMD64   64bit-OS: True
+Administrador: True
+
+## Herramientas
+python  : Python 3.14.8
+node    : v24.21.0
+npm     : 11.19.0
+rustc   : rustc 1.99.0 (b940084d7 2026-09-28)
+cargo   : cargo 1.99.0 (5f94df478 2026-08-27)
+git     : git version 2.56.0.windows.2
+
+rustup show:
+  Default host: x86_64-pc-windows-gnu
+  installed toolchains:
+    stable-x86_64-pc-windows-gnu (active, default)   installed targets: x86_64-pc-windows-gnu
+    stable-x86_64-pc-windows-msvc
+  active toolchain: stable-x86_64-pc-windows-gnu (default)
+
+openssl : OpenSSL 3.5.9 29 Sep 2026  @ C:\Program Files\Git\ucrt64\bin\openssl.exe
+          (tambien en C:\Program Files\Git\usr\bin\openssl.exe)
+link.exe en PATH: C:\Program Files\Git\usr\bin\link.exe  -> es el 'link' de coreutils/Git, NO el enlazador de MSVC
+gcc de MinGW: NO encontrado (ni en PATH ni en C:\Program Files\Git\{ucrt64,mingw64}\bin, C:\msys64\..., C:\mingw64\...)
+MSVC: Visual Studio 18 Community instalado en C:\Program Files\Microsoft Visual Studio\18\Community (via vswhere).
+      Toolchain rust stable-x86_64-pc-windows-msvc instalado (NO es el por defecto).
+CONCLUSION toolchain: el toolchain por defecto (gnu) no puede enlazar (falta gcc). Para cargo build/test se usa
+      MSVC con 'cargo +stable-x86_64-pc-windows-msvc' (rustc autodetecta VS18); asi no se cambia el toolchain por defecto.
+
+## Antivirus
+Windows Defender: AMServiceEnabled=True, RealTimeProtectionEnabled=True, AntivirusEnabled=True, version 4.18.26090.9
+Sin antivirus de terceros (solo Defender). NO se desactiva.
+
+## Red
+Perfiles de conexion:
+  MoraMasis1  (Wi-Fi)                                    NetworkCategory=Public   IPv4=Internet       <- interfaz LAN de la prueba
+  Network 17  (ZeroTier One [8bd5124fd689aad3])          NetworkCategory=Private  IPv4=LocalNetwork
+Perfiles de cortafuegos: Domain=True, Private=True, Public=True (TODOS activos)
+  -> La interfaz LAN (Wi-Fi 192.168.0.246) esta en perfil PUBLICO; las reglas entrantes deben aplicar a Public.
+
+Direcciones IPv4 (sin loopback):
+  Wi-Fi                              192.168.0.246  /24   <- IP LAN (coincide con el formulario)
+  vEthernet (Default Switch)         172.23.128.1   /20   (Hyper-V, virtual)
+  ZeroTier One [...]                 192.168.111.10 /24   (ZeroTier VPN, virtual)
+  Local Area Connection* 1           169.254.120.222/16   (Microsoft Wi-Fi Direct Virtual Adapter, link-local)
+  Local Area Connection* 10          169.254.114.126/16   (Microsoft Wi-Fi Direct Virtual Adapter #2, link-local)
+
+Adaptadores activos (Up):
+  Wi-Fi                        TP-Link Wireless Nano USB Adapter       MAC C0-06-C3-91-29-F1
+  vEthernet (Default Switch)   Hyper-V Virtual Ethernet Adapter        MAC 00-15-5D-B1-0B-73
+  ZeroTier One [...]           ZeroTier Virtual Port                   MAC D2-C8-22-0D-CD-5F
+  (ademas: muchos "VirtualBox Host-Only Ethernet Adapter" en estado Not Present / desconectados)
+
+OBSERVACION (candidato de hallazgo para fase 2/5): hay adaptadores virtuales ACTIVOS con IP
+  (vEthernet de Hyper-V y ZeroTier). Reptile salta docker*/veth*/tun*/wg*, pero probablemente NO
+  "vEthernet (...)" ni "ZeroTier". Verificar en /api/state.identity.addresses.
+
+## Disco de trabajo
+D:  FileSystem=NTFS  Libre ~960 GB / ~2794 GB
+
+## Alcance de red (Windows -> Linux 192.168.0.241)
+TCP 55667, 55668, 55669, 55670, 55690: todos TcpTestSucceeded=True.
+ICMP ping: OK, RTT ~195 ms (Wi-Fi), SourceAddress 192.168.0.246.
+agent ping (python reptile-xtest.py remote ... ping):
+  platform=linux, clock_skew_ms_remote_minus_local=-1 ms (relojes sincronizados), round_trip ~91 ms.
+Prueba inversa (agente Linux -> http://192.168.0.246:55667/api/ping) SIN instancia y con firewall activo:
+  "URLError: <urlopen error timed out>"  => el firewall de Windows DESCARTA el entrante (timeout, no 'rechazado').

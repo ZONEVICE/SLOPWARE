@@ -33,7 +33,7 @@ import { mkdir } from 'node:fs/promises';
 import { EVENTS } from '../lib/events.js';
 import { backoffDelay, runPool, SerialQueue } from '../lib/queue.js';
 import { depthOf, isSameOrInside, normalizeWirePath, parentOf, resolveWirePath } from '../lib/wirePath.js';
-import { isTempPath, publicState, readState, sameState } from '../fs/entry.js';
+import { isOsRepresentable, isTempPath, publicState, readState, sameState } from '../fs/entry.js';
 import { commitOp, FileIndex } from '../fs/fileIndex.js';
 import { hashFile } from '../fs/hash.js';
 import { ensureDirectory, moveEntry, removeFile, removeStaleTempFiles, removeTree, setMtime, stageFile } from '../fs/mutate.js';
@@ -428,6 +428,10 @@ class SyncEngine {
   }
 
   isRejected(path) {
+    // A name the local OS cannot store (Windows reserved chars/names) is skipped
+    // like an unshared path, so the planner never keeps retrying a download that
+    // can never land, nor lets a munged name round-trip.
+    if (!isOsRepresentable(path)) return true;
     for (const rejected of this.rejected) if (isSameOrInside(rejected, path)) return true;
     return false;
   }
@@ -708,8 +712,21 @@ class SyncEngine {
         this.scheduleReconcile();
         return false;
       }
+      const base = this.index.get(path);
       this.index.set(path, staged.state);
-      await staged.commit();
+      try {
+        await staged.commit();
+      } catch (error) {
+        // Commit can fail on Windows (e.g. the target is locked). Put the base
+        // back and drop the temp file so the two sides do not diverge silently.
+        // Forgetting the base would leave the next reconciliation deciding by
+        // mtime alone, and a host that just restored an older copy would get
+        // the stale local one uploaded over it.
+        if (base) this.index.set(path, base);
+        else this.index.delete(path);
+        await staged.discard();
+        throw error;
+      }
       this.activity.add({ kind: 'received', op: 'write', path, size: remote.size });
       return true;
     } catch (error) {
@@ -890,7 +907,10 @@ class SyncEngine {
           this.scheduleReconcile();
           return;
         }
-        await this.download(path, { expectLocal: current });
+        // A failed download (e.g. the target is locked on Windows) must not be
+        // dropped silently, or the two sides diverge while reporting "live":
+        // reconcile so the file is retried once the obstacle clears.
+        if (!(await this.download(path, { expectLocal: current }))) this.scheduleReconcile();
         return;
       }
       case 'unlink': {

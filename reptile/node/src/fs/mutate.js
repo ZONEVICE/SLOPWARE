@@ -12,7 +12,7 @@
  * not for the whole transfer.
  */
 import { createWriteStream } from 'node:fs';
-import { lstat, mkdir, readdir, rename, rm, rmdir, unlink, utimes } from 'node:fs/promises';
+import { chmod, lstat, mkdir, readdir, rename, rm, rmdir, unlink, utimes } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { isTempName, readState, tempName } from './entry.js';
@@ -126,12 +126,40 @@ export async function stageFile(root, wirePath, source, meta) {
         const existing = await readState(targetPath);
         if (existing?.kind === 'dir') throw fsError('conflict', `${wirePath} is a directory.`);
         if (existing?.kind === 'other') throw fsError('conflict', `${wirePath} is a special file or a link.`);
-        await rename(tempPath, targetPath);
+        try {
+          await rename(tempPath, targetPath);
+        } catch (error) {
+          // Windows refuses to replace a read-only file (POSIX replaces it as long
+          // as the directory is writable). Clear the attribute and retry once, or a
+          // read-only file on the peer would never update.
+          if (await clearReadonly(targetPath)) await rename(tempPath, targetPath);
+          else throw error;
+        }
       },
     };
   } catch (error) {
     await discard();
     throw error;
+  }
+}
+
+/**
+ * Clear a file's read-only attribute. Returns true only when it was set and is
+ * now cleared, so the caller retries the rename exactly once. Windows only, like
+ * Rust's `clear_readonly`: on POSIX a rename that failed did so for another
+ * reason (the directory, say), and granting the owner write access to the file
+ * would change the user's permissions without fixing anything.
+ * @returns {Promise<boolean>}
+ */
+async function clearReadonly(path) {
+  if (process.platform !== 'win32') return false;
+  try {
+    const st = await lstat(path);
+    if (st.mode & 0o200) return false; // already writable (no read-only attribute)
+    await chmod(path, st.mode | 0o200);
+    return true;
+  } catch {
+    return false;
   }
 }
 

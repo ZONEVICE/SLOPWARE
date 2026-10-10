@@ -1,0 +1,31 @@
+{
+  "A": {
+    "part": "A - kill Windows PEER (Linux host)",
+    "live_s": 20.5,
+    "host_session_before": "{'lastSeen': 1791516293536, 'peer': {'ad",
+    "killed_pid": "14532",
+    "host_freed_session_s": 22.8,
+    "resync_status": 201,
+    "relive_s": 1.0,
+    "reconverge": {
+      "ok": true,
+      "s": 0.1
+    }
+  },
+  "B": {
+    "part": "B - kill Windows HOST (Linux peer)",
+    "linux_live_s": 11.4,
+    "killed_host_pid": "8448",
+    "linux_states_after_kill": [
+      "reconnecting"
+    ],
+    "linux_to_reconnecting_s": 0.0,
+    "rehost_status": 201,
+    "linux_states_after_rehost": [
+      "stopped"
+    ],
+    "linux_final_s": 0.0,
+    "explicit_resync_status": 201,
+    "linux_live_after_resync_s": 0.9
+  }
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "scenario": "m9",
+    "host": 201,
+    "sync": 201,
+    "live_s": 21.4,
+    "pin_change_status": 200,
+    "peer_to_pin_required_s": 0.0,
+    "peer_state_after_pin_change": "pin_required",
+    "wrong_pin_status": 403,
+    "wrong_pin_body": "{\"error\":{\"code\":\"pin_invalid\",\"message\":\"Wrong PIN. Try again.\"}}",
+    "right_pin_status": 200,
+    "peer_back_to_live_s": 0.4,
+    "peer_state_after_right_pin": "live",
+    "peer_change_on_host": true
+  },
+  {
+    "scenario": "m11",
+    "windows_sees_linux_s": 0.0,
+    "windows_sees_linux_n": 4,
+    "windows_discovery_of_linux": [
+      [
+        55667,
+        "http",
+        true
+      ],
+      [
+        55668,
+        "http",
+        true
+      ],
+      [
+        55669,
+        "https",
+        false
+      ],
+      [
+        55670,
+        "https",
+        false
+      ]
+    ],
+    "linux_sees_windows_s": 0.0,
+    "linux_sees_windows_n": 4,
+    "linux_discovery_of_windows": [
+      [
+        55667,
+        "http",
+        true
+      ],
+      [
+        55668,
+        "http",
+        true
+      ],
+      [
+        55669,
+        "https",
+        false
+      ],
+      [
+        55670,
+        "https",
+        false
+      ]
+    ],
+    "linux_sees_windows_hosting": {
+      "connected": false,
+      "id": "46a933f6-fd32-488b-af13-6eb5873c3bf3",
+      "name": "m11pub"
+    },
+    "linux_sees_windows_hosting_s": 2.3
+  }
+]

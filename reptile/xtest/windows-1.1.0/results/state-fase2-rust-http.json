@@ -1,0 +1,88 @@
+{
+  "discovery": {
+    "enabled": true,
+    "hosts": 509,
+    "instances": [
+      {
+        "address": "192.168.0.241",
+        "compatible": true,
+        "firstSeen": 1791512010762,
+        "hosting": null,
+        "hostname": "T14",
+        "lastSeen": 1791512049800,
+        "mode": "idle",
+        "port": 55667,
+        "protocol": "http",
+        "uuid": "ab72a617-96ab-43be-ae1e-4e5d78a6e282",
+        "version": "1.1.0"
+      },
+      {
+        "address": "192.168.0.241",
+        "compatible": true,
+        "firstSeen": 1791512010790,
+        "hosting": null,
+        "hostname": "T14",
+        "lastSeen": 1791512049802,
+        "mode": "idle",
+        "port": 55668,
+        "protocol": "http",
+        "uuid": "c497e6fb-602b-478c-9fc2-b7fc0220fd02",
+        "version": "1.1.0"
+      },
+      {
+        "address": "192.168.0.241",
+        "compatible": false,
+        "firstSeen": 1791512010808,
+        "hosting": null,
+        "hostname": "T14",
+        "lastSeen": 1791512049810,
+        "mode": "idle",
+        "port": 55669,
+        "protocol": "https",
+        "uuid": "b39c0fa4-3250-4b67-9175-67bfd841df6f",
+        "version": "1.1.0"
+      },
+      {
+        "address": "192.168.0.241",
+        "compatible": false,
+        "firstSeen": 1791512010817,
+        "hosting": null,
+        "hostname": "T14",
+        "lastSeen": 1791512049812,
+        "mode": "idle",
+        "port": 55670,
+        "protocol": "https",
+        "uuid": "56946fda-e7b9-416c-a40e-ae29d7ba2deb",
+        "version": "1.1.0"
+      }
+    ],
+    "lastSweepAt": 1791512047438,
+    "lastSweepMs": 3619,
+    "ports": {
+      "count": 20,
+      "ranges": "55667-55686"
+    },
+    "scanning": false,
+    "sweeps": 4
+  },
+  "hosting": null,
+  "identity": {
+    "address": "192.168.111.10",
+    "addresses": [
+      "192.168.111.10",
+      "192.168.0.246"
+    ],
+    "app": "reptile",
+    "hostname": "ATUN",
+    "port": 55667,
+    "protocol": "http",
+    "uuid": "8e1d8c21-2019-460e-adbb-e67d3111e5d3",
+    "version": "1.1.0"
+  },
+  "mode": "idle",
+  "serverTime": 1791512051987,
+  "syncing": null,
+  "ui": {
+    "remote": false
+  }
+}
