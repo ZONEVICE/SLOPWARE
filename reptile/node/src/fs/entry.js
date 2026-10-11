@@ -54,6 +54,9 @@ const WINDOWS_RESERVED = new Set([
  * space, or a reserved device base name (CON, AUX, COM1…). A peer there skips
  * such a path instead of retrying a download that can never succeed, or that
  * Windows would silently munge (e.g. "x." -> "x") into an endless round-trip.
+ *
+ * Twin of `rust/src/fs/entry.rs::is_os_representable`: keep the rule identical so
+ * a Node and a Rust peer on one OS skip exactly the same names.
  * @param {string} wirePath
  * @returns {boolean}
  */

@@ -22,6 +22,9 @@ import { hostname as osHostname, networkInterfaces } from 'node:os';
  * friendly names Windows reports for the same software ("ZeroTier One [...]",
  * "VirtualBox Host-Only ...", "VMware Network Adapter ...") are listed; Hyper-V
  * and WSL already match through `veth` ("vEthernet (...)").
+ *
+ * Twin of `rust/src/util/net.rs::VIRTUAL_PREFIXES`: edit both together so a Node
+ * and a Rust instance on one machine pick the same LAN address.
  */
 export const VIRTUAL_INTERFACE =
   /^(lo|docker|br-|veth|virbr|vmnet|vboxnet|lxc|lxd|cni|flannel|cali|weave|tun|tap|utun|zt|zerotier|tailscale|wg|kube|podman|dummy|ham|nordlynx|virtualbox|vmware)/i;

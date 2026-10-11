@@ -38,6 +38,14 @@ it. A dismissed prompt leaves a rule that blocks `reptile.exe`, and a block
 rule wins over any allow rule. Check *Windows Defender Firewall → Allow an app
 through Windows Firewall* if peers cannot connect.
 
+The zip also holds two scripts that settle this for you. With them next to
+`reptile.exe`, run `firewall-add-rules.bat` (it asks for administrator rights):
+it deletes every inbound rule Windows created for that `reptile.exe`, blocking
+ones included, and adds one allow rule for all network profiles.
+`firewall-remove-rules.bat` deletes them again, and both accept `check` to only
+list the rules. The rules are tied to the full path of the `.exe`, so run the
+script again if you move it.
+
 These files are built by `scripts/package.sh` (below) into `dist/`.
 
 ## Run

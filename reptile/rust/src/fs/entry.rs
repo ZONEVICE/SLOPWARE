@@ -151,6 +151,9 @@ pub fn temp_name() -> String {
 /// space, or a reserved device base name (CON, AUX, COM1…). A peer there skips
 /// such a path instead of retrying a download that can never succeed, or that
 /// Windows would silently munge (e.g. "x." -> "x") into an endless round-trip.
+///
+/// Twin of `node/src/fs/entry.js::isOsRepresentable`: keep the rule identical so
+/// a Rust and a Node peer on one OS skip exactly the same names.
 pub fn is_os_representable(wire_path: &str) -> bool {
     #[cfg(windows)]
     {

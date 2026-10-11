@@ -3,7 +3,7 @@
 #
 #   reptile-<version>-linux-x86_64           one binary, glibc 2.28+ (Debian 10 and newer)
 #   reptile_<version>-1_amd64.deb            installs /usr/bin/reptile
-#   reptile-<version>-windows-x86_64.zip     reptile.exe (Windows 10/11) + README + licence
+#   reptile-<version>-windows-x86_64.zip     reptile.exe (Windows 10/11) + firewall .bat files + README + licence
 #
 # Cross-compilation goes through zig (cargo-zigbuild): it links against an
 # older glibc than the build machine's, and against the MinGW runtime for
@@ -42,7 +42,7 @@ staging="$(mktemp -d)"
 trap 'rm -rf "$staging"' EXIT
 folder="$staging/reptile-${version}-windows-x86_64"
 mkdir -p "$folder"
-cp "target/${windows_target}/release/reptile.exe" README.md ../LICENCE.txt "$folder/"
+cp "target/${windows_target}/release/reptile.exe" firewall-add-rules.bat firewall-remove-rules.bat README.md ../LICENCE.txt "$folder/"
 (cd "$staging" && rm -f "$OLDPWD/$dist/reptile-${version}-windows-x86_64.zip" && zip -qr "$OLDPWD/$dist/reptile-${version}-windows-x86_64.zip" "reptile-${version}-windows-x86_64")
 
 echo "==> Done"

@@ -14,6 +14,12 @@ specific to Rust. `README.md` covers building, packaging and running;
 
 ## 1. Hard constraints (this implementation)
 
+- **This crate is the twin of `../node`; change both together.** Any adjustment
+  asked of Reptile is applied to the Node.js implementation in the same change,
+  kept as faithful as the languages allow (see `../CLAUDE.md` section 1). Only
+  mechanism differs (threads vs the event loop), listed in section 4; behaviour,
+  rules and tests mirror Node's. A Windows-only fix still gets its Node twin
+  (guarded by `process.platform`).
 - **Communicate with the user in Spanish. Write code, comments, documentation
   and interface text in English.** (Repository-wide convention.)
 - **Dependencies: `rustls` (ring backend, no aws-lc), `ring`, `serde_json`,
@@ -247,8 +253,12 @@ them). Each is `#[cfg(windows)]` or windows-only in effect; none change Linux.
 12. **Windows silently blocks the listener in the firewall** (deployment, not
     code). On first run Windows created inbound *Block* rules ("Query User…")
     for `reptile.exe` instead of showing the allow prompt, so no peer could
-    reach it until the app was allowed. Worth a note in the README/installer, or
-    sign the executable.
+    reach it until the app was allowed. Addressed with `firewall-add-rules.bat` /
+    `firewall-remove-rules.bat` (next to `reptile.exe`, shipped in the Windows
+    zip): they delete every inbound rule bound to the `.exe` (a Block rule beats
+    any Allow) and add one Allow rule on all profiles. Windows-only deployment
+    scripts, so Node.js has no twin. Signing the executable would still avoid
+    the silent Block rules.
 
 ---
 

@@ -13,6 +13,12 @@ this implementation; `AGENTS.md` only points here.
 
 The product-wide ones are in `../CLAUDE.md` section 1. On top of them:
 
+- **This implementation is the twin of `../rust`; change both together.** Any
+  adjustment asked of Reptile is applied to the Rust implementation in the same
+  change, kept as faithful as the languages allow (see `../CLAUDE.md` section 1).
+  Only mechanism differs (the event loop vs threads), listed in `../rust/CLAUDE.md`
+  section 4; behaviour, rules and tests mirror Rust's. A Windows-only fix still
+  gets its Rust twin (guarded by `#[cfg(windows)]`).
 - **Communicate with the user in Spanish. Write code, comments, documentation
   and interface text in English.** (Repository-wide convention.)
 - **No npm dependencies.** None, in any layer, including dev and test

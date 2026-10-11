@@ -47,6 +47,9 @@ pub struct Ipv4Interface {
 /// adapter friendly names Windows reports for the same software (`ZeroTier One
 /// [...]`, `VirtualBox Host-Only ...`, `VMware Network Adapter ...`) are listed;
 /// Hyper-V and WSL already match through `veth` (`vEthernet (...)`).
+///
+/// Twin of `node/src/lib/net.js::VIRTUAL_INTERFACE`: edit both together so a Rust
+/// and a Node instance on one machine pick the same LAN address.
 const VIRTUAL_PREFIXES: &[&str] = &[
     "lo",
     "docker",

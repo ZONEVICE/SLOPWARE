@@ -25,6 +25,16 @@ These are not preferences. Breaking one of them breaks the product.
 
 - **Communicate with the user in Spanish. Write code, comments, documentation
   and interface text in English.** (Repository-wide convention.)
+- **Two implementations, one product — change them together.** Node.js
+  (`node/`) and Rust (`rust/`) are the same program written twice and must stay
+  as faithful to each other as the languages allow: same behaviour, same rules,
+  same layering and names, mirrored tests. **Any adjustment asked of Reptile is
+  applied to BOTH implementations in the same change** — never leave one ahead
+  of the other. The only differences allowed are mechanism, not behaviour (Rust
+  uses threads where Node uses the event loop; each has `*/CLAUDE.md` section 4
+  listing exactly where its mechanism differs). Platform-specific fixes still go
+  in both (guarded by `cfg!(windows)` / `process.platform`). If the two ever
+  disagree, one is wrong (section 7).
 - **The two implementations stay wire-compatible.** A Rust instance and a
   Node.js instance must find, host for and sync with each other, over HTTP and
   HTTPS, in both directions. Any change to section 4 is made in both, and
@@ -187,6 +197,9 @@ peer routes and `/api/ping` are not.
 ---
 
 ## 5. Changing things
+
+Whatever you change, change it in **both** implementations as one piece of work
+(section 1), keeping them faithful to each other, and update both guides.
 
 - **A rule or a behaviour:** change `domain` in both implementations, add a
   test in both, and update both guides.
