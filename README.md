@@ -21,6 +21,7 @@ Every application's original generation prompt is kept in its `prompts/init.md` 
 - Each application's `README.md` documents its own setup and usage. Start there.
 - Each application's `AGENTS.md`/`CLAUDE.md` (when present) is the handoff entry point for an AI coding assistant working on that app, and documents which AI tools were used to create and maintain it.
 - [`.claude/skills/new-app/SKILL.md`](.claude/skills/new-app/SKILL.md) records the conventions a new application must follow. It is packaged as a Claude Code skill, but the body is plain Markdown with no Claude-specific machinery: any assistant, Codex included, can be pointed at that path and read it as a checklist.
+- [`.claude/skills/syncthing-conflicts/SKILL.md`](.claude/skills/syncthing-conflicts/SKILL.md) is the second skill: what to do when Syncthing leaves a `*.sync-conflict-*` file (tell the developer, merge it keeping the most recent, coherent and working content, ask when unsure, delete it afterwards). Those files are deliberately not git-ignored, so they stay visible.
 
 ## Developer Comments
 
