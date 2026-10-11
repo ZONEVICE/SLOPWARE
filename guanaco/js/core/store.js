@@ -1,8 +1,11 @@
 import { DEFAULT_CONFIG, configSnapshot } from './config.js';
 
+// The store owns config and workspace. The theme key belongs to js/ui/theme.js
+// (and the pre-paint script in index.html) and is listed here with the others.
 export const STORAGE_KEYS = Object.freeze({
   config: 'guanaco.config.v1',
   workspace: 'guanaco.workspace.v1',
+  theme: 'guanaco.theme.v1',
 });
 
 const STATUSES = new Set(['queued', 'running', 'completed', 'failed', 'cancelled', 'interrupted']);

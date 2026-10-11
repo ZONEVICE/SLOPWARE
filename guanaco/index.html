@@ -3,12 +3,23 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light">
     <meta name="theme-color" content="#fafbf8">
     <meta name="description" content="A local-first workspace for organizing and queuing conversations with your Ollama models.">
     <title>Guanaco — Your local AI workspace</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23166055'/%3E%3Cpath d='M18 43V30l7-3V14l5 5 4-6 4 6v14l9 6v10h-6v-7l-11-5-6 2v10h-6z' fill='%23f4f4de'/%3E%3Ccircle cx='33' cy='24' r='2' fill='%23166055'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="./css/styles.css">
+    <!-- The only classic script: it applies the saved theme before the first
+         paint, so a dark theme never flashes light. The stylesheet above has
+         loaded when it runs. js/ui/theme.js validates the choice and owns every
+         later change; keep this key equal to STORAGE_KEYS.theme. -->
+    <script>
+      try {
+        const theme = localStorage.getItem('guanaco.theme.v1');
+        if (theme) document.documentElement.dataset.theme = theme;
+        const page = getComputedStyle(document.documentElement).getPropertyValue('--page').trim();
+        if (page) document.querySelector('meta[name="theme-color"]').content = page;
+      } catch { /* Blocked storage leaves the default theme in place. */ }
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to workspace</a>
@@ -18,7 +29,7 @@
       <aside class="sidebar" aria-label="Workspace navigation">
         <a class="brand" href="#orchestrator" aria-label="Guanaco home">
           <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 44 44" fill="none"><path d="M10 33V23l7-3V8l4 4 4-5 4 6v13l7 4v7h-5v-5l-11-5-5 3v7h-5Z" fill="currentColor"/><circle cx="24" cy="18" r="1.7" fill="#166055"/></svg>
+            <svg viewBox="0 0 44 44" fill="none"><path d="M10 33V23l7-3V8l4 4 4-5 4 6v13l7 4v7h-5v-5l-11-5-5 3v7h-5Z" fill="currentColor"/><circle class="brand-eye" cx="24" cy="18" r="1.7"/></svg>
           </span>
           <span class="brand-name">guanaco<span class="brand-caption">LOCAL AI WORKSPACE</span></span>
         </a>

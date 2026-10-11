@@ -7,11 +7,12 @@ This file is the entry point for an AI assistant arriving with no conversation c
 Guanaco is a single-page application that orchestrates conversations with an existing Ollama server. The user creates any number of small request windows, represented by cards. Submitting a prompt immediately starts it when the application queue is idle; otherwise it waits. Opening a card shows its full chat, including pending work. Follow-up messages use the same shared queue.
 
 - All source code, identifiers, code comments, UI text, and project documentation are in English. Communicate with this user in Spanish.
-- Application code is exclusively HTML, CSS, and vanilla JavaScript ES modules. Keep it runnable with `python -m http.server`; do not introduce a Node.js server, build pipeline, package dependency, CDN, or external font requirement.
+- Application code is exclusively HTML, CSS, and vanilla JavaScript ES modules. Keep it runnable with `python -m http.server`; do not introduce a Node.js server, build pipeline, package dependency, CDN, or external font requirement. The single exception is the small inline classic script in `index.html` that applies the saved theme before the first paint.
 - The browser manages inference serialization. Never rely on Ollama's internal queue to implement Guanaco's ordering.
 - The six primary settings are server URL, model selection from the server, `num_ctx`, `num_predict`, system prompt, and the Boolean Think switch. Advanced settings supplement them.
 - Global defaults apply when a chat is created. Per-chat overrides are visually distinguished with purple, while global snapshots use teal. Color always has a corresponding text label.
 - Global settings support validated JSON import/export, localStorage persistence, and restoring application defaults.
+- Configuration offers three appearance themes: Light (the default), Dark, and Dark OLED. The theme is a per-browser display preference stored on its own key; configuration export, import, and restore never include or reset it.
 
 ## Start and inspect
 
@@ -30,8 +31,8 @@ Ollama is a separate existing process at `http://localhost:11434`. Use only the 
 
 | File | Responsibility |
 | --- | --- |
-| `index.html` | Static shell, navigation, view containers, dialogs, import input, module entry point. |
-| `css/styles.css` | Tokens, layout, forms, status colors, responsive behavior, focus styles, reduced-motion and print rules. |
+| `index.html` | Static shell, pre-paint theme script, navigation, view containers, dialogs, import input, module entry point. |
+| `css/styles.css` | Theme palettes and derived color tokens, layout, forms, status colors, responsive behavior, focus styles, reduced-motion and print rules. |
 | `js/app.js` | Composition root, hash routing, shared context, actions, dialogs, model cache, connection status, toasts. |
 | `js/core/config.js` | Defaults, validation, immutable snapshots, versioned configuration import/export. |
 | `js/core/store.js` | Observable workspace, storage validation, chat operations, persistence and recovery. |
@@ -41,14 +42,15 @@ Ollama is a separate existing process at `http://localhost:11434`. Use only the 
 | `js/ui/config-form.js` | Shared global/per-chat form and model dropdown. |
 | `js/ui/orchestrator.js` | Request cards, search/filter, statistics, live queue. |
 | `js/ui/chat.js` | Conversation list, streamed turns, thinking blocks, composer, retry/cancel/copy. |
-| `js/ui/settings.js` | Global settings, import/export/reset, server diagnostics. |
+| `js/ui/settings.js` | Appearance picker, global settings, import/export/reset, server diagnostics. |
+| `js/ui/theme.js` | Theme registry, saved-theme validation and application, settings picker. |
 | `tests/core.test.js` | Browser-native, isolated automated core tests using fake transports. |
 | `tests/index.html` | Test harness; exposes `window.testsDone` for automation. |
 | `tests/browser.mjs` | Optional Node-based Chromium DevTools test driver; not part of application runtime. |
 
 Views receive a shared context explicitly; application state is not exposed as a window global. A view factory returns `{ element, update, destroy }`, with the board also exposing `focusChat(id)`. Views are created lazily and retained, preserving drafts during navigation; the chat view additionally keeps one draft per conversation in memory. Store notifications are rendered at most once per animation frame, and only the active view updates. Routing uses `#orchestrator`, `#chat`, and `#settings`.
 
-The context is `{ store, queue, toast, confirm, getModels, checkConnection, navigate, openChat, newChat, removeChat, editChatConfig, selectedChatId }`. `toast(message, isError)` and `confirm(title, message, actionLabel)` own the only user notifications and the only destructive confirmation; do not call `alert`/`confirm` or build ad-hoc banners. `getModels(config, force)` caches each server URL's model list for 30 seconds so several forms can populate a dropdown without repeated requests. `selectedChatId` is a mutable field on the context, not persisted state.
+The context is `{ store, queue, theme, toast, confirm, getModels, checkConnection, navigate, openChat, newChat, removeChat, editChatConfig, selectedChatId }`. `theme` is the controller described under Themes. `toast(message, isError)` and `confirm(title, message, actionLabel)` own the only user notifications and the only destructive confirmation; do not call `alert`/`confirm` or build ad-hoc banners. `getModels(config, force)` caches each server URL's model list for 30 seconds so several forms can populate a dropdown without repeated requests. `selectedChatId` is a mutable field on the context, not persisted state.
 
 `js/ui/config-form.js` returns `{ element, read, refreshModels, fields, destroy }` instead of the view interface, because dialogs and the settings view embed it. `read()` validates and throws; the caller renders the message. A saved model that the server does not list is kept as a `(saved selection)` option so an offline server cannot silently rewrite a configuration.
 
@@ -63,7 +65,7 @@ turn  = { id, prompt, content, thinking, status, error, createdAt, metrics }
 job   = { id, chatId, turnId, config, status, createdAt }
 ```
 
-`store.js` also exports `createId(prefix)` (a UUID where available) and `STORAGE_KEYS`. `store.storageError` holds the last load/save failure message.
+`store.js` also exports `createId(prefix)` (a UUID where available) and `STORAGE_KEYS`, which lists every key the application uses, including the theme key that `theme.js` owns. `store.storageError` holds the last load/save failure message.
 
 `configMode` is `global` or `custom`. Turn/job statuses are `queued`, `running`, `completed`, `failed`, `cancelled`, and `interrupted`. A card without turns is displayed as `draft`; draft is a derived UI state, computed with `chatStatus()` in `dom.js` alongside `statusLabel()` and `jobForTurn()`. Dates are ISO strings.
 
@@ -116,10 +118,23 @@ Exports have `{ schema: "guanaco.configuration", version: 1, exportedAt, config 
 
 - `guanaco.config.v1`: saved global configuration.
 - `guanaco.workspace.v1`: `{ version: 1, chats, jobs, paused }`.
+- `guanaco.theme.v1`: the chosen theme id as a plain string, written only when the user picks a theme. An unknown value renders as Light and is left in place, so a newer version's theme survives a visit from an older tab.
 
 Terminal transitions persist immediately. Streaming notifications schedule a save at most every 250 ms, and `pagehide` flushes a save. Reloading turns any saved `queued`/`running` work into `interrupted`; it never replays inference automatically. A navigation warning appears if work is pending.
 
-Storage load validates dates, IDs, configuration, statuses, and job references. Malformed data falls back to a usable in-memory app and produces a visible notice. Quota errors do not stop inference; `storageError` makes failed saves visible. Settings are saved separately before the larger workspace. Browser profiles, hostnames, and ports each have their own storage scope. Draft text and the selected conversation are deliberately not persisted; only the view lives outside memory, in the URL hash.
+Storage load validates dates, IDs, configuration, statuses, and job references. Malformed data falls back to a usable in-memory app and produces a visible notice. Quota errors do not stop inference; `storageError` makes failed saves visible. Settings are saved separately before the larger workspace. Browser profiles, hostnames, and ports each have their own storage scope. Draft text and the selected conversation are deliberately not persisted; only the view lives outside memory, in the URL hash. A theme change in another tab is followed, not reported as a workspace conflict.
+
+## Themes
+
+Colors exist only as palette tokens. `css/styles.css` declares the Light palette on `:where(:root), [data-theme="light"]`, so Light is also the zero-specificity fallback for a missing or unknown `data-theme`. The other palettes are inside `@media screen`, which keeps printing on Light. Rules read tokens such as `--surface`, `--ink`, `--muted`, `--accent`, `--teal`, or `--red`; never add a literal color to a rule. A few derived tokens (`--focus-halo`, `--purple-line`, `--thinking`, and similar) and some inline `color-mix()` values are computed from the palette, so themes do not define them. `--accent` is the fill behind `--on-accent` text, while `--accent-text` is accent-colored text, outlines, and native control color on surfaces. They are equal in Light but not in the dark themes.
+
+- **Add a theme:** copy a dark palette block, give every token a new value, and append `{ id, label, description }` with the same id to `THEMES` in `js/ui/theme.js`. The core test "Every theme has a complete palette and the pre-paint script uses its key" fails if the registry and the palettes disagree or if a palette lacks a token, and the picker previews the new theme without other changes.
+- **Add a color:** define the new token in every palette, or derive it from existing tokens with `color-mix()`.
+- Status hues mean the same in every theme: teal is a global snapshot, purple a custom configuration, amber waiting, red an error, green success and generation. Always keep the text label.
+- Dark OLED keeps backgrounds at `#000000` and primary text at `#ffffff`. Neutral grays and borders provide the hierarchy, and color appears only on actions and statuses.
+- Dark and Dark OLED keep visible text at 4.5:1 contrast or better against its background; recheck this whenever you change a palette. Light preserves the original design values, including its lighter secondary text.
+
+The inline script in `index.html` runs after the stylesheet has loaded. It copies the saved id to `<html data-theme>` and the `--page` token to `<meta name="theme-color">` before the body exists, so a dark theme never flashes light. Its key must equal `STORAGE_KEYS.theme`, which the same core test checks. `createThemeController({ storage, root })` then validates the saved id, owns later changes, and is passed to views as `context.theme` with `themes`, `current`, `set(id)`, and `sync()`. `set(id)` throws for an unknown id and returns `false` when storage refuses the write; the theme still applies for the session, and the settings view shows a toast. `createThemePicker(theme, { labelledBy, onSaveError })` renders native radio cards. Each preview carries `data-theme`, so it paints with that theme's own palette, and the settings view's `update()` re-syncs the radios after another tab changes the theme.
 
 ## Transport and rendering
 
@@ -139,6 +154,7 @@ Preserve focused controls and draft inputs while streaming. Cards are keyed by c
 
 - **New setting:** update defaults/validation, the shared form, the API mapping if needed, import/export compatibility, and relevant tests/docs together. Preserve snapshot semantics.
 - **New view:** add a view module/factory, static section and navigation link, and routing registration in `app.js`. Use injected context and return the standard view interface.
+- **New theme:** add a palette block and a `THEMES` entry, as described under Themes. Nothing else changes.
 - **New generation feature:** represent it as queued work. Keep scheduling policy out of views and wire protocol details in `api.js`.
 - **Different storage:** inject a compatible adapter; an asynchronous IndexedDB adapter requires a deliberate store redesign rather than pretending writes are synchronous.
 - **Richer message types/tools:** extend the turn schema and history builder together. Tool calls, image attachments, and model management are not implemented today.
@@ -146,19 +162,19 @@ Preserve focused controls and draft inputs while streaming. Cards are keyed by c
 
 ## Verification
 
-Open `http://localhost:8000/tests/` for 11 browser-native tests. They use injected in-memory storage and mocked transports, so they do not overwrite actual chats or need Ollama. Wait until the page reports completion. Automation can await `window.testsDone`, which resolves `{passed, failed, tests}` and also sets `document.documentElement.dataset.testStatus`. Run the harness when no other tab is holding Guanaco's generation lock.
+Open `http://localhost:8000/tests/` for 13 browser-native tests. They use injected in-memory storage, mocked transports, and detached theme roots, so they do not overwrite actual chats or the chosen theme, and they do not need Ollama. Wait until the page reports completion. Automation can await `window.testsDone`, which resolves `{passed, failed, tests}` and also sets `document.documentElement.dataset.testStatus`. Run the harness when no other tab is holding Guanaco's generation lock.
 
-The optional `tests/browser.mjs` uses a dedicated Chromium debugging profile and Node solely as a DevTools client. It verifies real Ollama CORS/model loading, three queued requests and chat continuation, snapshots, configuration transfer/reset, Think streaming, cancellation/retry, reload persistence, responsive layout, browser exceptions, and the core harness. It reads `GUANACO_TEST_URL` and `GUANACO_DEBUG_URL`, and takes one optional flag:
+The optional `tests/browser.mjs` uses a dedicated Chromium debugging profile and Node solely as a DevTools client. It verifies real Ollama CORS/model loading, three queued requests and chat continuation, snapshots, configuration transfer/reset, Think streaming, cancellation/retry, reload persistence, responsive layout, theme choice and pre-paint application, browser exceptions, and the core harness. It reads `GUANACO_TEST_URL` and `GUANACO_DEBUG_URL`, and takes one optional flag:
 
 - no flag: the full suite. It clears Guanaco's keys in that test profile first, then runs the feature and closing checks.
 - `--features`: import/export, Think streaming, restoring defaults, and cancellation/retry against the workspace already in that profile.
-- `--finish`: reload persistence, board filters, the 390-pixel mobile pass, and the core harness.
+- `--finish`: reload persistence, board filters, the 390-pixel mobile pass, theme checks (which end by selecting Light again), and the core harness.
 - `--inspect` / `--status`: read-only dumps of the current page for debugging; they assert nothing.
 
 README documents the default and `--features` commands only.
 
-The complete DevTools runner passed with exit code 0 on September 19, 2026, against the local Qwen model in Chromium, including all 11 core cases and desktop/390-pixel mobile layouts. It also covers imported stop-string fidelity and creation with active board filters. Screenshots are optional temporary artifacts under `/tmp/guanaco-*.png`; the application does not depend on them. Read `docs/validation.md` for the recorded results and practical scope.
+The complete DevTools runner passed with exit code 0 on September 19, 2026, against the local Qwen model in Chromium, including all 11 core cases at the time and desktop/390-pixel mobile layouts. It passed again on October 10, 2026, after the themes were added, with all 13 core cases. It also covers imported stop-string fidelity and creation with active board filters. Screenshots are optional temporary artifacts under `/tmp/guanaco-*.png`; the application does not depend on them. Read `docs/validation.md` for the recorded results and practical scope.
 
-Test-driver detail: reset persisted fixtures using `Page.addScriptToEvaluateOnNewDocument` before reloading. Clearing storage in the old page before navigation is insufficient because its `pagehide` handler saves the old workspace again. The driver disables cache and waits through two animation frames after button actions so assertions inspect the final render.
+Test-driver detail: reset persisted fixtures using `Page.addScriptToEvaluateOnNewDocument` before reloading. Clearing storage in the old page before navigation is insufficient because its `pagehide` handler saves the old workspace again. The driver disables cache and waits through two animation frames after button actions so assertions inspect the final render. A control that appears only after a store notification, such as Stop generation or Retry request, must be awaited until visible before clicking it: renders are batched into the next animation frame. The theme check records `data-theme` from a `MutationObserver` the moment `<body>` exists, which proves the pre-paint script ran before any module.
 
-For future changes, run the checks relevant to the changed behavior. Queue, history, cancellation, storage recovery, and protocol changes need meaningful regression checks. Plain styling changes need visual inspection at desktop and mobile sizes; avoid tests that merely repeat CSS implementation details.
+For future changes, run the checks relevant to the changed behavior. Queue, history, cancellation, storage recovery, and protocol changes need meaningful regression checks. Plain styling changes need visual inspection at desktop and mobile sizes in every theme; avoid tests that merely repeat CSS implementation details.

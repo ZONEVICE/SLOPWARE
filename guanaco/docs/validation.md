@@ -40,6 +40,18 @@ The Chromium DevTools runner exercised the application through its visible forms
 
 Application browser sessions completed without uncaught JavaScript exceptions. The reusable DevTools runner waits for document/render completion, bypasses the browser cache, and resets fixture storage at the new document's start so the previous page's shutdown save cannot restore old test data.
 
+## Theme verification
+
+Re-verified on October 10, 2026, after the Light, Dark, and Dark OLED themes were added, using the same Chromium setup and local model:
+
+- The complete `node tests/browser.mjs` run finished with exit code 0, including the new theme checks and all 13 core tests. Case 12 covers theme validation, persistence, unknown saved values, and blocked storage. Case 13 checks that `THEMES`, the stylesheet palettes, and the pre-paint script agree. Removing one token from a palette, or adding a palette without registering it, made case 13 fail and name the problem.
+- Choosing Dark OLED applied and saved it at once. After a reload, the theme was already set on `<html>` when `<body>` was created, before any module ran, and `theme-color` matched the page background. With the pre-paint script removed, the same probe found no theme at that moment, so it detects a light flash.
+- Light keeps the original design. Computed colors of every element in a fixture workspace (every request status, both configuration modes, dialogs, toasts, thinking, code, and errors) were compared with the previous version at desktop and 390-pixel widths. About 95% of the compared values were identical, and most of the rest moved by 8 units per channel or less. The largest moves, up to 20 units, affected a few small secondary text shades that were merged into shared tokens. Side-by-side screenshots looked identical.
+- Contrast was measured for the 831 visible text runs in that fixture. Dark has a minimum of 4.5:1 and a median of 7.5:1. Dark OLED has a minimum of 5.4:1 and a median of 11.2:1. The Light palette is unchanged, including its lighter secondary text.
+- All three views and both dialogs were inspected at desktop and 390-pixel widths in each theme, with no horizontal overflow and no browser exceptions.
+
+The runner's cancellation step now waits for the Stop generation button to render before clicking it. Before, it could click during the frame between dispatch and the next render, and one run failed that way.
+
 ## Scope
 
 The application runs entirely in the browser; Python serves unchanged static files. Node is optional and used only by the DevTools runner. The core test page requires no Node installation.

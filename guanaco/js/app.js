@@ -1,10 +1,11 @@
-import { createStore } from './core/store.js';
+import { createStore, STORAGE_KEYS } from './core/store.js';
 import { RequestQueue } from './core/queue.js';
 import { listModels, serverVersion } from './core/api.js';
 import { createOrchestrator } from './ui/orchestrator.js';
 import { createChatView } from './ui/chat.js';
 import { createSettingsView } from './ui/settings.js';
 import { createConfigForm } from './ui/config-form.js';
+import { createThemeController } from './ui/theme.js';
 import { el, button } from './ui/dom.js';
 
 /**
@@ -12,6 +13,7 @@ import { el, button } from './ui/dom.js';
  * The queue lives for the whole page lifetime, independently of active views.
  * To add a view, create its factory, register it here, and add a shell nav link.
  */
+const theme = createThemeController();
 const store = createStore();
 const queue = new RequestQueue(store);
 const factories = { orchestrator: createOrchestrator, chat: createChatView, settings: createSettingsView };
@@ -97,7 +99,7 @@ function editChatConfig(id) {
   dialog.showModal();
 }
 
-const context = { store, queue, toast, confirm, getModels, checkConnection, navigate, openChat, newChat, removeChat, editChatConfig, selectedChatId: store.state.chats[0]?.id || null };
+const context = { store, queue, theme, toast, confirm, getModels, checkConnection, navigate, openChat, newChat, removeChat, editChatConfig, selectedChatId: store.state.chats[0]?.id || null };
 
 function renderRoute() {
   const requested = location.hash.slice(1);
@@ -129,7 +131,9 @@ window.addEventListener('beforeunload', event => {
   if (store.state.jobs.some(job => ['running','queued'].includes(job.status))) { event.preventDefault(); event.returnValue = ''; }
 });
 window.addEventListener('storage', event => {
-  if (event.key?.startsWith('guanaco.')) toast('Another tab changed this workspace. Keep one editing tab open to avoid competing saves.', true);
+  // A theme chosen in another tab is simply followed; workspace edits conflict.
+  if (event.key === STORAGE_KEYS.theme) { theme.sync(); views.get(activeView)?.update(); }
+  else if (event.key?.startsWith('guanaco.')) toast('Another tab changed this workspace. Keep one editing tab open to avoid competing saves.', true);
 });
 renderRoute();
 if (store.storageError) { seenStorageError = store.storageError; toast(store.storageError, true); }

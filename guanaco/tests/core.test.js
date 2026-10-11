@@ -7,6 +7,7 @@ import { DEFAULT_CONFIG, validateConfig, parseConfigImport, exportConfig } from 
 import { createStore, STORAGE_KEYS } from '../js/core/store.js';
 import { RequestQueue } from '../js/core/queue.js';
 import { listModels, streamChat } from '../js/core/api.js';
+import { THEMES, DEFAULT_THEME, createThemeController } from '../js/ui/theme.js';
 
 const cases = [];
 const test = (name, run) => cases.push({ name, run });
@@ -296,6 +297,51 @@ test('Timeout aborts the transport and user cancellation retains AbortError', as
     const error = await rejects(() => pending);
     equal(error.name, 'AbortError');
   });
+});
+
+test('Theme choice is validated, applied, remembered, and survives blocked storage', () => {
+  const storage = memoryStorage();
+  const root = document.createElement('div');
+  const theme = createThemeController({ storage, root });
+  equal([theme.current, root.dataset.theme], [DEFAULT_THEME, DEFAULT_THEME]);
+  equal(storage.getItem(STORAGE_KEYS.theme), null, 'Nothing is saved until a theme is chosen.');
+  assert(theme.set('oled'), 'Writable storage saves the theme.');
+  equal([theme.current, root.dataset.theme, storage.getItem(STORAGE_KEYS.theme)], ['oled', 'oled', 'oled']);
+  throws(() => theme.set('sepia'), /Unknown theme/);
+  equal(theme.current, 'oled');
+  equal(createThemeController({ storage, root: document.createElement('div') }).current, 'oled', 'A new page restores the saved theme.');
+  storage.setItem(STORAGE_KEYS.theme, 'retired-theme');
+  equal([theme.sync(), root.dataset.theme], [DEFAULT_THEME, DEFAULT_THEME], 'Unknown saved values fall back to the default.');
+  const denied = () => { throw new DOMException('Storage is disabled.', 'SecurityError'); };
+  const blocked = createThemeController({ root, storage: { getItem: denied, setItem: denied } });
+  equal(blocked.current, DEFAULT_THEME);
+  equal(blocked.set('dark'), false, 'A refused write is reported.');
+  equal(root.dataset.theme, 'dark', 'The theme still applies for this session.');
+});
+
+test('Every theme has a complete palette and the pre-paint script uses its key', async () => {
+  const read = async path => (await fetch(path, { cache: 'no-store' })).text();
+  const sheet = new CSSStyleSheet();
+  sheet.replaceSync(await read('../css/styles.css'));
+  const palettes = new Map();
+  const collect = rules => {
+    for (const rule of rules) {
+      if (rule instanceof CSSMediaRule) collect(rule.cssRules);
+      const id = /\[data-theme="([^"]+)"\]/.exec(rule.selectorText || '')?.[1];
+      if (id) palettes.set(id, new Set(Array.from(rule.style)));
+    }
+  };
+  collect(sheet.cssRules);
+  equal([...palettes.keys()].sort(), THEMES.map(theme => theme.id).sort(), 'Stylesheet palettes must match the registered themes.');
+  const reference = palettes.get(DEFAULT_THEME);
+  assert(reference.has('color-scheme') && reference.has('--page'), 'The default palette defines the base tokens.');
+  for (const [id, tokens] of palettes) {
+    const missing = [...reference].filter(name => !tokens.has(name));
+    const extra = [...tokens].filter(name => !reference.has(name));
+    assert(!missing.length && !extra.length, `The ${id} palette must define the same tokens as ${DEFAULT_THEME}. Missing: ${missing.join(', ') || 'none'}. Extra: ${extra.join(', ') || 'none'}.`);
+  }
+  assert(THEMES.every(theme => /^[a-z][a-z0-9-]*$/.test(theme.id) && theme.label), 'Theme ids are lowercase identifiers with labels.');
+  assert((await read('../index.html')).includes(`localStorage.getItem('${STORAGE_KEYS.theme}')`), 'index.html must read the same theme key before the first paint.');
 });
 
 window.testsDone = (async () => {

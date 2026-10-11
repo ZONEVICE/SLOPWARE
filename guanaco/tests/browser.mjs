@@ -55,6 +55,7 @@ async function finishChecks() {
   check(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), 'Mobile chat has no horizontal overflow');
   await click('Configuration'); await waitFor(`!document.querySelector('#settings-view').hidden`);
   check(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), 'Mobile settings have no horizontal overflow');
+  await themeChecks();
   await send('Page.navigate', { url: `${base}/tests/` });
   await waitFor(`window.testsDone !== undefined`);
   const results = await evaluate('window.testsDone');
@@ -64,6 +65,24 @@ async function finishChecks() {
   await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1040, deviceScaleFactor: 1, mobile: false });
   await send('Page.navigate', { url: base });
   console.log('Browser verification complete. Screenshots: /tmp/guanaco-*.png');
+}
+
+// Runs at phone size, where a dark theme matters most. The probe records the
+// theme as soon as <body> exists, before any module runs: no light flash.
+async function themeChecks() {
+  const pick = id => evaluate(`document.querySelector('#settings-view input[name="theme"][value="${id}"]').click()`);
+  await pick('oled');
+  check(await evaluate(`document.documentElement.dataset.theme==='oled' && localStorage.getItem('guanaco.theme.v1')==='oled'`), 'Choosing a theme applies it at once and saves it');
+  await click('Orchestrator');
+  const probe = await send('Page.addScriptToEvaluateOnNewDocument', { source: `new MutationObserver((records, observer) => { if (document.body) { window.themeAtBody = document.documentElement.dataset.theme || ''; observer.disconnect(); } }).observe(document, { childList: true, subtree: true });` });
+  await reload();
+  await send('Page.removeScriptToEvaluateOnNewDocument', { identifier: probe.identifier });
+  check(await evaluate(`window.themeAtBody==='oled' && document.querySelector('meta[name="theme-color"]').content===getComputedStyle(document.documentElement).getPropertyValue('--page').trim()`), 'Saved theme applies before the page body renders and tints the browser toolbar');
+  await screenshot('mobile-oled');
+  await click('Configuration'); await waitFor(`!document.querySelector('#settings-view').hidden`);
+  check(await evaluate(`document.querySelector('#settings-view input[name="theme"][value="oled"]').checked`), 'Configuration shows the saved theme as selected');
+  await pick('light');
+  check(await evaluate(`document.documentElement.dataset.theme==='light' && localStorage.getItem('guanaco.theme.v1')==='light'`), 'Light theme can be chosen again');
 }
 
 async function featureChecks() {
@@ -106,7 +125,9 @@ async function featureChecks() {
   // Use a mocked stream to exercise an active cancellation and retry through UI.
   await evaluate(`window.liveFetch=window.fetch;window.fakeAttempts=0;window.fetch=async (url,options)=>{if(!String(url).endsWith('/api/chat'))return window.liveFetch(url,options);window.fakeAttempts++;if(window.fakeAttempts===1)return new Promise((resolve,reject)=>options.signal.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError')),{once:true}));return new Response('{"message":{"content":"Recovered successfully"},"done":false}\\n{"done":true,"eval_count":2}\\n');};`);
   await fill('.composer textarea','Exercise cancellation and retry.'); await evaluate(`document.querySelector('.composer').requestSubmit()`);
-  await waitFor(`window.fakeAttempts===1`); await click('Stop generation');
+  await waitFor(`window.fakeAttempts===1`);
+  await waitFor(`[...document.querySelectorAll('button')].some(node => node.textContent === 'Stop generation' && node.getClientRects().length)`);
+  await click('Stop generation');
   await waitFor(`JSON.parse(localStorage.getItem('guanaco.workspace.v1')).chats.at(-1).turns.at(-1).status==='cancelled'`);
   await waitFor(`[...document.querySelectorAll('button')].some(node => node.textContent === 'Retry request' && node.getClientRects().length)`);
   await click('Retry request');
@@ -141,7 +162,7 @@ try {
   } else {
     // Clear at the next document's start: clearing before reload would let the
     // old page's pagehide save restore its previous test workspace afterward.
-    const resetScript = await send('Page.addScriptToEvaluateOnNewDocument', { source: `localStorage.removeItem('guanaco.config.v1'); localStorage.removeItem('guanaco.workspace.v1');` });
+    const resetScript = await send('Page.addScriptToEvaluateOnNewDocument', { source: `localStorage.removeItem('guanaco.config.v1'); localStorage.removeItem('guanaco.workspace.v1'); localStorage.removeItem('guanaco.theme.v1');` });
     await reload();
     await send('Page.removeScriptToEvaluateOnNewDocument', { identifier: resetScript.identifier });
     await waitFor(`document.querySelector('#connection-label').textContent === 'Ollama connected'`);

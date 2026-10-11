@@ -1,9 +1,12 @@
 import { DEFAULT_CONFIG, exportConfig, parseConfigImport } from '../core/config.js';
 import { createConfigForm } from './config-form.js';
+import { createThemePicker } from './theme.js';
 import { el, button, downloadJson } from './dom.js';
 
 export function createSettingsView(context) {
-  const { store, toast, getModels, checkConnection, confirm } = context;
+  const { store, toast, getModels, checkConnection, confirm, theme } = context;
+  // Appearance applies immediately and is stored apart from global defaults.
+  const themePicker = createThemePicker(theme, { labelledBy: 'appearance-title', onSaveError: () => toast('Theme applied, but this browser could not save it for next time.', true) });
   const root = el('div');
   const editorHost = el('div');
   const connection = el('div', { class: 'connection-result', role: 'status', text: 'Test your server connection or refresh the model list below.' });
@@ -35,13 +38,15 @@ export function createSettingsView(context) {
   root.append(
     el('header', { class: 'view-header' }, el('div', {}, el('p', { class: 'eyebrow', text: 'MAKE IT YOURS' }), el('h1', { text: 'Configuration' }), el('p', { class: 'subtitle', text: 'Set the starting point for every new conversation.' })), el('div', { class: 'actions' }, button('↓ Export JSON', () => { downloadJson(exportConfig(store.state.config), 'guanaco-configuration.json'); toast('Saved global configuration exported.'); }, 'button secondary'), button('↑ Import JSON', () => importInput.click(), 'button secondary'))),
     el('div', { class: 'settings-layout' },
-      el('section', { class: 'settings-card' }, el('div', { class: 'section-heading' }, el('h2', { text: 'Global defaults' }), test), connection, editorHost),
+      el('div', { class: 'settings-main' },
+        el('section', { class: 'settings-card', 'aria-labelledby': 'appearance-title' }, el('div', { class: 'section-heading' }, el('h2', { id: 'appearance-title', text: 'Appearance' }), el('span', { class: 'muted', text: 'Saved in this browser' })), themePicker.element),
+        el('section', { class: 'settings-card' }, el('div', { class: 'section-heading' }, el('h2', { text: 'Global defaults' }), test), connection, editorHost)),
       el('aside', { class: 'settings-intro' },
         el('div', { class: 'settings-note' }, el('span', { class: 'settings-note-icon', text: '↗' }), el('h3', { text: 'A starting point, per chat' }), el('p', { text: 'Every new conversation takes a snapshot of these defaults. Existing conversations and queued requests keep their own settings.' }), el('p', { text: 'Use the gear button on any request window to customize just that conversation.' }), el('div', { class: 'config-legend' }, el('span', { class: 'badge global', text: 'Global snapshot' }), el('span', { class: 'badge custom', text: 'Custom config' }))),
-        el('div', { class: 'settings-note' }, el('h3', { text: 'Saved in this browser' }), el('p', { text: 'Your settings and conversations stay in local browser storage. Export your saved defaults as JSON to use them in another browser.' }), el('p', { text: 'Keep one editing tab open to avoid competing workspace saves.' })),
+        el('div', { class: 'settings-note' }, el('h3', { text: 'Saved in this browser' }), el('p', { text: 'Your settings, theme, and conversations stay in local browser storage. Export your saved defaults as JSON to use them in another browser; the theme is not exported.' }), el('p', { text: 'Keep one editing tab open to avoid competing workspace saves.' })),
         el('div', { class: 'settings-note' }, el('h3', { text: 'Connecting a remote server?' }), el('p', { text: 'Ollama must allow this page’s origin through OLLAMA_ORIGINS. An HTTPS page needs an HTTPS Ollama endpoint.' }), el('a', { href: './docs/ollama.md', target: '_blank', rel: 'noopener', text: 'Read the Ollama setup guide ↗' })),
         button('Restore default settings', async () => {
-          if (await confirm('Restore default settings?', 'Your saved global configuration will be replaced with Guanaco defaults. Existing conversations retain their settings.', 'Restore defaults')) {
+          if (await confirm('Restore default settings?', 'Your saved global configuration will be replaced with Guanaco defaults. Existing conversations retain their settings, and the theme does not change.', 'Restore defaults')) {
             store.setConfig(DEFAULT_CONFIG); mountEditor(); toast('Default settings restored.'); checkConnection(DEFAULT_CONFIG);
           }
         }, 'button ghost')
@@ -54,5 +59,5 @@ export function createSettingsView(context) {
     editorHost.replaceChildren(editor.element);
   }
   mountEditor();
-  return { element: root, update() {}, destroy() { editor.destroy(); importInput.removeEventListener('change', importFile); } };
+  return { element: root, update() { themePicker.update(); }, destroy() { editor.destroy(); importInput.removeEventListener('change', importFile); } };
 }

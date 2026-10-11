@@ -1,6 +1,6 @@
 # Guanaco
 
-> **This software was generated 100% using artificial intelligence** — specifically Codex + GPT-6 Astra, Ultra effort — on September 19, 2026. No skills were used during generation. The initial prompt used to create this application can be found in [`prompts/init.md`](prompts/init.md). Post-creation adjustments draw on both Codex GPT-6 Astra and Claude Code Opus 5.
+> **This software was generated 100% using artificial intelligence** — specifically Codex + GPT-6 Astra, Ultra effort — on September 19, 2026. No skills were used during generation. The initial prompt used to create this application can be found in [`prompts/init.md`](prompts/init.md). Post-creation adjustments draw on both Codex GPT-6 Astra and Claude Code Opus 5, and on Claude Code + Opus 5.5, Max effort, which added the Light, Dark, and Dark OLED themes on October 10, 2026, from the second prompt in the same file.
 
 A browser-based workspace for queued Ollama conversations. Create as many prompt cards as you need, watch replies stream, and open any card as a full conversation. One application-managed FIFO queue serves every card and chat.
 
@@ -23,9 +23,21 @@ An existing Ollama server must be reachable from your browser. The initial serve
 
 1. **Orchestrator:** create a prompt card, type a message, and submit it. An idle queue starts it immediately; later submissions wait their turn. Cards show request progress and a response preview. Open a card before, during, or after generation to see its full conversation.
 2. **Chat:** continue any conversation using the same queue. A conversation's earlier response is available before its next queued turn is sent. Switching views does not stop generation.
-3. **Configuration:** set the server URL, select from the server's model list, set context and response-token limits, edit the system prompt, and enable or disable Think. Advanced Configuration exposes temperature, Top P, Top K, repeat penalty, seed, model keep-alive, request timeout, output format, and stop sequences.
+3. **Configuration:** choose the theme, set the server URL, select from the server's model list, set context and response-token limits, edit the system prompt, and enable or disable Think. Advanced Configuration exposes temperature, Top P, Top K, repeat penalty, seed, model keep-alive, request timeout, output format, and stop sequences.
 
 Each new card receives a snapshot of the saved global configuration. Later global edits apply to future cards. Use a card's configuration button to customize that conversation. Global cards use teal accents; custom cards use purple accents, with text labels as well as color.
+
+## Themes
+
+Configuration opens with an Appearance section offering three themes:
+
+- **Light:** bright, soft surfaces. The default.
+- **Dark:** dimmed, softly tinted surfaces and off-white text for low light.
+- **Dark OLED:** absolute black backgrounds and pure white text. Color remains only on actions and status labels, and OLED screens can switch off black pixels.
+
+A theme applies as soon as you select it, and this browser remembers it. Guanaco applies the saved theme before the page first appears, so reopening it at night does not flash a light page. On mobile browsers that support it, the browser toolbar takes the theme's background color. Printing always uses the light palette.
+
+The theme is a display preference of the current browser, separate from the configuration: it is not included in configuration exports or imports, and Restore default settings leaves it unchanged. Adding another theme takes one palette block in `css/styles.css` and one entry in `js/ui/theme.js`; see [AGENTS.md](AGENTS.md).
 
 ## Queue and recovery
 
@@ -37,7 +49,7 @@ On browsers with the Web Locks API, Guanaco also serializes inference across its
 
 ## Save and transfer settings
 
-Saved global settings use the `guanaco.config.v1` localStorage key. Conversation data uses `guanaco.workspace.v1`. Storage belongs to the current browser profile and origin; using another hostname or port creates a separate storage scope. Browser storage is not encrypted and may be cleared by browser settings.
+Saved global settings use the `guanaco.config.v1` localStorage key. Conversation data uses `guanaco.workspace.v1`, and the chosen theme uses `guanaco.theme.v1`. Storage belongs to the current browser profile and origin; using another hostname or port creates a separate storage scope. Browser storage is not encrypted and may be cleared by browser settings.
 
 Export downloads the saved global configuration as JSON. Import validates a configuration before applying it. It accepts Guanaco's versioned export and a plain configuration object; unknown fields, unsupported versions, and invalid values are rejected. An import changes global defaults for future chats. Configuration exports do not include conversation history.
 
@@ -57,7 +69,7 @@ With Ollama and a downloaded model running locally, inference can stay on your c
 
 With the Python static server running, open [http://localhost:8000/tests/](http://localhost:8000/tests/). This browser-native suite uses mocked Ollama responses and injected in-memory storage. It requires neither a model nor Node.js, and it cannot overwrite your saved Guanaco workspace.
 
-Confirmed in Chromium: all 11 isolated core tests pass. Live browser checks against the installed `hf.co/Qwen/Qwen3-0.6B-GGUF:Q8_0` model also verified three requests completing through the shared FIFO queue, opening a queued conversation, continuing its history, global and custom configuration snapshots, pause and queued cancellation, persistence after reload, and all three views at a 390-pixel mobile width.
+Confirmed in Chromium: all 13 isolated core tests pass. Live browser checks against the installed `hf.co/Qwen/Qwen3-0.6B-GGUF:Q8_0` model also verified three requests completing through the shared FIFO queue, opening a queued conversation, continuing its history, global and custom configuration snapshots, pause and queued cancellation, persistence after reload, all three views at a 390-pixel mobile width, and choosing a theme that is saved and applied before the page appears after a reload.
 
 An optional DevTools runner automates the browser checks. Keep the Python server and local Ollama instance running, then launch a dedicated Chromium profile in another terminal:
 
@@ -73,7 +85,7 @@ From the Guanaco directory, run:
 node tests/browser.mjs
 ```
 
-Node.js is only the DevTools test driver; it does not serve the application. The optional driver requires a Node.js runtime with built-in `fetch` and `WebSocket`. It connects to the dedicated Chromium instance above and clears only the `guanaco.config.v1` and `guanaco.workspace.v1` keys in that test profile before its full smoke run. Live requests target `http://localhost:11434` and use only the supplied Qwen model. Screenshots are written to `/tmp/guanaco-*.png`.
+Node.js is only the DevTools test driver; it does not serve the application. The optional driver requires a Node.js runtime with built-in `fetch` and `WebSocket`. It connects to the dedicated Chromium instance above and clears only the `guanaco.config.v1`, `guanaco.workspace.v1`, and `guanaco.theme.v1` keys in that test profile before its full smoke run. Live requests target `http://localhost:11434` and use only the supplied Qwen model. Screenshots are written to `/tmp/guanaco-*.png`.
 
 To rerun the extended import/export, Think, restoration, and cancellation/retry scenarios against the existing test workspace:
 
@@ -87,10 +99,10 @@ The extended import/export, real Think streaming, restoration, and active cancel
 
 ```text
 index.html        Single-page shell and navigation
-css/              Responsive presentation
+css/              Responsive presentation and theme palettes
 js/app.js         Application wiring and user actions
 js/core/          Configuration, storage, queue, and Ollama transport
-js/ui/            Reusable forms and view rendering
+js/ui/            Reusable forms, themes, and view rendering
 tests/            Browser-oriented verification
 docs/ollama.md    HTTP/CLI integration and connectivity guidance
 AGENTS.md         Architecture and maintenance guide for future agents

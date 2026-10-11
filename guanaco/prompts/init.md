@@ -29,3 +29,23 @@ No pares hasta que todos los puntos anteriores estén completos y funcionales.
 
 Cuando termines todo lo anterior, documenta todo lo relevante en el fichero AGENTS.md enfocado a explicar la aplicación para otra IA sin contexto sobre la aplicación sin importar si es Codex o Claude Code.
 ```
+
+Second prompt, to add appearance themes, including a dark mode for using the app on a phone at night:
+
+```md
+Cambio a realizar a Guanaco:
+
+Por favor, por Dios, agrega un modo oscuro. Se me queman los ojos al usar la app en el móvil en la oscuridad.
+
+Ya que estamos. Agrega en los ajustes los siguientes temas:
+
+- Dark: Modo oscuro.
+- Light: Modo claro. Seleccionado por defecto.
+- Dark OLED: Colores negros y blancos absolutos.
+
+Deja el codigo flexible para que sea posible agregar otros temas sin esfuerzo en el futuro.
+
+Agrega para que el LocalStorage guarde el tema elegido para que lo recuerde la proxima vez.
+
+Veras que hay cosas en el repositorio sin hacer commit. Ignoralo. Haz el cambio en Guanaco. No hagas commits ni push ni nada.
+```
