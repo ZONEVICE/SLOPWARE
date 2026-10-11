@@ -41,7 +41,7 @@ use crate::config::{default_config, CliArgs, HostConfig, INSTANCE_MUTEX};
 use crate::json::Value;
 use crate::log::Logger;
 use crate::state::{category_files, AppState, CATEGORIES, CONFIG_FILE};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -62,6 +62,13 @@ fn main() {
             std::process::exit(2);
         }
     };
+
+    // `firewall-setup` is the elevated helper AllySwally launches for itself
+    // (a user can also run it from an administrator console). It fixes the
+    // rules and exits, before the single-instance lock the main process holds.
+    if args.firewall_setup {
+        std::process::exit(run_firewall_setup());
+    }
 
     // Single instance: a second launch should bow out, not fight for the port.
     let _instance = match win::instance::SingleInstance::acquire(INSTANCE_MUTEX) {
@@ -95,8 +102,23 @@ fn main() {
     // The debug-only no-auth flag never takes effect in release builds.
     let dev_no_auth = cfg!(debug_assertions) && args.dev_no_auth;
 
+    // Firewall, before binding: listening without a rule is what makes Windows
+    // raise its own prompt, whose answer usually blocks Public networks. The
+    // screenshot harness skips it so a UAC prompt never stalls automation.
+    let exe = firewall::exe_path();
+    let firewall = if dev_no_auth {
+        firewall::Outcome::Skipped("--dev-no-auth")
+    } else if !HostConfig::new(&store.get(CONFIG_FILE)).firewall_auto_rule() {
+        firewall::Outcome::Skipped("firewallAutoRule is false in config.json")
+    } else {
+        firewall::ensure(&exe, elevated, |problem| {
+            console_ui::print_firewall_fixing(problem, elevated)
+        })
+    };
+    log_firewall(&logger, &exe, &firewall);
+
     // Bind the port (walks upward if busy) before building state so the banner
-    // and firewall rule use the real port.
+    // uses the real port.
     let (listener, port) = match http::bind(args.port) {
         Ok(pair) => pair,
         Err(e) => {
@@ -116,21 +138,10 @@ fn main() {
         dev_no_auth,
         start_instant: Instant::now(),
         start_unix: now_unix(),
-        firewall_ready: AtomicBool::new(false),
+        firewall_ready: AtomicBool::new(firewall.is_ready()),
         version: VERSION,
         build_date: BUILD_DATE,
     });
-
-    // Firewall: create/refresh the inbound rule when elevated and enabled.
-    let firewall_auto = state.with_config(|c| c.firewall_auto_rule());
-    if elevated && firewall_auto {
-        let ok = firewall::ensure_rule(port);
-        state.firewall_ready.store(ok, Ordering::Relaxed);
-    } else {
-        state
-            .firewall_ready
-            .store(firewall::rule_exists(), Ordering::Relaxed);
-    }
 
     // The startup screen.
     let interfaces = win::net::interfaces();
@@ -139,8 +150,8 @@ fn main() {
         port,
         &interfaces,
         elevated,
-        state.firewall_ready.load(Ordering::Relaxed),
-        &firewall::manual_command(port),
+        &firewall,
+        &firewall::manual_command(&exe),
         VERSION,
     );
 
@@ -205,6 +216,46 @@ fn default_shortcuts() -> Value {
         );
     }
     Value::Array(items)
+}
+
+/// The `firewall-setup` run: fix this executable's rules, report, and return
+/// the process exit code (0 fixed or already fine, 1 failed, 3 not elevated).
+fn run_firewall_setup() -> i32 {
+    let exe = firewall::exe_path();
+    if !win::elevation::is_elevated() {
+        eprintln!("`{}` needs administrator rights: run it from an administrator console.", firewall::SETUP_ARG);
+        return 3;
+    }
+    if let Ok(None) = firewall::rules_for(&exe).map(|rules| firewall::assess(&rules)) {
+        println!("Firewall: {exe} is already allowed on Private and Public networks.");
+        return 0;
+    }
+    match firewall::repair(&exe) {
+        Ok(()) => {
+            println!("Firewall: {exe} is now allowed on all networks.");
+            0
+        }
+        Err(e) => {
+            eprintln!("Firewall fix failed: {e}");
+            1
+        }
+    }
+}
+
+fn log_firewall(logger: &Logger, exe: &str, outcome: &firewall::Outcome) {
+    let mut fields = vec![
+        ("exe".into(), Value::Str(exe.to_string())),
+        ("status".into(), Value::Str(outcome.label().to_string())),
+    ];
+    if let Some(detail) = outcome.detail() {
+        fields.push(("detail".into(), Value::Str(detail)));
+    }
+    match outcome {
+        firewall::Outcome::Declined(_)
+        | firewall::Outcome::Failed(..)
+        | firewall::Outcome::Unknown(_) => logger.warn("firewall", fields),
+        _ => logger.info("firewall", fields),
+    }
 }
 
 fn log_startup(state: &Arc<AppState>, interfaces: &[win::net::Interface]) {

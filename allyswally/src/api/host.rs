@@ -81,7 +81,7 @@ pub fn host_info(state: &Arc<AppState>, current_token: Option<&str>) -> Value {
             "firewall",
             Obj::new()
                 .boolean("ready", state.firewall_ready.load(Ordering::Relaxed))
-                .str("manualCommand", firewall::manual_command(state.port))
+                .str("manualCommand", firewall::manual_command(&firewall::exe_path()))
                 .build(),
         )
         .num("hostUptimeSecs", state.host_uptime_secs() as f64)

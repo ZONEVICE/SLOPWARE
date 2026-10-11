@@ -167,7 +167,8 @@ First client message must be `{type:"auth", token}` → server replies
 
 `config.json` has `version`, `logRetentionDays`, `commandTimeoutSecs`,
 `commandOutputLimitBytes`, `interpreters{python,node,ahkV1,ahkV2}`,
-`firewallAutoRule`, `defaults{theme,showBand}`. Each MASKED item has `id`,
+`firewallAutoRule` (the startup firewall check/fix, §6),
+`defaults{theme,showBand}`. Each MASKED item has `id`,
 `name`, `description`, `showInBand`, `order`, optional `color`/`icon`,
 `createdAt`, `updatedAt`, plus category fields: shortcuts `combo`/`keys`;
 launchers `target`/`args`; clipboard `text`/`mode`/`restore`; scripts
@@ -217,11 +218,48 @@ and uses only relative paths, so it works over any IP link unchanged:
 - **USB tethering (RNDIS).** Enable USB tethering on the phone; the host gets an
   RNDIS address.
 
-PAN and USB links are usually classified **Public**. When elevated, AllySwally
-creates an inbound firewall rule valid on Private **and** Public profiles via
-`netsh` ([`src/firewall.rs`](src/firewall.rs)); when not elevated it prints the
-exact command to run. Sockets use `set_nodelay(true)`; movement is coalesced and
-sent as compact binary; the client reconnects with exponential backoff and a
+PAN and USB links are usually classified **Public** (home Wi-Fi often is too).
+The firewall is handled per **program**, not per port — see
+[`src/firewall.rs`](src/firewall.rs):
+
+- **Why.** Listening without a rule makes Windows raise its own "allow access"
+  prompt and store the answer as rules bound to the `.exe`'s full path, usually
+  Allow-Private + **Block-Public**. A Block rule beats every Allow rule (the old
+  port rule `AllySwally`, TCP 8787, included), so the phone could never connect
+  on a Public network. A copy of the `.exe` in another folder has its own rules.
+- **When.** `main` runs `firewall::ensure` **before** `http::bind`, so a correct
+  rule exists before Windows would ever prompt. Skipped when `firewallAutoRule`
+  is false and under `--dev-no-auth` (so a UAC prompt never stalls the harness).
+- **Read.** The rules come straight from the local rule store,
+  `HKLM\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\FirewallRules`
+  ([`src/win/registry.rs`](src/win/registry.rs), read-only, readable by
+  standard users): one `REG_SZ` per rule named by its unique ID, data like
+  `v2.30|Action=Block|Active=TRUE|Dir=In|Protocol=6|Profile=Public|App=…|`. No
+  `Profile=` means all profiles; no `Protocol=` means any. Paths compare after
+  `%VAR%` expansion, case-insensitively (Windows' prompt stores them
+  lower-cased). It takes milliseconds; PowerShell's `Get-NetFirewallRule` takes
+  2–3 s on a machine with ~2,000 rules, and `netsh` output is localized.
+- **Assess.** Problem if any enabled inbound TCP rule for the path is **Block**,
+  or the enabled Allow rules do not cover **both** Private and Public.
+- **Fix.** Delete every inbound rule for the path by ID and add one Allow rule,
+  `AllySwally (program)`, `-Profile Any`, through PowerShell NetSecurity cmdlets
+  passed as `-EncodedCommand` (no quoting pitfalls). IDs are matched with
+  `-contains`, never `-Name` (that parameter takes wildcards, and IDs contain
+  paths that may contain `[`). `netsh` cannot delete by ID. Elevated: in place.
+  Not elevated: `win::shell::run_elevated` relaunches the `.exe` with
+  `firewall-setup` via `ShellExecuteExW` + `runas` and a hidden window (one UAC
+  prompt), waits, then **re-reads the store** — the store, not the exit code, is
+  the verdict. The helper runs before the single-instance lock.
+- **Fallback.** Declined or failed: the app still starts; the banner prints the
+  PowerShell one-liner (`firewall::manual_command`) **and** recommends
+  `firewall-add-rules.bat`, which does the same from outside the app.
+  `firewall-remove-rules.bat` is its inverse, for tests (the app re-adds the
+  rules at the next start unless `firewallAutoRule` is false).
+
+The old port rule from earlier versions is left alone (harmless).
+
+Sockets use `set_nodelay(true)`; movement is coalesced and sent as compact
+binary; the client reconnects with exponential backoff and a
 heartbeat (ping every 3 s, server reaps a connection after 35 s of silence).
 
 ---
@@ -248,6 +286,14 @@ heartbeat (ping every 3 s, server reaps a connection after 35 s of silence).
   pad + 32 union). The union is padded to the `MOUSEINPUT` size; a wrong field
   width silently corrupts `SendInput`. Validated by the app working, not by a
   test (SendInput needs a real session) — be careful editing `ffi.rs`.
+- **A firewall port rule was not enough.** v1.0 only created a TCP-8787 Allow
+  rule when elevated. Windows' own "allow access" prompt (raised the first time
+  the `.exe` listened without elevation) had already stored Block-Public rules
+  for the `.exe` path, and Block beats Allow — the phone got "This site can't
+  be reached" on a Public Wi-Fi while the host itself loaded the page fine. It
+  looked like the `.exe` needed files from `target/release`; it was only that
+  the copy there had no rules for its path. Fixed by the per-program check
+  before binding (§6).
 - **Gboard reports `keyCode 229`.** The native-keyboard bridge relies on
   `input`/`beforeinput` diffing a hidden textarea with a sentinel zero-width
   space (to detect Backspace on an "empty" field), not on `keydown`.
@@ -260,7 +306,11 @@ heartbeat (ping every 3 s, server reaps a connection after 35 s of silence).
 cargo test
 ```
 
-83 tests, ~9 s (the slow one is a real `ping` timeout in `exec`). Coverage:
+99 tests plus 1 ignored, ~9 s (the slow one is a real `ping` timeout in
+`exec`). The ignored one, `win::shell::tests::elevated_child_exit_code_is_reported`,
+shows a UAC prompt unless the runner is elevated: run it with
+`cargo test -- --ignored`. Never write a test that changes the firewall.
+Coverage:
 
 - `src/sha1.rs` — RFC 3174 vectors incl. the 1,000,000-`a` case.
 - `src/base64.rs` — RFC 4648 vectors and round-trips.
@@ -274,6 +324,11 @@ cargo test
 - `src/api/items.rs`, `src/api/bundle.rs` — the item model and import merge.
 - `src/config.rs`, `src/events.rs`, `src/input/`, `src/exec.rs`, `src/log.rs` —
   CLI parsing, the hub, key mapping, command capture/timeout, civil dates.
+- `src/firewall.rs` — rule-store parsing (real values), the Block/NotAllowed
+  assessment, path normalization, PowerShell quoting and scripts, the
+  `-EncodedCommand` round trip, and a read-only scan of the real store.
+- `src/win/registry.rs`, `src/win/shell.rs` — reading a well-known key, the
+  `SHELLEXECUTEINFOW` size (112 on x64).
 
 The screenshot harness uses the debug-only `--dev-no-auth` flag (compiled out of
 release via `cfg!(debug_assertions)`) plus `?tab=…&theme=…` URL params to reach

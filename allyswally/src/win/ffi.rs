@@ -146,6 +146,51 @@ pub const TOKEN_ADJUST_PRIVILEGES: DWORD = 0x0020;
 pub const TokenElevation: i32 = 20;
 pub const SE_PRIVILEGE_ENABLED: DWORD = 0x0002;
 
+// ---------------------------------------------------------------------------
+// Registry (advapi32) — read-only, for the firewall rule store
+// ---------------------------------------------------------------------------
+
+pub type HKEY = *mut c_void;
+/// `(HKEY)(ULONG_PTR)(LONG)0x80000002` — sign-extended to pointer width.
+pub const HKEY_LOCAL_MACHINE: HKEY = 0x8000_0002u32 as i32 as isize as HKEY;
+pub const KEY_READ: DWORD = 0x0002_0019;
+pub const REG_SZ: DWORD = 1;
+pub const REG_EXPAND_SZ: DWORD = 2;
+pub const ERROR_MORE_DATA: DWORD = 234;
+pub const ERROR_NO_MORE_ITEMS: DWORD = 259;
+
+// ---------------------------------------------------------------------------
+// Elevated relaunch (shell32 ShellExecuteExW + kernel32 wait)
+// ---------------------------------------------------------------------------
+
+pub const SEE_MASK_NOCLOSEPROCESS: ULONG = 0x0000_0040;
+pub const SEE_MASK_NOASYNC: ULONG = 0x0000_0100;
+pub const SW_HIDE: i32 = 0;
+pub const WAIT_OBJECT_0: DWORD = 0;
+pub const ERROR_CANCELLED: DWORD = 1223;
+
+/// `SHELLEXECUTEINFOW`. Natural alignment on Win64 (shellapi.h packs to 1 byte
+/// only on 32-bit), 112 bytes on x64.
+#[repr(C)]
+pub struct SHELLEXECUTEINFOW {
+    pub cbSize: DWORD,
+    pub fMask: ULONG,
+    pub hwnd: HWND,
+    pub lpVerb: *const WCHAR,
+    pub lpFile: *const WCHAR,
+    pub lpParameters: *const WCHAR,
+    pub lpDirectory: *const WCHAR,
+    pub nShow: i32,
+    pub hInstApp: HANDLE,
+    pub lpIDList: *mut c_void,
+    pub lpClass: *const WCHAR,
+    pub hkeyClass: HKEY,
+    pub dwHotKey: DWORD,
+    /// Union of `hIcon` / `hMonitor`.
+    pub hIconOrMonitor: HANDLE,
+    pub hProcess: HANDLE,
+}
+
 pub const EWX_LOGOFF: DWORD = 0;
 pub const EWX_SHUTDOWN: DWORD = 0x00000001;
 pub const EWX_REBOOT: DWORD = 0x00000002;
@@ -350,6 +395,8 @@ extern "system" {
     pub fn CloseHandle(hObject: HANDLE) -> BOOL;
     pub fn LoadLibraryW(lpLibFileName: *const WCHAR) -> HANDLE;
     pub fn GetProcAddress(hModule: HANDLE, lpProcName: *const u8) -> *mut c_void;
+    pub fn WaitForSingleObject(hHandle: HANDLE, dwMilliseconds: DWORD) -> DWORD;
+    pub fn GetExitCodeProcess(hProcess: HANDLE, lpExitCode: *mut DWORD) -> BOOL;
 }
 
 #[link(name = "user32")]
@@ -403,6 +450,38 @@ extern "system" {
         PreviousState: *mut TOKEN_PRIVILEGES,
         ReturnLength: *mut DWORD,
     ) -> BOOL;
+    pub fn RegOpenKeyExW(
+        hKey: HKEY,
+        lpSubKey: *const WCHAR,
+        ulOptions: DWORD,
+        samDesired: DWORD,
+        phkResult: *mut HKEY,
+    ) -> LONG;
+    pub fn RegQueryInfoKeyW(
+        hKey: HKEY,
+        lpClass: *mut WCHAR,
+        lpcchClass: *mut DWORD,
+        lpReserved: *mut DWORD,
+        lpcSubKeys: *mut DWORD,
+        lpcbMaxSubKeyLen: *mut DWORD,
+        lpcbMaxClassLen: *mut DWORD,
+        lpcValues: *mut DWORD,
+        lpcbMaxValueNameLen: *mut DWORD,
+        lpcbMaxValueLen: *mut DWORD,
+        lpcbSecurityDescriptor: *mut DWORD,
+        lpftLastWriteTime: *mut c_void,
+    ) -> LONG;
+    pub fn RegEnumValueW(
+        hKey: HKEY,
+        dwIndex: DWORD,
+        lpValueName: *mut WCHAR,
+        lpcchValueName: *mut DWORD,
+        lpReserved: *mut DWORD,
+        lpType: *mut DWORD,
+        lpData: *mut u8,
+        lpcbData: *mut DWORD,
+    ) -> LONG;
+    pub fn RegCloseKey(hKey: HKEY) -> LONG;
 }
 
 #[link(name = "shell32")]
@@ -415,6 +494,7 @@ extern "system" {
         lpDirectory: *const WCHAR,
         nShowCmd: i32,
     ) -> HANDLE;
+    pub fn ShellExecuteExW(pExecInfo: *mut SHELLEXECUTEINFOW) -> BOOL;
 }
 
 #[link(name = "iphlpapi")]

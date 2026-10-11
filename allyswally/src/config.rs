@@ -1,7 +1,9 @@
 //! Command-line arguments and the host `config.json`.
 //!
-//! The CLI is tiny: an optional port (default 8787; a busy port walks upward)
-//! and a debug-only `--dev-no-auth` flag used by the screenshot harness. The
+//! The CLI is tiny: an optional port (default 8787; a busy port walks upward),
+//! `firewall-setup` (fix this executable's firewall rules and exit — what the
+//! elevated helper runs, see [`crate::firewall`]) and a debug-only
+//! `--dev-no-auth` flag used by the screenshot harness. The
 //! host config is a JSON object stored in `user-data\config.json`, editable by
 //! hand and hot-reloaded through the [`crate::store::Store`]; this module only
 //! builds the defaults (with interpreter autodetection) and offers typed views
@@ -15,6 +17,8 @@ pub const DEFAULT_PORT: u16 = 8787;
 
 pub struct CliArgs {
     pub port: u16,
+    /// Fix the firewall rules for this executable and exit (needs elevation).
+    pub firewall_setup: bool,
     /// Debug-only: skip the PIN gate so the screenshot harness can reach every
     /// screen. Compiled out of release builds (see `main`).
     pub dev_no_auth: bool,
@@ -30,6 +34,7 @@ impl CliArgs {
 
     pub fn parse_from(args: &[String]) -> Result<CliArgs, String> {
         let mut port = DEFAULT_PORT;
+        let mut firewall_setup = false;
         let mut dev_no_auth = false;
         let mut i = 0;
         while i < args.len() {
@@ -44,6 +49,7 @@ impl CliArgs {
                         .parse::<u16>()
                         .map_err(|_| format!("invalid port `{value}`"))?;
                 }
+                "firewall-setup" => firewall_setup = true,
                 // The screenshot/no-auth flag exists only in debug builds; in
                 // release it is an unknown argument, so the PIN gate can never
                 // be bypassed in a shipped binary.
@@ -59,12 +65,16 @@ impl CliArgs {
             }
             i += 1;
         }
-        Ok(CliArgs { port, dev_no_auth })
+        Ok(CliArgs {
+            port,
+            firewall_setup,
+            dev_no_auth,
+        })
     }
 }
 
 const HELP: &str =
-    "Usage: AllySwally [port <number>] [--dev-no-auth (debug builds only)]";
+    "Usage: AllySwally [port <number>] [firewall-setup] [--dev-no-auth (debug builds only)]";
 
 /// Build the default `config.json`, autodetecting interpreter paths so the
 /// MASKED "run code" feature works out of the box where possible.
@@ -199,7 +209,15 @@ mod tests {
     fn default_port_when_no_args() {
         let args = CliArgs::parse_from(&[]).unwrap();
         assert_eq!(args.port, DEFAULT_PORT);
+        assert!(!args.firewall_setup);
         assert!(!args.dev_no_auth);
+    }
+
+    #[test]
+    fn firewall_setup_flag() {
+        let bare = CliArgs::parse_from(&[crate::firewall::SETUP_ARG.into()]).unwrap();
+        assert!(bare.firewall_setup);
+        assert!(CliArgs::parse_from(&["--firewall-setup".into()]).unwrap().firewall_setup);
     }
 
     #[test]

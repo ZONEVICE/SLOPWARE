@@ -3,8 +3,9 @@
 //! [`ffi`] holds the raw declarations; everything else in this module is the
 //! only code allowed to call them. Each submodule owns one slice of the OS
 //! surface (console setup, input injection, clipboard, power, system info,
-//! network adapters, the CSPRNG, single-instance guard, shell open). Callers
-//! above this layer never touch `ffi` directly and never write `unsafe`.
+//! network adapters, the CSPRNG, single-instance guard, shell open and
+//! elevated relaunch, read-only registry). Callers above this layer never touch
+//! `ffi` directly and never write `unsafe`.
 
 pub mod clipboard;
 pub mod console;
@@ -15,6 +16,7 @@ pub mod input;
 pub mod instance;
 pub mod net;
 pub mod power;
+pub mod registry;
 pub mod shell;
 pub mod sysinfo;
 

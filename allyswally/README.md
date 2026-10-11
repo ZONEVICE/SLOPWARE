@@ -51,10 +51,47 @@ AllySwally.exe port 9000
   launching a second instance just gives a second server. (A second instance is
   actually prevented by a single-instance lock; the port walk covers an
   unrelated program holding the port.)
+- `firewall-setup` — fix this `.exe`'s Windows Firewall rules and exit (see
+  below). Needs an administrator console; AllySwally normally runs it for itself.
 
 The server listens on `0.0.0.0`, so it works over home Wi-Fi, the phone's Wi-Fi
 hotspot, **Bluetooth PAN**, or **USB tethering** without any change — see
 [`CLAUDE.md`](CLAUDE.md) for how to connect each way.
+
+### Windows Firewall
+
+The first time a program listens on the network without a firewall rule,
+Windows shows its own "allow access" prompt and saves the answer as rules bound
+to that `.exe`'s full path — typically *allow on Private, block on Public*. A
+block rule beats every allow rule, so on a network classified Public (home Wi-Fi
+often is; Bluetooth PAN and USB tethering usually are) the phone shows "This
+site can't be reached" while the page loads fine on the host itself.
+
+AllySwally prevents that on its own. On every start, **before** it opens the
+port, it reads the firewall rules for its own path (milliseconds, no
+administrator rights needed). If a rule blocks it, or none allows it on both
+Private and Public networks, it replaces every inbound rule for that path with a
+single allow rule named `AllySwally (program)` on all profiles:
+
+- **Run as administrator:** fixed in place, no prompt.
+- **Not elevated:** the console explains the problem and Windows shows one UAC
+  prompt; accepting it lets an elevated copy of AllySwally (`firewall-setup`)
+  fix the rules, then the app continues normally without elevation.
+- **Prompt declined, or the fix failed:** the app still starts and prints a
+  one-line command for an administrator PowerShell, and recommends
+  [`firewall-add-rules.bat`](firewall-add-rules.bat): put it next to `AllySwally.exe` and
+  double-click it (`firewall-add-rules.bat check` only lists the rules and network
+  profiles).
+
+[`firewall-remove-rules.bat`](firewall-remove-rules.bat) does the opposite: it
+deletes every rule tied to the `.exe` (and the old port rule from v1.0), to test
+the automatic fix or to switch the feature off — together with
+`"firewallAutoRule": false`, since otherwise the next start adds them again.
+Both scripts take `check` to only list the rules.
+
+Because the rules follow the path, moving the `.exe` to another folder simply
+triggers the check again on its next start. Set `"firewallAutoRule": false` in
+`config.json` to turn the check off.
 
 ## Build
 
@@ -128,12 +165,15 @@ console. Without elevation, Windows blocks input to higher-integrity windows
 cargo test
 ```
 
-83 unit tests cover the hand-rolled primitives (SHA-1 and the WebSocket RFC 6455
+99 unit tests cover the hand-rolled primitives (SHA-1 and the WebSocket RFC 6455
 handshake vector, Base64, JSON parser/serializer with line/column errors, the
 HTTP parser, the port walk), the PIN/lockout/session logic, the persistence
 store (including tolerance to hand-edited invalid JSON), the MASKED item model,
-config parsing, the event hub, input key mapping, command execution, and the
-export/import bundle.
+config parsing, the event hub, input key mapping, command execution, the
+export/import bundle, and the firewall rule parsing and assessment (plus a
+read-only pass over the real rule store). One more test, the elevated relaunch,
+shows a UAC prompt unless the runner is already elevated, so it only runs on
+request: `cargo test -- --ignored`.
 
 ## Licence
 
