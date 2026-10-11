@@ -15,6 +15,23 @@ Every application's original generation prompt is kept in its `prompts/init.md` 
 | [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. | Linux Mint + Claude Code + Opus 5 + Max |
 | [`reptile/`](reptile/) | Keeps one directory identical on two LAN computers, in real time and both ways, over HTTP or HTTPS, in two wire-compatible implementations: Node.js, and Rust built for Debian and Windows 10/11. | Windows 10 + Linux Mint + Claude Code + Opus 5.5 + Max |
 
+## Roadmap
+
+Upcoming projects that will be added:
+
+- DONE - Guanaco: Orchestration of Ollama chats.
+- DONE - Frisbee: No limits web file explorer tool.
+- DONE - Pellets: Encripted web chat.
+- DONE - Reptile: Sync tool over HTTP like Syncthing.
+- DONE - Lurker: Recursive gallery of images and videos on file system.
+- DONE - AllySwally: Control a Windows Handheld from a mobile browser.
+- Tendril: ?
+- Gandul: ?
+- Overseer: ?
+- Nap: ?
+- Snooper: ?
+- Tomahawk: ?
+
 ## Conventions
 
 - Every application lives in its own top-level directory and is independently runnable; there is no shared build system or dependency graph across apps.
