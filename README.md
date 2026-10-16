@@ -10,7 +10,7 @@ Every application's original generation prompt is kept in its `prompts/init.md` 
 | --- | --- | --- |
 | [`allyswally/`](allyswally/) | A single-binary Rust server that turns a phone into a trackpad, keyboard and power-user command surface for a Windows handheld, over the LAN. | Windows 10 + Claude Code + Opus 4.8 + Max |
 | [`frisbee/`](frisbee/) | A standard-library Python server for LAN file sharing and shared notes. | Linux Mint + Codex + GPT-6 Astra + Ultra |
-| [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama conversations. | Linux Mint + Codex + GPT-6 Astra + Ultra |
+| [`guanaco/`](guanaco/) | A browser-based workspace for queued Ollama and OpenRouter conversations. | Linux Mint + Codex + GPT-6 Astra + Ultra |
 | [`lurker/`](lurker/) | A standard-library Python gallery that shows every image and video under a directory in one filterable grid, shared over HTTPS on the LAN. | Linux Mint + Claude Code + Opus 5.5 + Max |
 | [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. | Linux Mint + Claude Code + Opus 5 + Max |
 | [`reptile/`](reptile/) | Keeps one directory identical on two LAN computers, in real time and both ways, over HTTP or HTTPS, in two wire-compatible implementations: Node.js, and Rust built for Debian and Windows 10/11. | Windows 10 + Linux Mint + Claude Code + Opus 5.5 + Max |

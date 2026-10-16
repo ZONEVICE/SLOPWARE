@@ -1,4 +1,4 @@
-import { el, button, badge, configurationBadge, shortModel, chatStatus, statusLabel, jobForTurn, submitShortcut, renderMarkdown, formatDate } from './dom.js';
+import { el, button, badge, configurationBadge, providerBadges, shortModel, modelTitle, chatStatus, statusLabel, jobForTurn, submitShortcut, renderMarkdown, formatDate } from './dom.js';
 
 /** A chat is a projection of queue turns; navigating never owns or cancels work. */
 export function createChatView(context) {
@@ -54,8 +54,8 @@ export function createChatView(context) {
       if (currentId) drafts.set(currentId, input.value);
       currentId = selected.id; input.value = drafts.get(currentId) || ''; messages.replaceChildren(); rendered.clear();
     }
-    title.textContent = selected.title; configBadge.replaceChildren(configurationBadge(selected));
-    model.textContent = shortModel(selected.config.model); model.title = selected.config.model;
+    title.textContent = selected.title; configBadge.replaceChildren(configurationBadge(selected), ...providerBadges(selected.config));
+    model.textContent = shortModel(selected.config.model); model.title = modelTitle(selected.config);
     const active = selected.turns.find(turn => turn.status === 'running');
     const queued = selected.turns.filter(turn => turn.status === 'queued');
     const firstQueuedJob = queued.length ? jobForTurn(store.state, queued[0].id) : null;
@@ -76,9 +76,13 @@ export function createChatView(context) {
       nodes.error.hidden = !turn.error; nodes.error.textContent = turn.error || '';
       const metrics = turn.metrics;
       const details = [statusLabel(turn.status)];
-      if (metrics?.eval_count) details.push(`${metrics.eval_count} output tokens`);
+      if (metrics?.eval_count) details.push(`${metrics.eval_count} output tokens${metrics.reasoning_tokens ? ` (${metrics.reasoning_tokens} reasoning)` : ''}`);
       if (metrics?.total_duration) details.push(`${(metrics.total_duration / 1e9).toFixed(1)} s`);
       if (metrics?.done_reason === 'length') details.push('Response limit reached');
+      if (metrics?.done_reason === 'content_filter') details.push('Stopped by the provider’s content filter');
+      // OpenRouter turns also report the hosting provider and the cost.
+      if (metrics?.provider) details.push(`via ${metrics.provider}`);
+      if (Number.isFinite(metrics?.cost)) details.push(metrics.cost === 0 ? 'no cost' : `$${metrics.cost < 0.01 ? metrics.cost.toPrecision(2) : metrics.cost.toFixed(4)}`);
       nodes.meta.textContent = details.join(' · ');
       const canRetry = ['failed','cancelled','interrupted'].includes(turn.status) && !selected.turns.slice(selected.turns.indexOf(turn) + 1).some(item => item.status !== 'cancelled') && !selected.turns.some(item => ['running','queued'].includes(item.status));
       const controlsKey = `${turn.status}:${canRetry}:${Boolean(turn.content)}`;

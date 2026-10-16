@@ -3,7 +3,12 @@
  * Keep validation here rather than teaching each feature its own defaults.
  * Chats and jobs take snapshots; editing defaults never mutates existing work.
  */
+export const PROVIDERS = Object.freeze(['ollama', 'openrouter']);
+
 export const DEFAULT_CONFIG = Object.freeze({
+  // Which transport runs this configuration. Ollama-only fields (serverUrl,
+  // numCtx, keepAlive) stay in every config so switching back loses nothing.
+  provider: 'ollama',
   serverUrl: 'http://localhost:11434',
   model: 'hf.co/Qwen/Qwen3-0.6B-GGUF:Q8_0',
   numCtx: 4096,
@@ -44,6 +49,7 @@ export function validateConfig(raw) {
     if (!CONFIG_KEYS.has(key)) throw new Error(`Unknown configuration field: ${key}.`);
   }
   const config = { ...DEFAULT_CONFIG, ...raw };
+  if (!PROVIDERS.includes(config.provider)) throw new Error('Provider must be ollama or openrouter.');
   if (typeof config.serverUrl !== 'string') throw new Error('Server URL must be text.');
   let url;
   try { url = new URL(config.serverUrl.trim()); }
@@ -80,6 +86,12 @@ export function validateConfig(raw) {
     throw new Error('Stop sequences must be an array of up to 64 nonempty strings.');
   }
   config.stop = [...config.stop];
+  // OpenRouter's OpenAI-style API accepts narrower sampling ranges than
+  // Ollama. Refusing here names the field instead of a remote HTTP 400.
+  if (config.provider === 'openrouter') {
+    if (config.temperature > 2) throw new Error('OpenRouter accepts a temperature between 0 and 2.');
+    if (config.repeatPenalty > 2) throw new Error('OpenRouter accepts a repeat penalty between 0 and 2.');
+  }
   return config;
 }
 

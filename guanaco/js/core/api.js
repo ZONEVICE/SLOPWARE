@@ -1,31 +1,13 @@
+import { abortScope } from './http.js';
+
 /**
  * The only module that knows Ollama's HTTP protocol. It has no DOM or storage
  * dependencies so queue policy and presentation can evolve independently.
+ * OpenRouter lives in openrouter.js; providers.js picks one per request.
  */
 
 function endpoint(config, path) {
   return `${config.serverUrl.replace(/\/+$/, '')}${path}`;
-}
-
-function abortScope(parentSignal, timeoutSeconds) {
-  const controller = new AbortController();
-  let timedOut = false;
-  const onAbort = () => controller.abort(parentSignal.reason);
-  if (parentSignal?.aborted) onAbort();
-  else parentSignal?.addEventListener('abort', onAbort, { once: true });
-  const timer = setTimeout(() => {
-    timedOut = true;
-    controller.abort(new DOMException('The request timed out.', 'TimeoutError'));
-  }, timeoutSeconds * 1000);
-  return {
-    signal: controller.signal,
-    controller,
-    get timedOut() { return timedOut; },
-    cleanup() {
-      clearTimeout(timer);
-      parentSignal?.removeEventListener('abort', onAbort);
-    },
-  };
 }
 
 function explainError(error, scope, serverUrl) {

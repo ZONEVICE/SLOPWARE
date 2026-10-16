@@ -49,3 +49,12 @@ Agrega para que el LocalStorage guarde el tema elegido para que lo recuerde la p
 
 Veras que hay cosas en el repositorio sin hacer commit. Ignoralo. Haz el cambio en Guanaco. No hagas commits ni push ni nada.
 ```
+
+Third prompt, to add OpenRouter as a second provider. It followed a feasibility question in the same session ("Analiza la factibilidad de agregar una integracion a la API de OpenRouter ... sin agregar un servidor para ejecutar Python o NodeJS"), whose answer was that the browser can call OpenRouter directly:
+
+```md
+Actualmente hay ajustes sin hacer commit del proyecto Tendril. Haz `git add .` y haz un commit siguiendo las reglas de siempre en @guanaco/prompts/commit-gen.md .
+Luego muevete al commit `96eb122f19`, crea la rama `guanaco-v1.2.0-dev`, y trabaja ahí.
+Agrega la integración a OpenRouter. Eres libre de elegir los cambios de GUI y como integrarlo. Lo esperable es que pueda conectarse a la API de OpenRouter y, pues, ejecutar un prompt y recibir la respuesta.
+Suelo tener varios problemas con OpenRouter, así que intenta integrar un control de errores y mensaje significativo como puedas.
+```

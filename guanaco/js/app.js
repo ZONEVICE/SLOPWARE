@@ -1,6 +1,7 @@
 import { createStore, STORAGE_KEYS } from './core/store.js';
 import { RequestQueue } from './core/queue.js';
-import { listModels, serverVersion } from './core/api.js';
+import { createProviders, PROVIDER_LABELS } from './core/providers.js';
+import { createCredentials } from './core/credentials.js';
 import { createOrchestrator } from './ui/orchestrator.js';
 import { createChatView } from './ui/chat.js';
 import { createSettingsView } from './ui/settings.js';
@@ -15,7 +16,9 @@ import { el, button } from './ui/dom.js';
  */
 const theme = createThemeController();
 const store = createStore();
-const queue = new RequestQueue(store);
+const credentials = createCredentials();
+const providers = createProviders({ credentials });
+const queue = new RequestQueue(store, providers);
 const factories = { orchestrator: createOrchestrator, chat: createChatView, settings: createSettingsView };
 const views = new Map(), modelCache = new Map();
 let activeView = '', framePending = false, connectionSequence = 0, seenStorageError = '';
@@ -41,27 +44,48 @@ function confirm(title, message, action = 'Confirm') {
   });
 }
 
+// Ollama lists differ per server URL; OpenRouter has one public catalogue.
+const modelCacheKey = config => (config.provider === 'openrouter' ? 'openrouter' : `ollama ${config.serverUrl}`);
+
 async function getModels(config, force = false) {
-  const cached = modelCache.get(config.serverUrl);
+  const key = modelCacheKey(config);
+  const cached = modelCache.get(key);
   if (!force && cached && Date.now() - cached.createdAt < 30000) return cached.models;
-  const models = await listModels(config);
-  modelCache.set(config.serverUrl, { models, createdAt: Date.now() });
+  const models = await providers.listModels(config);
+  modelCache.set(key, { models, createdAt: Date.now() });
   return models;
 }
 
+/**
+ * Check the configured provider and mirror the result in the sidebar.
+ * Resolves {ok, provider, models, version, account, accountError, error}.
+ * For OpenRouter `ok` means the catalogue loaded and the key, when one is
+ * set, was accepted; a missing key is reported as a warning, not a failure.
+ */
 async function checkConnection(config = store.state.config) {
   const sequence = ++connectionSequence;
   const label = document.querySelector('#connection-label');
   const indicator = document.querySelector('#connection-indicator');
+  const name = PROVIDER_LABELS[config.provider];
   label.textContent = 'Connecting…'; indicator.dataset.status = 'connecting';
-  document.querySelector('#server-label').textContent = config.serverUrl;
+  document.querySelector('#server-label').textContent = config.provider === 'openrouter' ? 'openrouter.ai · cloud' : config.serverUrl;
+  const show = (text, status, title) => { if (sequence === connectionSequence) { label.textContent = text; indicator.dataset.status = status; label.title = title; } };
   try {
-    const [models, version] = await Promise.all([getModels(config, true), serverVersion(config).catch(() => '')]);
-    if (sequence === connectionSequence) { label.textContent = 'Ollama connected'; indicator.dataset.status = 'connected'; label.title = `${models.length} models available${version ? ` · v${version}` : ''}`; }
-    return { ok: true, models, version };
+    const result = await providers.describe(config, { models: await getModels(config, true) });
+    if (result.provider === 'ollama') {
+      show('Ollama connected', 'connected', `${result.models.length} models available${result.version ? ` · v${result.version}` : ''}`);
+      return { ok: true, ...result };
+    }
+    if (result.accountError) {
+      show('OpenRouter key rejected', 'error', result.accountError);
+      return { ok: false, ...result, error: result.accountError };
+    }
+    if (!result.account) show('OpenRouter · no API key', 'warning', 'Add an OpenRouter API key in Configuration before sending requests.');
+    else show(`${name} connected`, 'connected', `${result.models.length} models available`);
+    return { ok: true, ...result };
   } catch (error) {
-    if (sequence === connectionSequence) { label.textContent = 'Connection unavailable'; indicator.dataset.status = 'error'; label.title = error.message; }
-    return { ok: false, error: error.message };
+    show('Connection unavailable', 'error', error.message);
+    return { ok: false, provider: config.provider, error: error.message };
   }
 }
 
@@ -89,7 +113,7 @@ function editChatConfig(id) {
   if (!chat) return;
   const dialog = document.querySelector('#config-dialog');
   if (dialog.open) return;
-  const editor = createConfigForm(chat.config, { getModels, submitLabel: 'Apply to this conversation', onSubmit: config => { store.updateChatConfig(id, config); dialog.close(); toast('Custom configuration applied to future messages in this conversation.'); } });
+  const editor = createConfigForm(chat.config, { getModels, credentials, submitLabel: 'Apply to this conversation', onSubmit: config => { store.updateChatConfig(id, config); dialog.close(); toast('Custom configuration applied to future messages in this conversation.'); } });
   dialog.replaceChildren(
     el('div', { class: 'dialog-header' }, el('div', {}, el('p', { class: 'eyebrow', text: 'PER-CONVERSATION SETTINGS' }), el('h2', { id: 'chat-config-title', text: 'Make this chat your own' })), button('×', () => dialog.close(), 'icon-button', { 'aria-label': 'Close chat configuration' })),
     el('div', { class: 'dialog-body' }, el('p', { class: 'muted', text: 'These settings apply only to future messages in this conversation. Requests already in the queue keep their submitted settings.' }), button('Use current global defaults', () => { store.updateChatConfig(id, null); dialog.close(); toast('This conversation now uses a fresh snapshot of global defaults.'); }, 'button secondary small'), editor.element)
@@ -99,7 +123,7 @@ function editChatConfig(id) {
   dialog.showModal();
 }
 
-const context = { store, queue, theme, toast, confirm, getModels, checkConnection, navigate, openChat, newChat, removeChat, editChatConfig, selectedChatId: store.state.chats[0]?.id || null };
+const context = { store, queue, theme, credentials, toast, confirm, getModels, checkConnection, navigate, openChat, newChat, removeChat, editChatConfig, selectedChatId: store.state.chats[0]?.id || null };
 
 function renderRoute() {
   const requested = location.hash.slice(1);
@@ -133,6 +157,8 @@ window.addEventListener('beforeunload', event => {
 window.addEventListener('storage', event => {
   // A theme chosen in another tab is simply followed; workspace edits conflict.
   if (event.key === STORAGE_KEYS.theme) { theme.sync(); views.get(activeView)?.update(); }
+  // The OpenRouter key is a browser-level setting, not workspace data.
+  else if (event.key === STORAGE_KEYS.openrouterKey) { views.get(activeView)?.update(); checkConnection(); }
   else if (event.key?.startsWith('guanaco.')) toast('Another tab changed this workspace. Keep one editing tab open to avoid competing saves.', true);
 });
 renderRoute();

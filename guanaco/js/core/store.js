@@ -1,11 +1,13 @@
 import { DEFAULT_CONFIG, configSnapshot } from './config.js';
 
 // The store owns config and workspace. The theme key belongs to js/ui/theme.js
-// (and the pre-paint script in index.html) and is listed here with the others.
+// (and the pre-paint script in index.html), and the OpenRouter key to
+// js/core/credentials.js; they are listed here with the others.
 export const STORAGE_KEYS = Object.freeze({
   config: 'guanaco.config.v1',
   workspace: 'guanaco.workspace.v1',
   theme: 'guanaco.theme.v1',
+  openrouterKey: 'guanaco.openrouter.key.v1',
 });
 
 const STATUSES = new Set(['queued', 'running', 'completed', 'failed', 'cancelled', 'interrupted']);

@@ -52,6 +52,17 @@ Re-verified on October 10, 2026, after the Light, Dark, and Dark OLED themes wer
 
 The runner's cancellation step now waits for the Stop generation button to render before clicking it. Before, it could click during the frame between dispatch and the next render, and one run failed that way.
 
+## OpenRouter verification
+
+Verified on October 16, 2026, after the OpenRouter provider was added, in Chromium against the live OpenRouter API, without an API key:
+
+- The complete `node tests/browser.mjs` run finished with exit code 0, including all 19 core tests. The Ollama scenarios above still pass unchanged against the local Qwen model; the runner itself does not use OpenRouter.
+- Six new core cases cover OpenRouter with a mocked `fetch`: provider validation and defaults for older configurations; byte-by-byte fragmented SSE with keep-alive comments, CRLF, reasoning, usage, and `[DONE]`, and the request body for each setting (including Think on, Think off, and a model that must reason); 13 HTTP error shapes (401, 402, 403 budget and moderation, 404 privacy, 400 context and model, 429 free and upstream, 502, 503, a Cloudflare 524 HTML page, 500); mid-stream error events with and without partial output, a stream closed early, malformed data, a JSON error with HTTP 200, a network failure, cancellation, and timeout; key normalization, session versus device storage, blocked storage, and its absence from configurations and exports; and one queue running an Ollama conversation and an OpenRouter conversation, each through its own provider.
+- Live from the page at `http://localhost:8000`: the public catalogue loaded 467 models (19 free) into the dropdown; the filter and Free only narrowed it; the selected model showed its name, context, price, and reasoning support. A cross-origin `GET /key` and `POST /chat/completions` with an `Authorization` header passed the CORS preflight, and an obviously invalid placeholder key produced OpenRouter's real 401 body, explained as an unrecognised key.
+- Through the visible interface: saving OpenRouter as the global provider without a key turned the sidebar status amber (*OpenRouter · no API key*), the form showed the missing-key notice, and a submitted prompt failed at once with the missing-key explanation on the card and in the chat, without a request. Saving an empty key showed its error. The new settings section was checked in Light and Dark and at a 375-pixel width without horizontal overflow, and no console errors appeared.
+- With the page's `fetch` replaced for the chat and key endpoints only (nothing sent), a prompt submitted from a card streamed into the chat with its reasoning in the thinking block, Markdown rendered, and the metrics line *18 output tokens (7 reasoning) · 1.2 s · via Google AI Studio · no cost*. **Check key** showed the label, the limit left, the spending, and the free-model requests left today. At start-up, before that replacement, the real API rejected the placeholder key and the sidebar showed *OpenRouter key rejected* in red.
+- Not verified: a real streamed answer, key check, and cost report with a funded or free-tier key, which need the user's own key.
+
 ## Scope
 
 The application runs entirely in the browser; Python serves unchanged static files. Node is optional and used only by the DevTools runner. The core test page requires no Node installation.

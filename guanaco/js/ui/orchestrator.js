@@ -1,4 +1,4 @@
-import { el, button, badge, configurationBadge, shortModel, chatStatus, statusLabel, submitShortcut, jobForTurn } from './dom.js';
+import { el, button, badge, configurationBadge, providerBadges, shortModel, modelTitle, chatStatus, statusLabel, submitShortcut, jobForTurn } from './dom.js';
 
 /** The board is a keyed collection: streaming never replaces an in-progress prompt. */
 export function createOrchestrator(context) {
@@ -85,8 +85,8 @@ export function createOrchestrator(context) {
       const queued = chat.turns.find(turn => turn.status === 'queued');
       const queuedJob = queued && jobForTurn(store.state, queued.id);
       card.status.textContent = status === 'queued' && queuedJob ? `Queued · #${queue.position(queuedJob.id)}` : statusLabel(status);
-      card.configBadge.replaceChildren(configurationBadge(chat));
-      card.model.textContent = shortModel(chat.config.model); card.model.title = chat.config.model;
+      card.configBadge.replaceChildren(configurationBadge(chat), ...providerBadges(chat.config));
+      card.model.textContent = shortModel(chat.config.model); card.model.title = modelTitle(chat.config);
       card.form.hidden = Boolean(chat.turns.length);
       card.promptPreview.hidden = !last; card.promptPreview.textContent = last?.prompt || '';
       card.preview.hidden = !last;

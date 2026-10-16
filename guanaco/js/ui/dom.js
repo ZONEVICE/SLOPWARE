@@ -20,6 +20,9 @@ export function button(text, onClick, className = 'button secondary', attributes
 
 export function badge(text, type = '') { return el('span', { class: `badge ${type}`, text }); }
 export function shortModel(model) { return model.replace(/^hf\.co\//, '').split('/').pop() || 'No model selected'; }
+/** Cards and chat headers name OpenRouter because those chats leave this computer. */
+export function providerBadges(config) { return config.provider === 'openrouter' ? [badge('OpenRouter', 'provider')] : []; }
+export function modelTitle(config) { return `${config.provider === 'openrouter' ? 'OpenRouter' : 'Ollama'} · ${config.model}`; }
 export function configurationBadge(chat) { return badge(chat.configMode === 'custom' ? 'Custom config' : 'Global snapshot', chat.configMode); }
 export function formatDate(value) { return new Date(value).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }); }
 export function chatStatus(chat) { return chat.turns.find(turn => turn.status === 'running')?.status || chat.turns.find(turn => turn.status === 'queued')?.status || chat.turns.at(-1)?.status || 'draft'; }
