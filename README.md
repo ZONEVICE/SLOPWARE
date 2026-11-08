@@ -14,6 +14,7 @@ Every application's original generation prompt is kept in its `prompts/init.md` 
 | [`lurker/`](lurker/) | A standard-library Python gallery that shows every image and video under a directory in one filterable grid, shared over HTTPS on the LAN. | Linux Mint + Claude Code + Opus 5.5 + Max |
 | [`pellets/`](pellets/) | A Node.js real-time chat server that keeps nothing on disk. | Linux Mint + Claude Code + Opus 5 + Max |
 | [`reptile/`](reptile/) | Keeps one directory identical on two LAN computers, in real time and both ways, over HTTP or HTTPS, in two wire-compatible implementations: Node.js, and Rust built for Debian and Windows 10/11. | Windows 10 + Linux Mint + Claude Code + Opus 5.5 + Max |
+| [`tendril/`](tendril/) | A lightweight web code editor in one self-contained Rust binary for Linux and Windows: CodeMirror 6 or Monaco in a split editor, a file tree, a terminal, git, a Markdown preview and media viewers, served over HTTPS behind a password in a few megabytes of RAM. | Linux Mint + Claude Code + Opus 5.5 + Max + Windows 10 + Claude Code + Opus 4.8 + Max |
 
 ## Roadmap
 
@@ -25,7 +26,7 @@ Upcoming projects that will be added:
 - DONE - Reptile: Sync tool over HTTP like Syncthing.
 - DONE - Lurker: Recursive gallery of images and videos on file system.
 - DONE - AllySwally: Control a Windows Handheld from a mobile browser.
-- Tendril: ?
+- DONE - Tendril: Lightweight web code editor in a single binary.
 - Gandul: ?
 - Overseer: ?
 - Nap: ?
@@ -39,8 +40,13 @@ Upcoming projects that will be added:
 - Each application's `AGENTS.md`/`CLAUDE.md` (when present) is the handoff entry point for an AI coding assistant working on that app, and documents which AI tools were used to create and maintain it.
 - [`.claude/skills/new-app/SKILL.md`](.claude/skills/new-app/SKILL.md) records the conventions a new application must follow. It is packaged as a Claude Code skill, but the body is plain Markdown with no Claude-specific machinery: any assistant, Codex included, can be pointed at that path and read it as a checklist.
 - [`.claude/skills/syncthing-conflicts/SKILL.md`](.claude/skills/syncthing-conflicts/SKILL.md) is the second skill: what to do when Syncthing leaves a `*.sync-conflict-*` file (tell the developer, merge it keeping the most recent, coherent and working content, ask when unsure, delete it afterwards). Those files are deliberately not git-ignored, so they stay visible.
+- [`.claude/skills/git-commits/SKILL.md`](.claude/skills/git-commits/SKILL.md) is the third: the commit message format (a short title, then one bullet per file), a redacted joke in place of any session link, commits only when the developer asks, and no push to GitHub unless the developer says so.
 
 ## Developer Comments
+
+> 8 November 2026
+
+Tendril took around 3,000,000 tokens between Linux and Windows sessions to complete and 4 complete 5 hours Claude 20USD usage limits. The most expensive slop so far.
 
 > 9 October 2026
 

@@ -1,0 +1,11 @@
+# Static C runtime on Windows, so tendril.exe runs without the Visual C++
+# (or MinGW) runtime DLLs: one self-contained .exe. musl targets are static by
+# default.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.x86_64-pc-windows-gnu]
+rustflags = ["-C", "target-feature=+crt-static"]

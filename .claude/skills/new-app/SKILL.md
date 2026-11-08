@@ -323,10 +323,11 @@ the handoff guide.
 
 ## 7. Commit
 
-One commit per new app. The format is set by
-[`guanaco/prompts/commit-gen.md`](../../../guanaco/prompts/commit-gen.md) and is
-visible in `git log`: a short English title of 10 words or fewer, then a bullet
-per file.
+One commit per new app, made when the developer asks for it: if more sessions
+will follow, such as tests on another machine, leave the work uncommitted. The
+[`git-commits`](../git-commits/SKILL.md) skill sets the format and the rules
+about pushing: a short English title of 10 words or fewer, then a bullet per
+file.
 
 ```
 Add <AppName>: <short description>
@@ -339,8 +340,8 @@ Add <AppName>: <short description>
 
 Paths are relative to the app directory, sorted with `LC_ALL=C sort` (dotfiles,
 then uppercase, then lowercase). The last bullet is written out in words because
-it refers to the root README rather than the app's own. Commit only; do not push
-unless asked.
+it refers to the root README rather than the app's own. Commit only; never push
+unless the developer explicitly says so.
 
 ---
 

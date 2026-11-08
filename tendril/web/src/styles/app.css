@@ -1,0 +1,17 @@
+/*
+ * Workbench styles. Bundled by esbuild into assets/app/app.css.
+ * Colors always come from the variables in themes.css; theme-specific
+ * decorations (Gorbino's chrome frame, DOS shadows, CRT scanlines...) live
+ * in theme-extras.css.
+ */
+@import "./base.css";
+@import "./workbench.css";
+@import "./tree.css";
+@import "./overlays.css";
+@import "./editor.css";
+@import "./terminal.css";
+@import "./pages.css";
+@import "./preview.css";
+@import "./git.css";
+@import "./mobile.css";
+@import "./theme-extras.css";

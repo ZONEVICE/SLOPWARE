@@ -1,0 +1,481 @@
+/*
+ * Theme decorations that go beyond colors. Each block applies only to one
+ * theme (the palettes themselves are in themes.css).
+ */
+
+/* =================================================================== Kirby
+ * Soft and round: pill buttons, polka dots on the sidebar, a pink star.
+ */
+:root[data-theme="kirby"] .sidebar {
+  background:
+    radial-gradient(#ffb6d5 1px, transparent 1.5px) 0 0 / 16px 16px,
+    var(--bg);
+}
+
+:root[data-theme="kirby"] .btn,
+:root[data-theme="kirby"] .icon-btn,
+:root[data-theme="kirby"] .toggle-btn {
+  border-radius: 999px;
+}
+
+:root[data-theme="kirby"] .tab {
+  margin: 4px 2px 0;
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+}
+
+:root[data-theme="kirby"] .tab.active::before {
+  left: 10px;
+  right: 10px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+}
+
+:root[data-theme="kirby"] .brand-logo {
+  color: #ff3d8b;
+}
+
+:root[data-theme="kirby"] .statusbar {
+  border-top: 0;
+}
+
+/* ================================================================= Gorbino
+ * Cruelty Squad's HUD: a chrome, biomechanical frame with red eyes, a green
+ * serif title plate, malachite textures, magenta drop shadows.
+ */
+:root[data-theme="gorbino"] body {
+  background: #0b2e18;
+}
+
+:root[data-theme="gorbino"] .topbar {
+  position: relative;
+  border-bottom: 5px solid;
+  border-image: linear-gradient(180deg, #f4f7fa, #9aa3ad 35%, #3b4249 60%, #c9ced6) 1;
+  background:
+    repeating-radial-gradient(circle at 12% 40%, #0b3d1e 0 6px, #0f5f2a 6px 11px, #082814 11px 15px),
+    #0b2e18;
+  text-shadow: 1px 1px 0 #000000;
+}
+
+:root[data-theme="gorbino"] .brand {
+  padding: 1px 12px;
+  border: 2px solid #9aa3ad;
+  outline: 1px solid #000000;
+  background: #031a0b;
+}
+
+:root[data-theme="gorbino"] .brand-name {
+  display: inline;
+  color: #6dff3a;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="gorbino"] .brand-logo {
+  color: #ff2bd6;
+}
+
+:root[data-theme="gorbino"] .menubar-item {
+  color: #6dff3a;
+  font-size: 15px;
+}
+
+:root[data-theme="gorbino"] .menubar-item:hover,
+:root[data-theme="gorbino"] .menubar-item.open {
+  background: #ff2bd6;
+  color: #000000;
+  text-shadow: none;
+}
+
+:root[data-theme="gorbino"] .main::before,
+:root[data-theme="gorbino"] .main::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  z-index: 40;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, #ffffff 0 14%, #ff4b5c 16% 38%, #a00018 40% 56%, #3b0008 58% 62%, #dfe5ec 64% 76%, #59616b 78%);
+  box-shadow: 0 0 0 1px #000000, 0 2px 4px #000000aa;
+  pointer-events: none;
+}
+
+:root[data-theme="gorbino"] .main::before {
+  left: 4px;
+}
+
+:root[data-theme="gorbino"] .main::after {
+  right: 4px;
+}
+
+:root[data-theme="gorbino"] .sidebar {
+  border-right: 4px solid;
+  border-image: linear-gradient(90deg, #59616b, #f4f7fa 40%, #9aa3ad 70%, #3b4249) 1;
+  background:
+    linear-gradient(180deg, #06201099, #031a0bcc),
+    repeating-radial-gradient(circle at 70% 20%, #0b3d1e 0 5px, #0f5f2a 5px 9px, #082814 9px 13px);
+}
+
+:root[data-theme="gorbino"] .workbench.sidebar-right .sidebar {
+  border-left: 4px solid;
+  border-right: 0;
+  border-image: linear-gradient(90deg, #3b4249, #9aa3ad 30%, #f4f7fa 60%, #59616b) 1;
+}
+
+:root[data-theme="gorbino"] .view-title,
+:root[data-theme="gorbino"] .panel-title {
+  color: #f6ff00;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+:root[data-theme="gorbino"] .tree-row.selected {
+  background: #ff2bd6;
+  color: #000000;
+}
+
+:root[data-theme="gorbino"] .tree-row.selected .tree-icon,
+:root[data-theme="gorbino"] .tree-row.selected .tree-twisty {
+  color: #000000 !important;
+}
+
+:root[data-theme="gorbino"] .tabstrip {
+  border-bottom: 3px solid #9aa3ad;
+}
+
+:root[data-theme="gorbino"] .tab {
+  border-right: 2px solid #4b535c;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 14px;
+}
+
+:root[data-theme="gorbino"] .tab.active::before {
+  height: 4px;
+  background: linear-gradient(90deg, #ff2bd6, #f6ff00, #6dff3a);
+}
+
+:root[data-theme="gorbino"] .statusbar {
+  border-top: 4px solid;
+  border-image: linear-gradient(180deg, #c9ced6, #59616b) 1;
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+}
+
+:root[data-theme="gorbino"] .menu,
+:root[data-theme="gorbino"] .dialog,
+:root[data-theme="gorbino"] .quickpick,
+:root[data-theme="gorbino"] .toast,
+:root[data-theme="gorbino"] .picker-card,
+:root[data-theme="gorbino"] .stopped-card {
+  border: 3px solid #dfe5ec;
+  outline: 2px solid #4b535c;
+  background: linear-gradient(180deg, #0b3a1ef2, #031a0bf2);
+}
+
+:root[data-theme="gorbino"] .dialog-title,
+:root[data-theme="gorbino"] .picker-header h1,
+:root[data-theme="gorbino"] .settings-top h1 {
+  color: #f6ff00;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="gorbino"] .btn.primary {
+  border: 2px outset #ff8ae6;
+  background: #ff2bd6;
+  color: #000000;
+}
+
+:root[data-theme="gorbino"] .picker-page,
+:root[data-theme="gorbino"] .stopped-page {
+  background:
+    repeating-radial-gradient(circle at 20% 30%, #0b3d1e 0 7px, #0f5f2a 7px 13px, #082814 13px 17px),
+    #0b2e18;
+}
+
+:root[data-theme="gorbino"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #59616b, #f4f7fa, #59616b);
+  border-radius: 0;
+}
+
+/* ================================================================= DOS
+ * MS-DOS EDIT: grey menu bar with black text, inverted selections, cyan
+ * status line, double-line frames and hard black shadows.
+ */
+:root[data-theme="dos"] .topbar {
+  border-bottom: 0;
+}
+
+:root[data-theme="dos"] .menubar-item:hover,
+:root[data-theme="dos"] .menubar-item.open,
+:root[data-theme="dos"] .topbar .icon-btn:hover:not(:disabled) {
+  background: #000000;
+  color: #aaaaaa;
+}
+
+:root[data-theme="dos"] .menubar-item::first-letter {
+  color: #aa0000;
+}
+
+:root[data-theme="dos"] .brand-logo {
+  color: #000000;
+}
+
+:root[data-theme="dos"] .editor-pick {
+  border-color: #000000;
+}
+
+/* Grey surfaces carry dark text: re-scope the text variables inside them,
+   and back to light text inside the blue lists they contain. */
+:root[data-theme="dos"] .menu,
+:root[data-theme="dos"] .dialog,
+:root[data-theme="dos"] .quickpick,
+:root[data-theme="dos"] .toast,
+:root[data-theme="dos"] .tooltip,
+:root[data-theme="dos"] .picker-card,
+:root[data-theme="dos"] .stopped-card,
+:root[data-theme="dos"] .audio-card {
+  --fg: #000000;
+  --fg-muted: #000000;
+  --fg-subtle: #333333;
+  --border: #000000;
+}
+
+:root[data-theme="dos"] .picker-list,
+:root[data-theme="dos"] .picker-recent-item,
+:root[data-theme="dos"] .quickpick-input,
+:root[data-theme="dos"] .picker-card .input {
+  --fg: #ffffff;
+  --fg-muted: #aaaaaa;
+  --fg-subtle: #55ffff;
+}
+
+:root[data-theme="dos"] .menu,
+:root[data-theme="dos"] .dialog,
+:root[data-theme="dos"] .quickpick,
+:root[data-theme="dos"] .toast,
+:root[data-theme="dos"] .picker-card,
+:root[data-theme="dos"] .stopped-card,
+:root[data-theme="dos"] .tooltip {
+  border: 3px double #000000;
+  box-shadow: 8px 8px 0 #000000;
+  color: #000000;
+}
+
+:root[data-theme="dos"] .menu-item:hover,
+:root[data-theme="dos"] .menu-item:focus,
+:root[data-theme="dos"] .menu-item.expanded,
+:root[data-theme="dos"] .qp-item.selected {
+  background: #000000;
+  color: #aaaaaa;
+}
+
+:root[data-theme="dos"] .menu-keys,
+:root[data-theme="dos"] .qp-desc,
+:root[data-theme="dos"] .dialog-message,
+:root[data-theme="dos"] .menu-check {
+  color: #000000;
+}
+
+:root[data-theme="dos"] .menu-item:hover .menu-keys,
+:root[data-theme="dos"] .qp-item.selected .qp-desc {
+  color: #aaaaaa;
+}
+
+:root[data-theme="dos"] .btn {
+  border: 0;
+  background: #00aa00;
+  color: #ffffff;
+  box-shadow: 3px 3px 0 #000000;
+}
+
+:root[data-theme="dos"] .btn::before {
+  content: "<";
+}
+
+:root[data-theme="dos"] .btn::after {
+  content: ">";
+}
+
+:root[data-theme="dos"] .btn.primary {
+  background: #00aaaa;
+  color: #ffffff;
+}
+
+:root[data-theme="dos"] .input,
+:root[data-theme="dos"] .quickpick-input {
+  border: 0;
+  border-radius: 0;
+  background: #0000aa;
+  color: #ffffff;
+}
+
+:root[data-theme="dos"] .sidebar,
+:root[data-theme="dos"] .workbench.sidebar-right .sidebar {
+  border-right: 2px solid #aaaaaa;
+  border-left: 2px solid #aaaaaa;
+}
+
+:root[data-theme="dos"] .tree-row.selected,
+:root[data-theme="dos"] .picker-item:hover,
+:root[data-theme="dos"] .picker-item.selected {
+  background: #00aaaa;
+  color: #000000;
+}
+
+:root[data-theme="dos"] .tree-icon.folder,
+:root[data-theme="dos"] .picker-item .icon {
+  color: #ffff55;
+}
+
+:root[data-theme="dos"] .tab {
+  border-right: 1px solid #5555ff;
+}
+
+:root[data-theme="dos"] .tab.active::before {
+  display: none;
+}
+
+:root[data-theme="dos"] .statusbar {
+  border-top: 0;
+}
+
+:root[data-theme="dos"] .picker-list,
+:root[data-theme="dos"] .settings-page,
+:root[data-theme="dos"] .settings-nav {
+  background: #0000aa;
+  color: #ffffff;
+}
+
+:root[data-theme="dos"] .picker-card .picker-list .picker-item {
+  color: #ffffff;
+}
+
+/* ===================================================== Nuclear and Ambar
+ * Phosphor CRT: a soft glow on text, scanlines and a vignette over the
+ * whole screen (pointer-events: none, so they never get in the way).
+ */
+:root[data-theme="nuclear"] {
+  --glow: #39ff6a59;
+}
+
+:root[data-theme="ambar"] {
+  --glow: #ffb00059;
+}
+
+:root[data-theme="nuclear"] body,
+:root[data-theme="ambar"] body {
+  text-shadow: 0 0 3px var(--glow);
+}
+
+:root[data-theme="nuclear"] body::after,
+:root[data-theme="ambar"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(180deg, #00000038 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 62%, #00000073 100%);
+}
+
+:root[data-theme="nuclear"] .tree-row.selected,
+:root[data-theme="ambar"] .tree-row.selected,
+:root[data-theme="nuclear"] .menu-item:hover,
+:root[data-theme="ambar"] .menu-item:hover,
+:root[data-theme="nuclear"] .menu-item:focus,
+:root[data-theme="ambar"] .menu-item:focus,
+:root[data-theme="nuclear"] .qp-item.selected,
+:root[data-theme="ambar"] .qp-item.selected {
+  background: var(--accent);
+  color: var(--accent-fg);
+  text-shadow: none;
+}
+
+:root[data-theme="nuclear"] .tree-row.selected .icon,
+:root[data-theme="ambar"] .tree-row.selected .icon {
+  color: var(--accent-fg) !important;
+}
+
+:root[data-theme="nuclear"] .tab.active,
+:root[data-theme="ambar"] .tab.active {
+  box-shadow: inset 0 -1px 0 var(--accent);
+}
+
+:root[data-theme="nuclear"] .brand-name,
+:root[data-theme="ambar"] .brand-name {
+  display: inline;
+  letter-spacing: 0.2em;
+}
+
+:root[data-theme="nuclear"] .brand-name::after,
+:root[data-theme="ambar"] .brand-name::after {
+  content: "_";
+  animation: cursor-blink 1s steps(1) infinite;
+}
+
+@keyframes cursor-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ============================================================ Eye Burned
+ * Pure white, pure black lines, highlighter-yellow selections.
+ */
+:root[data-theme="eyeburned"] .topbar,
+:root[data-theme="eyeburned"] .tabstrip,
+:root[data-theme="eyeburned"] .statusbar,
+:root[data-theme="eyeburned"] .sidebar,
+:root[data-theme="eyeburned"] .panel-header {
+  border-color: #000000;
+}
+
+:root[data-theme="eyeburned"] .tab {
+  border-right-color: #000000;
+}
+
+:root[data-theme="eyeburned"] .tab.active {
+  font-weight: 700;
+}
+
+:root[data-theme="eyeburned"] .tab.active::before {
+  height: 4px;
+}
+
+:root[data-theme="eyeburned"] .menu-item:hover,
+:root[data-theme="eyeburned"] .menu-item:focus,
+:root[data-theme="eyeburned"] .tree-row.selected,
+:root[data-theme="eyeburned"] .qp-item.selected {
+  background: #ffff00;
+  color: #000000;
+}
+
+:root[data-theme="eyeburned"] .btn.primary {
+  border: 2px solid #000000;
+}
+
+:root[data-theme="eyeburned"] .input:focus {
+  box-shadow: 0 0 0 2px #ffff00;
+}
+
+/* ============================================================ Dark OLED */
+:root[data-theme="oled"] .tab.active::before {
+  height: 1px;
+}
+
+:root[data-theme="oled"] .tab {
+  border-right-color: #000000;
+}
+
+:root[data-theme="oled"] .btn.primary {
+  background: #ffffff;
+  color: #000000;
+}

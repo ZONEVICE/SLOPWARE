@@ -1,0 +1,60 @@
+/* The terminal panel and the extra-keys bars for touch screens. */
+.terminal-host {
+  flex: 1;
+  min-height: 0;
+  padding: 4px 0 0 8px;
+  background: var(--term-bg);
+}
+
+.terminal-host .xterm {
+  height: 100%;
+}
+
+.terminal-host .xterm-viewport {
+  scrollbar-width: thin;
+}
+
+.keybar {
+  display: flex;
+  gap: 4px;
+  flex: none;
+  overflow-x: auto;
+  padding: 5px 6px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-alt);
+  scrollbar-width: none;
+}
+
+.keybar::-webkit-scrollbar {
+  display: none;
+}
+
+.keybar-key {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  height: 36px;
+  flex: none;
+  padding: 0 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--surface-fg);
+  font: 600 14px var(--font-mono);
+  touch-action: manipulation;
+}
+
+.keybar-key:active,
+.keybar-key.on {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.editor-keybar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 80;
+  box-shadow: 0 -4px 14px #00000040;
+}

@@ -1,0 +1,920 @@
+/*
+ * Tendril themes.
+ *
+ * Every color the interface uses is a custom property defined here, per theme,
+ * on <html data-theme="...">. This file is the single source of truth: the
+ * CodeMirror theme uses these variables directly, and the Monaco and xterm
+ * themes are built at run time by reading them (app/core/themes.js), which is
+ * why every color is written as #rrggbb or #rrggbbaa (Monaco requires hex).
+ *
+ * Adding a theme: add a block below that defines every variable of the
+ * "dark" block, then add it to THEMES in app/core/themes.js and in
+ * public/boot.js.
+ */
+
+/* ------------------------------------------------------------------ Dark */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #18191c;
+  --bg-alt: #141518;
+  --surface: #222428;
+  --surface-2: #2b2d33;
+  /* Text on --surface (menus, dialogs, editor widgets). Themes whose
+     surfaces are not dark-on-light like their chrome override it (DOS). */
+  --surface-fg: var(--fg);
+  /* Icon color of pressed toggle buttons (on --accent-soft). */
+  --pressed-fg: var(--accent);
+  --fg: #d7d9de;
+  --fg-muted: #9aa0aa;
+  --fg-subtle: #6c717b;
+  --border: #2a2c31;
+  --border-strong: #3a3d44;
+  --hover: #ffffff0f;
+  --active: #ffffff1a;
+  --accent: #4cc38a;
+  --accent-fg: #06180f;
+  --accent-soft: #4cc38a2e;
+  --focus: #4cc38a;
+  --danger: #f2555a;
+  --warning: #e5b44a;
+  --success: #4cc38a;
+  --info: #5aa9f0;
+  --dirty: #e5b44a;
+  --shadow: 0 10px 30px #00000073, 0 2px 6px #00000059;
+  --backdrop: #00000080;
+  --scrollbar: #ffffff21;
+  --scrollbar-hover: #ffffff3d;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace;
+  --ui-size: 13px;
+
+  --topbar-bg: #141518;
+  --topbar-fg: #c3c7ce;
+  --tabbar-bg: #141518;
+  --tab-bg: #141518;
+  --tab-fg: #8c929c;
+  --tab-active-bg: #1b1c20;
+  --tab-active-fg: #eceef2;
+  --tab-indicator: #4cc38a;
+  --statusbar-bg: #141518;
+  --statusbar-fg: #9aa0aa;
+
+  --editor-bg: #1b1c20;
+  --editor-fg: #d7d9de;
+  --editor-gutter: #1b1c20;
+  --editor-gutter-fg: #4f545d;
+  --editor-gutter-active: #b9bdc5;
+  --editor-line: #ffffff09;
+  --editor-selection: #4cc38a38;
+  --editor-match: #e5b44a40;
+  --editor-cursor: #4cc38a;
+  --editor-guide: #ffffff14;
+  --editor-bracket: #4cc38a59;
+
+  --syn-keyword: #c792ea;
+  --syn-string: #a5d6a7;
+  --syn-number: #f5a97f;
+  --syn-comment: #6c727d;
+  --syn-comment-style: italic;
+  --syn-function: #82aaff;
+  --syn-type: #ffcb6b;
+  --syn-variable: #d7d9de;
+  --syn-property: #f07178;
+  --syn-operator: #89ddff;
+  --syn-punct: #a0a6b0;
+  --syn-tag: #f07178;
+  --syn-attr: #ffcb6b;
+  --syn-constant: #f78c6c;
+  --syn-regexp: #89ddff;
+  --syn-heading: #82aaff;
+  --syn-link: #5aa9f0;
+  --syn-meta: #9aa0aa;
+  --syn-invalid: #f2555a;
+
+  --term-bg: #141518;
+  --term-fg: #d7d9de;
+  --term-cursor: #4cc38a;
+  --term-selection: #4cc38a4d;
+  --ansi-black: #1e2024;
+  --ansi-red: #f2555a;
+  --ansi-green: #4cc38a;
+  --ansi-yellow: #e5b44a;
+  --ansi-blue: #5aa9f0;
+  --ansi-magenta: #c792ea;
+  --ansi-cyan: #56c6d6;
+  --ansi-white: #d7d9de;
+  --ansi-bright-black: #6c717b;
+  --ansi-bright-red: #ff7b80;
+  --ansi-bright-green: #7be0ad;
+  --ansi-bright-yellow: #ffd27a;
+  --ansi-bright-blue: #8cc6ff;
+  --ansi-bright-magenta: #ddb6f5;
+  --ansi-bright-cyan: #8ee3ee;
+  --ansi-bright-white: #ffffff;
+}
+
+/* ----------------------------------------------------------------- Light */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f5f7;
+  --bg-alt: #ebedf0;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --fg: #1f2328;
+  --fg-muted: #5b6470;
+  --fg-subtle: #8a929c;
+  --border: #dde1e6;
+  --border-strong: #c5cbd3;
+  --hover: #0000000d;
+  --active: #00000017;
+  --accent: #1a7f4e;
+  --accent-fg: #ffffff;
+  --accent-soft: #1a7f4e1f;
+  --focus: #1a7f4e;
+  --danger: #cf2e2e;
+  --warning: #b7791f;
+  --success: #1a7f4e;
+  --info: #0969da;
+  --dirty: #c27c0e;
+  --shadow: 0 10px 30px #1f232826, 0 2px 6px #1f23281a;
+  --backdrop: #1f232859;
+  --scrollbar: #0000002b;
+  --scrollbar-hover: #00000047;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace;
+  --ui-size: 13px;
+
+  --topbar-bg: #ebedf0;
+  --topbar-fg: #3b434d;
+  --tabbar-bg: #ebedf0;
+  --tab-bg: #ebedf0;
+  --tab-fg: #66707c;
+  --tab-active-bg: #ffffff;
+  --tab-active-fg: #1f2328;
+  --tab-indicator: #1a7f4e;
+  --statusbar-bg: #ebedf0;
+  --statusbar-fg: #5b6470;
+
+  --editor-bg: #ffffff;
+  --editor-fg: #1f2328;
+  --editor-gutter: #ffffff;
+  --editor-gutter-fg: #a3aab3;
+  --editor-gutter-active: #1f2328;
+  --editor-line: #0000000a;
+  --editor-selection: #1a7f4e2e;
+  --editor-match: #f2c94c59;
+  --editor-cursor: #1a7f4e;
+  --editor-guide: #00000014;
+  --editor-bracket: #1a7f4e3d;
+
+  --syn-keyword: #cf222e;
+  --syn-string: #0a3069;
+  --syn-number: #0550ae;
+  --syn-comment: #6e7781;
+  --syn-comment-style: italic;
+  --syn-function: #8250df;
+  --syn-type: #953800;
+  --syn-variable: #1f2328;
+  --syn-property: #0550ae;
+  --syn-operator: #cf222e;
+  --syn-punct: #57606a;
+  --syn-tag: #116329;
+  --syn-attr: #0550ae;
+  --syn-constant: #0550ae;
+  --syn-regexp: #116329;
+  --syn-heading: #0550ae;
+  --syn-link: #0969da;
+  --syn-meta: #6e7781;
+  --syn-invalid: #cf222e;
+
+  --term-bg: #fbfbfc;
+  --term-fg: #1f2328;
+  --term-cursor: #1a7f4e;
+  --term-selection: #1a7f4e33;
+  --ansi-black: #24292f;
+  --ansi-red: #cf222e;
+  --ansi-green: #116329;
+  --ansi-yellow: #8a6200;
+  --ansi-blue: #0969da;
+  --ansi-magenta: #8250df;
+  --ansi-cyan: #1b7c83;
+  --ansi-white: #6e7781;
+  --ansi-bright-black: #57606a;
+  --ansi-bright-red: #a40e26;
+  --ansi-bright-green: #1a7f37;
+  --ansi-bright-yellow: #633c01;
+  --ansi-bright-blue: #218bff;
+  --ansi-bright-magenta: #a475f9;
+  --ansi-bright-cyan: #3192aa;
+  --ansi-bright-white: #8c959f;
+}
+
+/* ----------------------------------------------------------------- Kirby */
+:root[data-theme="kirby"] {
+  color-scheme: light;
+  --bg: #ffe1ee;
+  --bg-alt: #ffd2e5;
+  --surface: #fff6fa;
+  --surface-2: #ffe9f2;
+  --fg: #5a2048;
+  --fg-muted: #9b4f7d;
+  --fg-subtle: #c387a8;
+  --border: #f7b9d3;
+  --border-strong: #ee93ba;
+  --hover: #ff5fa21a;
+  --active: #ff5fa233;
+  --accent: #ff3d8b;
+  --accent-fg: #ffffff;
+  --accent-soft: #ff3d8b26;
+  --focus: #ff3d8b;
+  --danger: #e8384f;
+  --warning: #e07b00;
+  --success: #2f9e6e;
+  --info: #3d5afe;
+  --dirty: #e8384f;
+  --shadow: 0 10px 30px #c2185b33, 0 2px 6px #c2185b1f;
+  --backdrop: #5a204859;
+  --scrollbar: #ff3d8b40;
+  --scrollbar-hover: #ff3d8b73;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --font-ui: "Nunito", "Varela Round", "Quicksand", system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --ui-size: 13px;
+
+  --topbar-bg: #ffc4dd;
+  --topbar-fg: #6d1f4f;
+  --tabbar-bg: #ffd2e5;
+  --tab-bg: #ffd2e5;
+  --tab-fg: #a2507f;
+  --tab-active-bg: #fff6fa;
+  --tab-active-fg: #5a2048;
+  --tab-indicator: #ff3d8b;
+  --statusbar-bg: #ff7ab3;
+  --statusbar-fg: #ffffff;
+
+  --editor-bg: #fff6fa;
+  --editor-fg: #5a2048;
+  --editor-gutter: #fff6fa;
+  --editor-gutter-fg: #e7a3c3;
+  --editor-gutter-active: #c2185b;
+  --editor-line: #ff3d8b0f;
+  --editor-selection: #ff3d8b33;
+  --editor-match: #3d5afe2e;
+  --editor-cursor: #ff3d8b;
+  --editor-guide: #ff3d8b1f;
+  --editor-bracket: #ff3d8b40;
+
+  --syn-keyword: #e0146f;
+  --syn-string: #a0279e;
+  --syn-number: #3d5afe;
+  --syn-comment: #c48aaa;
+  --syn-comment-style: italic;
+  --syn-function: #d6336c;
+  --syn-type: #8e24aa;
+  --syn-variable: #5a2048;
+  --syn-property: #c2185b;
+  --syn-operator: #ff3d8b;
+  --syn-punct: #a2507f;
+  --syn-tag: #e0146f;
+  --syn-attr: #8e24aa;
+  --syn-constant: #e8384f;
+  --syn-regexp: #3d5afe;
+  --syn-heading: #e0146f;
+  --syn-link: #3d5afe;
+  --syn-meta: #b0628f;
+  --syn-invalid: #e8384f;
+
+  --term-bg: #fff0f6;
+  --term-fg: #5a2048;
+  --term-cursor: #ff3d8b;
+  --term-selection: #ff3d8b40;
+  --ansi-black: #5a2048;
+  --ansi-red: #e8384f;
+  --ansi-green: #2f9e6e;
+  --ansi-yellow: #c46a00;
+  --ansi-blue: #3d5afe;
+  --ansi-magenta: #e0146f;
+  --ansi-cyan: #0f8fa3;
+  --ansi-white: #c387a8;
+  --ansi-bright-black: #9b4f7d;
+  --ansi-bright-red: #ff5c73;
+  --ansi-bright-green: #3fbf88;
+  --ansi-bright-yellow: #e08a1e;
+  --ansi-bright-blue: #6f86ff;
+  --ansi-bright-magenta: #ff3d8b;
+  --ansi-bright-cyan: #21b3c9;
+  --ansi-bright-white: #e7a3c3;
+}
+
+/* --------------------------------------------------------------- Gorbino
+ * Cruelty Squad: a chrome, biomechanical HUD frame studded with red eyes, a
+ * green serif title plate, malachite and toxic green, magenta and flesh. It is
+ * meant to look wrong - but code must stay readable, so the editor itself
+ * sits on a near-black green.
+ */
+:root[data-theme="gorbino"] {
+  color-scheme: dark;
+  --bg: #0b2e18;
+  --bg-alt: #062010;
+  --surface: #0d3b1f;
+  --surface-2: #145a2e;
+  --fg: #6dff3a;
+  --fg-muted: #39c24a;
+  --fg-subtle: #2a8a3a;
+  --border: #9aa3ad;
+  --border-strong: #dfe5ec;
+  --hover: #ff2bd626;
+  --active: #ff2bd64d;
+  --accent: #ff2bd6;
+  --accent-fg: #0a0a0a;
+  --accent-soft: #ff2bd633;
+  --focus: #f6ff00;
+  --danger: #ff1f3d;
+  --warning: #f6ff00;
+  --success: #6dff3a;
+  --info: #00e5ff;
+  --dirty: #ff1f3d;
+  --shadow: 0 0 0 2px #dfe5ec, 0 0 0 4px #4b535c, 6px 8px 0 #ff2bd6;
+  --backdrop: #3a0a1cb3;
+  --scrollbar: #9aa3adb3;
+  --scrollbar-hover: #dfe5ec;
+  --radius: 3px;
+  --radius-sm: 2px;
+  --font-ui: "Times New Roman", Times, "Liberation Serif", "DejaVu Serif", serif;
+  --font-mono: "Courier New", Courier, "Liberation Mono", "Nimbus Mono PS", monospace;
+  --ui-size: 14px;
+
+  --topbar-bg: #062010;
+  --topbar-fg: #6dff3a;
+  --tabbar-bg: #0a2a17;
+  --tab-bg: #0a2a17;
+  --tab-fg: #39c24a;
+  --tab-active-bg: #04140a;
+  --tab-active-fg: #b6ff00;
+  --tab-indicator: #ff2bd6;
+  --statusbar-bg: #6b0f1a;
+  --statusbar-fg: #b6ff00;
+
+  --editor-bg: #04140a;
+  --editor-fg: #8dff5a;
+  --editor-gutter: #062010;
+  --editor-gutter-fg: #2a8a3a;
+  --editor-gutter-active: #f6ff00;
+  --editor-line: #ff2bd614;
+  --editor-selection: #ff2bd659;
+  --editor-match: #f6ff0040;
+  --editor-cursor: #f6ff00;
+  --editor-guide: #6dff3a1f;
+  --editor-bracket: #00e5ff59;
+
+  --syn-keyword: #ff2bd6;
+  --syn-string: #f6ff00;
+  --syn-number: #ff8a00;
+  --syn-comment: #4fa860;
+  --syn-comment-style: italic;
+  --syn-function: #00e5ff;
+  --syn-type: #ff7ad9;
+  --syn-variable: #8dff5a;
+  --syn-property: #c6ff00;
+  --syn-operator: #ff4b4b;
+  --syn-punct: #9aa3ad;
+  --syn-tag: #ff2bd6;
+  --syn-attr: #f6ff00;
+  --syn-constant: #ff8a00;
+  --syn-regexp: #00e5ff;
+  --syn-heading: #ff2bd6;
+  --syn-link: #00e5ff;
+  --syn-meta: #9aa3ad;
+  --syn-invalid: #ff1f3d;
+
+  --term-bg: #03100a;
+  --term-fg: #8dff5a;
+  --term-cursor: #f6ff00;
+  --term-selection: #ff2bd659;
+  --ansi-black: #062010;
+  --ansi-red: #ff1f3d;
+  --ansi-green: #6dff3a;
+  --ansi-yellow: #f6ff00;
+  --ansi-blue: #3d7bff;
+  --ansi-magenta: #ff2bd6;
+  --ansi-cyan: #00e5ff;
+  --ansi-white: #c9ced6;
+  --ansi-bright-black: #4fa860;
+  --ansi-bright-red: #ff5c72;
+  --ansi-bright-green: #b6ff00;
+  --ansi-bright-yellow: #ffff7a;
+  --ansi-bright-blue: #7aa6ff;
+  --ansi-bright-magenta: #ff7ad9;
+  --ansi-bright-cyan: #7af3ff;
+  --ansi-bright-white: #ffffff;
+}
+
+/* ------------------------------------------------------------- Dark OLED */
+:root[data-theme="oled"] {
+  color-scheme: dark;
+  --bg: #000000;
+  --bg-alt: #000000;
+  --surface: #000000;
+  --surface-2: #111111;
+  --fg: #ffffff;
+  --fg-muted: #a6a6a6;
+  --fg-subtle: #6b6b6b;
+  --border: #1c1c1c;
+  --border-strong: #3a3a3a;
+  --hover: #ffffff14;
+  --active: #ffffff26;
+  --accent: #ffffff;
+  --accent-fg: #000000;
+  --accent-soft: #ffffff1f;
+  --focus: #ffffff;
+  --danger: #ff4d4d;
+  --warning: #ffffff;
+  --success: #ffffff;
+  --info: #ffffff;
+  --dirty: #ffffff;
+  --shadow: 0 0 0 1px #2e2e2e, 0 12px 32px #000000;
+  --backdrop: #000000b3;
+  --scrollbar: #ffffff2e;
+  --scrollbar-hover: #ffffff59;
+  --radius: 6px;
+  --radius-sm: 4px;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --ui-size: 13px;
+
+  --topbar-bg: #000000;
+  --topbar-fg: #d9d9d9;
+  --tabbar-bg: #000000;
+  --tab-bg: #000000;
+  --tab-fg: #7a7a7a;
+  --tab-active-bg: #000000;
+  --tab-active-fg: #ffffff;
+  --tab-indicator: #ffffff;
+  --statusbar-bg: #000000;
+  --statusbar-fg: #8c8c8c;
+
+  --editor-bg: #000000;
+  --editor-fg: #e6e6e6;
+  --editor-gutter: #000000;
+  --editor-gutter-fg: #3d3d3d;
+  --editor-gutter-active: #ffffff;
+  --editor-line: #ffffff0a;
+  --editor-selection: #ffffff38;
+  --editor-match: #ffffff26;
+  --editor-cursor: #ffffff;
+  --editor-guide: #ffffff12;
+  --editor-bracket: #ffffff33;
+
+  --syn-keyword: #ffffff;
+  --syn-string: #bdbdbd;
+  --syn-number: #ffffff;
+  --syn-comment: #5c5c5c;
+  --syn-comment-style: italic;
+  --syn-function: #f0f0f0;
+  --syn-type: #d4d4d4;
+  --syn-variable: #e6e6e6;
+  --syn-property: #cfcfcf;
+  --syn-operator: #9e9e9e;
+  --syn-punct: #8a8a8a;
+  --syn-tag: #ffffff;
+  --syn-attr: #bdbdbd;
+  --syn-constant: #ffffff;
+  --syn-regexp: #bdbdbd;
+  --syn-heading: #ffffff;
+  --syn-link: #ffffff;
+  --syn-meta: #7a7a7a;
+  --syn-invalid: #ff4d4d;
+
+  --term-bg: #000000;
+  --term-fg: #e6e6e6;
+  --term-cursor: #ffffff;
+  --term-selection: #ffffff40;
+  --ansi-black: #000000;
+  --ansi-red: #ff6b6b;
+  --ansi-green: #8fe3a8;
+  --ansi-yellow: #f5e08a;
+  --ansi-blue: #8ab8ff;
+  --ansi-magenta: #e0a6ff;
+  --ansi-cyan: #8ae6f0;
+  --ansi-white: #d9d9d9;
+  --ansi-bright-black: #5c5c5c;
+  --ansi-bright-red: #ff9494;
+  --ansi-bright-green: #b5f0c6;
+  --ansi-bright-yellow: #faeeb4;
+  --ansi-bright-blue: #b3d0ff;
+  --ansi-bright-magenta: #edc9ff;
+  --ansi-bright-cyan: #b8f0f6;
+  --ansi-bright-white: #ffffff;
+}
+
+/* ------------------------------------------------------------------- DOS
+ * MS-DOS EDIT / Turbo-era IDE: CGA blue, a light-grey menu bar with black
+ * text, a cyan status line, square corners, hard black drop shadows and
+ * double-line dialog frames.
+ */
+:root[data-theme="dos"] {
+  color-scheme: dark;
+  --bg: #0000aa;
+  --bg-alt: #0000aa;
+  --surface: #aaaaaa;
+  --surface-2: #00aaaa;
+  --surface-fg: #000000;
+  --pressed-fg: #000000;
+  --fg: #ffffff;
+  --fg-muted: #aaaaaa;
+  --fg-subtle: #5555ff;
+  --border: #aaaaaa;
+  --border-strong: #ffffff;
+  --hover: #00aaaa;
+  --active: #00aaaa;
+  --accent: #00aaaa;
+  --accent-fg: #000000;
+  --accent-soft: #00aaaa;
+  --focus: #ffff55;
+  --danger: #ff5555;
+  --warning: #ffff55;
+  --success: #55ff55;
+  --info: #55ffff;
+  --dirty: #ffff55;
+  --shadow: 8px 8px 0 #000000;
+  --backdrop: #00000066;
+  --scrollbar: #00aaaa;
+  --scrollbar-hover: #55ffff;
+  --radius: 0px;
+  --radius-sm: 0px;
+  --font-ui: "Px437 IBM VGA 8x16", "Perfect DOS VGA 437", "Lucida Console", "Courier New", ui-monospace, monospace;
+  --font-mono: "Px437 IBM VGA 8x16", "Perfect DOS VGA 437", "Lucida Console", "Courier New", ui-monospace, monospace;
+  --ui-size: 14px;
+
+  --topbar-bg: #aaaaaa;
+  --topbar-fg: #000000;
+  --tabbar-bg: #0000aa;
+  --tab-bg: #0000aa;
+  --tab-fg: #aaaaaa;
+  --tab-active-bg: #aaaaaa;
+  --tab-active-fg: #000000;
+  --tab-indicator: #ffff55;
+  --statusbar-bg: #00aaaa;
+  --statusbar-fg: #000000;
+
+  --editor-bg: #0000aa;
+  --editor-fg: #ffffff;
+  --editor-gutter: #0000aa;
+  --editor-gutter-fg: #5555ff;
+  --editor-gutter-active: #ffff55;
+  --editor-line: #0000c8;
+  --editor-selection: #aaaaaa99;
+  --editor-match: #00aaaa99;
+  --editor-cursor: #ffff55;
+  --editor-guide: #5555ff66;
+  --editor-bracket: #00aaaa;
+
+  --syn-keyword: #ffff55;
+  --syn-string: #55ffff;
+  --syn-number: #ff55ff;
+  --syn-comment: #aaaaaa;
+  --syn-comment-style: normal;
+  --syn-function: #55ff55;
+  --syn-type: #ffffff;
+  --syn-variable: #ffffff;
+  --syn-property: #55ffff;
+  --syn-operator: #ffff55;
+  --syn-punct: #aaaaaa;
+  --syn-tag: #ffff55;
+  --syn-attr: #55ff55;
+  --syn-constant: #ff55ff;
+  --syn-regexp: #ff5555;
+  --syn-heading: #ffff55;
+  --syn-link: #55ffff;
+  --syn-meta: #aaaaaa;
+  --syn-invalid: #ff5555;
+
+  --term-bg: #000000;
+  --term-fg: #aaaaaa;
+  --term-cursor: #aaaaaa;
+  --term-selection: #aaaaaa66;
+  --ansi-black: #000000;
+  --ansi-red: #aa0000;
+  --ansi-green: #00aa00;
+  --ansi-yellow: #aa5500;
+  --ansi-blue: #0000aa;
+  --ansi-magenta: #aa00aa;
+  --ansi-cyan: #00aaaa;
+  --ansi-white: #aaaaaa;
+  --ansi-bright-black: #555555;
+  --ansi-bright-red: #ff5555;
+  --ansi-bright-green: #55ff55;
+  --ansi-bright-yellow: #ffff55;
+  --ansi-bright-blue: #5555ff;
+  --ansi-bright-magenta: #ff55ff;
+  --ansi-bright-cyan: #55ffff;
+  --ansi-bright-white: #ffffff;
+}
+
+/* --------------------------------------------------------------- Nuclear
+ * Green P1-phosphor terminal: one hue in several intensities, a soft glow
+ * and scanlines (see the retro section of app.css).
+ */
+:root[data-theme="nuclear"] {
+  color-scheme: dark;
+  --bg: #020c03;
+  --bg-alt: #010902;
+  --surface: #031505;
+  --surface-2: #062a0b;
+  --fg: #39ff6a;
+  --fg-muted: #22b84a;
+  --fg-subtle: #157a30;
+  --border: #0f4f20;
+  --border-strong: #1f8a3c;
+  --hover: #39ff6a1a;
+  --active: #39ff6a33;
+  --accent: #39ff6a;
+  --accent-fg: #011005;
+  --accent-soft: #39ff6a26;
+  --focus: #9dffb5;
+  --danger: #c8ff3a;
+  --warning: #c8ff3a;
+  --success: #39ff6a;
+  --info: #9dffb5;
+  --dirty: #c8ff3a;
+  --shadow: 0 0 0 1px #1f8a3c, 0 0 18px #39ff6a33;
+  --backdrop: #000000b3;
+  --scrollbar: #39ff6a33;
+  --scrollbar-hover: #39ff6a66;
+  --radius: 0px;
+  --radius-sm: 0px;
+  --font-ui: "VT323", "Share Tech Mono", ui-monospace, "Cascadia Code", "DejaVu Sans Mono", "Liberation Mono", monospace;
+  --font-mono: "VT323", "Share Tech Mono", ui-monospace, "Cascadia Code", "DejaVu Sans Mono", "Liberation Mono", monospace;
+  --ui-size: 13px;
+
+  --topbar-bg: #010902;
+  --topbar-fg: #39ff6a;
+  --tabbar-bg: #010902;
+  --tab-bg: #010902;
+  --tab-fg: #1fa244;
+  --tab-active-bg: #031505;
+  --tab-active-fg: #9dffb5;
+  --tab-indicator: #39ff6a;
+  --statusbar-bg: #062a0b;
+  --statusbar-fg: #39ff6a;
+
+  --editor-bg: #020c03;
+  --editor-fg: #39ff6a;
+  --editor-gutter: #020c03;
+  --editor-gutter-fg: #136b2a;
+  --editor-gutter-active: #9dffb5;
+  --editor-line: #39ff6a0f;
+  --editor-selection: #39ff6a40;
+  --editor-match: #c8ff3a33;
+  --editor-cursor: #9dffb5;
+  --editor-guide: #39ff6a1a;
+  --editor-bracket: #39ff6a4d;
+
+  --syn-keyword: #b5ffc9;
+  --syn-string: #7dff9e;
+  --syn-number: #d9ffe4;
+  --syn-comment: #1b8a3b;
+  --syn-comment-style: italic;
+  --syn-function: #9dffb5;
+  --syn-type: #c8ff3a;
+  --syn-variable: #39ff6a;
+  --syn-property: #66ff8c;
+  --syn-operator: #9dffb5;
+  --syn-punct: #22b84a;
+  --syn-tag: #b5ffc9;
+  --syn-attr: #7dff9e;
+  --syn-constant: #d9ffe4;
+  --syn-regexp: #c8ff3a;
+  --syn-heading: #d9ffe4;
+  --syn-link: #9dffb5;
+  --syn-meta: #22b84a;
+  --syn-invalid: #c8ff3a;
+
+  --term-bg: #010902;
+  --term-fg: #39ff6a;
+  --term-cursor: #9dffb5;
+  --term-selection: #39ff6a4d;
+  --ansi-black: #010902;
+  --ansi-red: #c8ff3a;
+  --ansi-green: #39ff6a;
+  --ansi-yellow: #b5ffc9;
+  --ansi-blue: #22b84a;
+  --ansi-magenta: #7dff9e;
+  --ansi-cyan: #66ff8c;
+  --ansi-white: #39ff6a;
+  --ansi-bright-black: #157a30;
+  --ansi-bright-red: #e4ff8a;
+  --ansi-bright-green: #9dffb5;
+  --ansi-bright-yellow: #d9ffe4;
+  --ansi-bright-blue: #39ff6a;
+  --ansi-bright-magenta: #b5ffc9;
+  --ansi-bright-cyan: #b5ffc9;
+  --ansi-bright-white: #eaffef;
+}
+
+/* ----------------------------------------------------------------- Ambar
+ * Amber P3-phosphor terminal, the sibling of Nuclear.
+ */
+:root[data-theme="ambar"] {
+  color-scheme: dark;
+  --bg: #0d0700;
+  --bg-alt: #0a0500;
+  --surface: #160c00;
+  --surface-2: #2a1700;
+  --fg: #ffb000;
+  --fg-muted: #c07f00;
+  --fg-subtle: #7a5000;
+  --border: #4d3200;
+  --border-strong: #8a5c00;
+  --hover: #ffb0001a;
+  --active: #ffb00033;
+  --accent: #ffb000;
+  --accent-fg: #120900;
+  --accent-soft: #ffb00026;
+  --focus: #ffd27a;
+  --danger: #ff6a00;
+  --warning: #ffd27a;
+  --success: #ffb000;
+  --info: #ffd27a;
+  --dirty: #ff6a00;
+  --shadow: 0 0 0 1px #8a5c00, 0 0 18px #ffb00026;
+  --backdrop: #000000b3;
+  --scrollbar: #ffb00033;
+  --scrollbar-hover: #ffb00066;
+  --radius: 0px;
+  --radius-sm: 0px;
+  --font-ui: "VT323", "Share Tech Mono", ui-monospace, "Cascadia Code", "DejaVu Sans Mono", "Liberation Mono", monospace;
+  --font-mono: "VT323", "Share Tech Mono", ui-monospace, "Cascadia Code", "DejaVu Sans Mono", "Liberation Mono", monospace;
+  --ui-size: 13px;
+
+  --topbar-bg: #0a0500;
+  --topbar-fg: #ffb000;
+  --tabbar-bg: #0a0500;
+  --tab-bg: #0a0500;
+  --tab-fg: #a86e00;
+  --tab-active-bg: #160c00;
+  --tab-active-fg: #ffd27a;
+  --tab-indicator: #ffb000;
+  --statusbar-bg: #2a1700;
+  --statusbar-fg: #ffb000;
+
+  --editor-bg: #0d0700;
+  --editor-fg: #ffb000;
+  --editor-gutter: #0d0700;
+  --editor-gutter-fg: #6b4600;
+  --editor-gutter-active: #ffd27a;
+  --editor-line: #ffb0000f;
+  --editor-selection: #ffb00040;
+  --editor-match: #ff6a0040;
+  --editor-cursor: #ffd27a;
+  --editor-guide: #ffb0001a;
+  --editor-bracket: #ffb0004d;
+
+  --syn-keyword: #ffe0a3;
+  --syn-string: #ffc94d;
+  --syn-number: #fff0cc;
+  --syn-comment: #8a5c00;
+  --syn-comment-style: italic;
+  --syn-function: #ffd27a;
+  --syn-type: #ff8c1a;
+  --syn-variable: #ffb000;
+  --syn-property: #ffbd33;
+  --syn-operator: #ffd27a;
+  --syn-punct: #c07f00;
+  --syn-tag: #ffe0a3;
+  --syn-attr: #ffc94d;
+  --syn-constant: #fff0cc;
+  --syn-regexp: #ff8c1a;
+  --syn-heading: #fff0cc;
+  --syn-link: #ffd27a;
+  --syn-meta: #c07f00;
+  --syn-invalid: #ff6a00;
+
+  --term-bg: #0a0500;
+  --term-fg: #ffb000;
+  --term-cursor: #ffd27a;
+  --term-selection: #ffb0004d;
+  --ansi-black: #0a0500;
+  --ansi-red: #ff6a00;
+  --ansi-green: #ffc94d;
+  --ansi-yellow: #ffe0a3;
+  --ansi-blue: #c07f00;
+  --ansi-magenta: #ff8c1a;
+  --ansi-cyan: #ffd27a;
+  --ansi-white: #ffb000;
+  --ansi-bright-black: #7a5000;
+  --ansi-bright-red: #ff9a4d;
+  --ansi-bright-green: #ffdd8a;
+  --ansi-bright-yellow: #fff0cc;
+  --ansi-bright-blue: #ffb000;
+  --ansi-bright-magenta: #ffbd66;
+  --ansi-bright-cyan: #ffe7b8;
+  --ansi-bright-white: #fff7e6;
+}
+
+/* ------------------------------------------------------------ Eye Burned
+ * Absolute white everywhere, pure black ink, fully saturated primaries.
+ */
+:root[data-theme="eyeburned"] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --bg-alt: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #ffffff;
+  --fg: #000000;
+  --fg-muted: #000000;
+  --fg-subtle: #666666;
+  --border: #000000;
+  --border-strong: #000000;
+  --hover: #ffff00;
+  --active: #ffff00;
+  --accent: #0000ff;
+  --accent-fg: #ffffff;
+  --accent-soft: #ffff00;
+  --pressed-fg: #000000;
+  --focus: #0000ff;
+  --danger: #ff0000;
+  --warning: #ff8000;
+  --success: #00a000;
+  --info: #0000ff;
+  --dirty: #ff0000;
+  --shadow: 4px 4px 0 #000000;
+  --backdrop: #ffffffb3;
+  --scrollbar: #000000;
+  --scrollbar-hover: #0000ff;
+  --radius: 0px;
+  --radius-sm: 0px;
+  --font-ui: Arial, Helvetica, "Liberation Sans", "Nimbus Sans", sans-serif;
+  --font-mono: "Courier New", Courier, "Liberation Mono", monospace;
+  --ui-size: 13px;
+
+  --topbar-bg: #ffffff;
+  --topbar-fg: #000000;
+  --tabbar-bg: #ffffff;
+  --tab-bg: #ffffff;
+  --tab-fg: #000000;
+  --tab-active-bg: #ffffff;
+  --tab-active-fg: #000000;
+  --tab-indicator: #0000ff;
+  --statusbar-bg: #ffffff;
+  --statusbar-fg: #000000;
+
+  --editor-bg: #ffffff;
+  --editor-fg: #000000;
+  --editor-gutter: #ffffff;
+  --editor-gutter-fg: #000000;
+  --editor-gutter-active: #0000ff;
+  --editor-line: #ffffff;
+  --editor-selection: #ffff00;
+  --editor-match: #00ffff;
+  --editor-cursor: #ff0000;
+  --editor-guide: #000000;
+  --editor-bracket: #00ff00;
+
+  --syn-keyword: #0000ff;
+  --syn-string: #ff0000;
+  --syn-number: #ff00ff;
+  --syn-comment: #008000;
+  --syn-comment-style: normal;
+  --syn-function: #000000;
+  --syn-type: #008080;
+  --syn-variable: #000000;
+  --syn-property: #800080;
+  --syn-operator: #000000;
+  --syn-punct: #000000;
+  --syn-tag: #0000ff;
+  --syn-attr: #ff0000;
+  --syn-constant: #ff00ff;
+  --syn-regexp: #ff8000;
+  --syn-heading: #0000ff;
+  --syn-link: #0000ff;
+  --syn-meta: #808080;
+  --syn-invalid: #ff0000;
+
+  --term-bg: #ffffff;
+  --term-fg: #000000;
+  --term-cursor: #ff0000;
+  --term-selection: #ffff00;
+  --ansi-black: #000000;
+  --ansi-red: #ff0000;
+  --ansi-green: #00a000;
+  --ansi-yellow: #a0a000;
+  --ansi-blue: #0000ff;
+  --ansi-magenta: #ff00ff;
+  --ansi-cyan: #008080;
+  --ansi-white: #808080;
+  --ansi-bright-black: #404040;
+  --ansi-bright-red: #ff0000;
+  --ansi-bright-green: #00c000;
+  --ansi-bright-yellow: #c0c000;
+  --ansi-bright-blue: #0000ff;
+  --ansi-bright-magenta: #ff00ff;
+  --ansi-bright-cyan: #00a0a0;
+  --ansi-bright-white: #000000;
+}

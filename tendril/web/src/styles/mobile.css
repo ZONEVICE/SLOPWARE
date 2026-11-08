@@ -1,0 +1,262 @@
+/*
+ * Small screens and touch input. Below 768px the sidebar becomes a drawer
+ * over the editor, the menu bar collapses into one button, the toolbar
+ * keeps only its priority-1 buttons (see toolbar.js) and the status bar its
+ * essential items. Coarse pointers get 40px touch targets everywhere.
+ */
+@media (pointer: coarse) {
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .explorer {
+    --row-height: 36px;
+  }
+
+  .workbench {
+    --topbar-h: 46px;
+    --tabs-h: 42px;
+    --statusbar-h: 28px;
+  }
+
+  .tab {
+    padding-left: 14px;
+  }
+
+  .tab-close {
+    width: 32px;
+    height: 32px;
+    opacity: 1;
+  }
+
+  .menu-item {
+    height: 40px;
+  }
+
+  .qp-item {
+    min-height: 42px;
+  }
+
+  .search-file,
+  .search-match {
+    min-height: 34px;
+  }
+
+  .picker-item {
+    min-height: 42px;
+  }
+
+  .view-tab {
+    width: 40px;
+    height: 36px;
+  }
+
+  .view-actions .icon-btn,
+  .panel-actions .icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .sidebar-header {
+    height: 44px;
+  }
+
+  .btn {
+    height: 38px;
+  }
+
+  .input {
+    height: 38px;
+    font-size: 16px; /* avoids the iOS zoom on focus */
+  }
+
+  .panel-header {
+    height: 40px;
+  }
+}
+
+@media (max-width: 767px) {
+  .menubar,
+  .brand-name {
+    display: none;
+  }
+
+  .menubar-compact {
+    display: inline-grid;
+  }
+
+  .brand {
+    padding: 0 2px;
+  }
+
+  .toolbar .prio-3,
+  .toolbar .prio-4,
+  .toolbar-sep,
+  .editor-pick-label {
+    display: none;
+  }
+
+  .editor-pick {
+    padding: 0 6px;
+  }
+
+  .sidebar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    width: min(86vw, 340px);
+    box-shadow: var(--shadow);
+    transform: translateX(-104%);
+    transition: transform 0.2s ease;
+  }
+
+  .workbench.sidebar-right .sidebar {
+    right: 0;
+    left: auto;
+    transform: translateX(104%);
+  }
+
+  .workbench.drawer-open .sidebar {
+    transform: none;
+  }
+
+  .workbench.sidebar-hidden .sidebar {
+    display: flex;
+  }
+
+  .splitter-x {
+    display: none !important;
+  }
+
+  .drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 25;
+    background: var(--backdrop);
+  }
+
+  .workbench.drawer-open .drawer-backdrop {
+    display: block;
+  }
+
+  .workbench .panel {
+    height: min(var(--panel-height, 260px), 48dvh);
+  }
+
+  .statusbar [data-id="encoding"],
+  .statusbar [data-id="eol"],
+  .statusbar [data-id="engine"],
+  .statusbar [data-id="indent"] {
+    display: none;
+  }
+
+  .tab {
+    max-width: 180px;
+  }
+
+  .settings-page {
+    flex-direction: column;
+  }
+
+  .settings-nav {
+    flex-direction: row;
+    width: auto;
+    overflow-x: auto;
+    padding: 8px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .settings-nav-item {
+    white-space: nowrap;
+  }
+
+  .settings-body {
+    padding: 16px 16px 60px;
+  }
+
+  .setting {
+    grid-template-columns: 1fr;
+  }
+
+  .setting-control {
+    justify-content: flex-start;
+  }
+
+  .setting-toggle {
+    grid-template-columns: 1fr auto;
+  }
+
+  .picker-page {
+    padding: 0;
+  }
+
+  .picker-card {
+    max-height: 100dvh;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .picker-header {
+    padding: 14px 12px 10px 14px;
+  }
+
+  .picker-header p {
+    display: none;
+  }
+
+  .picker-toolbar,
+  .picker-filter-row,
+  .picker-footer {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .picker-recent-list {
+    padding: 0 12px 6px;
+  }
+
+  .picker-open {
+    max-width: none;
+    flex: 1;
+  }
+
+  .quickpick {
+    top: 8px;
+  }
+
+  .toasts {
+    right: 8px;
+    left: 8px;
+    max-width: none;
+  }
+
+  .dialog {
+    padding: 18px 16px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar .prio-2,
+  .brand-name {
+    display: none !important;
+  }
+
+  .topbar {
+    gap: 0;
+    padding: 0 2px;
+  }
+
+  .editor-pick {
+    margin-left: 2px;
+    border-color: transparent;
+  }
+
+  .editor-pick > .icon:last-child {
+    display: none;
+  }
+}

@@ -1,0 +1,77 @@
+[package]
+name = "tendril"
+# Must match version.txt; build.rs refuses to build when they differ.
+version = "1.0.0"
+edition = "2024"
+rust-version = "1.85"
+description = "A lightweight web code editor served by a single self-contained binary."
+license = "MIT"
+readme = "README.md"
+publish = false
+build = "build.rs"
+default-run = "tendril"
+
+[lib]
+name = "tendril"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tendril"
+path = "src/main.rs"
+
+# Every dependency below is justified; CLAUDE.md repeats the list. Do not add
+# a crate without the same kind of justification.
+[dependencies]
+# HTTP routing, extractors and the WebSocket upgrade (terminal). Only the
+# HTTP/1.1 server features are enabled: no HTTP/2 machinery in memory.
+axum = { version = "0.8.9", default-features = false, features = ["http1", "json", "query", "tokio", "ws"] }
+# Async runtime. Run as `current_thread` (see app.rs) to keep threads and
+# memory to a minimum; blocking work goes to the bounded blocking pool.
+tokio = { version = "1.53.3", features = ["rt", "net", "time", "io-util", "fs", "sync", "signal", "macros"] }
+# The connection-level HTTP/1.1 server. Used directly (instead of axum::serve)
+# to own the accept loop: TLS handshake timeouts, connection caps, peer IPs.
+hyper = { version = "1.12.0", features = ["server", "http1"] }
+# Glue between tokio and hyper (TokioIo, TokioTimer).
+hyper-util = { version = "0.1.21", default-features = false, features = ["tokio"] }
+# `ServiceExt::oneshot` to drive the axum Router from the accept loop. Already
+# part of axum's dependency tree, so it costs nothing extra.
+tower = { version = "0.5.3", default-features = false, features = ["util"] }
+# The `Body` trait for the streaming file body (Range requests, downloads).
+http-body = "1.1.0"
+# TLS. The ring provider instead of aws-lc-rs: aws-lc-rs needs CMake/NASM and
+# complicates musl and Windows builds; ring cross-compiles with `zig cc`.
+rustls = { version = "0.23.45", default-features = false, features = ["ring", "std", "tls12"] }
+tokio-rustls = { version = "0.26.6", default-features = false, features = ["ring", "tls12"] }
+# The self-signed certificate minted on every start (named by the prompt).
+rcgen = { version = "0.14.10", default-features = false, features = ["crypto", "pem", "ring"] }
+# Already required by rustls and rcgen: SHA-256 (certificate fingerprint,
+# password digest) and the OS CSPRNG (passwords and session tokens).
+ring = "0.17.14"
+# Constant-time comparison of passwords and session secrets.
+subtle = "2.6.1"
+# JSON for the API, settings.json and the JSON Lines logs.
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.151"
+# Pseudo-terminals for the integrated terminal: openpty on Unix, ConPTY on
+# Windows. Writing either by hand is a large, fragile surface.
+portable-pty = "0.9.0"
+
+[target.'cfg(unix)'.dependencies]
+# getifaddrs (local addresses for the banner and the certificate) and
+# gethostname. Already in the tree through portable-pty.
+libc = "0.2.177"
+
+[dev-dependencies]
+# Synchronous WebSocket client for the terminal integration tests. Already in
+# the tree through axum's `ws` feature.
+tungstenite = { version = "0.29.0", default-features = false, features = ["handshake"] }
+
+[profile.release]
+# Size-optimised: the binary should stay small for a Raspberry Pi.
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+# A panic aborts the process. The panic hook (src/main.rs) writes the panic to
+# the log synchronously first, because no destructor runs after this.
+panic = "abort"

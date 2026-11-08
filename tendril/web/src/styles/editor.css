@@ -1,0 +1,276 @@
+/* The editors (CodeMirror panels, Monaco tweaks) and the viewers. */
+.editor-pane .cm-editor {
+  height: 100%;
+}
+
+/* Fold markers appear when the pointer is over the gutter, like VS Code. */
+.editor-pane .cm-foldGutter .cm-gutterElement {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.editor-pane .cm-gutters:hover .cm-foldGutter .cm-gutterElement {
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  .editor-pane .cm-foldGutter .cm-gutterElement {
+    opacity: 1;
+  }
+}
+
+.editor-pane .monaco-editor {
+  --vscode-font-family: var(--font-ui);
+}
+
+/* CodeMirror's search / go-to-line panels, in the theme's colors. */
+.cm-panel.cm-search,
+.cm-panel.cm-gotoLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  padding: 6px 34px 6px 8px !important;
+  font: 12px var(--font-ui);
+}
+
+.cm-panel.cm-search br {
+  flex-basis: 100%;
+  height: 0;
+}
+
+.cm-panel input.cm-textfield {
+  height: 26px;
+  margin: 0 !important;
+  padding: 0 7px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  outline: none;
+  background: var(--bg);
+  color: var(--fg);
+  font: 13px var(--font-mono);
+}
+
+.cm-panel input.cm-textfield:focus {
+  border-color: var(--focus);
+}
+
+.cm-panel button.cm-button {
+  height: 26px;
+  margin: 0 !important;
+  padding: 0 9px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  background-image: none !important;
+  color: var(--surface-fg);
+  font: 12px var(--font-ui);
+  cursor: pointer;
+}
+
+.cm-panel button.cm-button:hover {
+  background: var(--hover);
+}
+
+.cm-panel label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.cm-panel label input {
+  accent-color: var(--accent);
+}
+
+.cm-panel button[name="close"] {
+  top: 6px !important;
+  right: 8px !important;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted) !important;
+  font-size: 18px !important;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------- viewers */
+.viewer {
+  display: flex;
+  flex-direction: column;
+}
+
+.viewer-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  flex: none;
+  padding: 0 6px 0 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.viewer-name {
+  overflow: hidden;
+  color: var(--fg);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viewer-spacer {
+  flex: 1;
+}
+
+.viewer-meta {
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.viewer-zoom {
+  min-width: 56px;
+  border-color: transparent;
+  background: transparent;
+  color: inherit;
+}
+
+.viewer-stage {
+  position: relative;
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px;
+}
+
+.viewer-stage.checker {
+  background-color: var(--editor-bg);
+  background-image:
+    linear-gradient(45deg, var(--hover) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--hover) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--hover) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--hover) 75%);
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  background-size: 16px 16px;
+}
+
+.viewer-stage.dark {
+  background: #111111;
+}
+
+.viewer-stage.light {
+  background: #f4f4f4;
+}
+
+.viewer-stage.frame {
+  padding: 0;
+}
+
+.viewer-img {
+  max-width: none;
+  image-rendering: auto;
+  box-shadow: 0 1px 6px #00000033;
+}
+
+.viewer-img.fit {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.viewer-video-el {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: var(--radius-sm);
+  background: #000000;
+}
+
+.audio-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(460px, 100%);
+  padding: 28px 22px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--surface);
+  color: var(--surface-fg);
+  box-shadow: var(--shadow);
+}
+
+.audio-art {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.audio-art .icon {
+  width: 44px;
+  height: 44px;
+  stroke-width: 1.1;
+}
+
+.audio-name {
+  font-weight: 600;
+  word-break: break-all;
+  text-align: center;
+}
+
+.audio-card audio {
+  width: 100%;
+}
+
+.viewer-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #ffffff;
+}
+
+.viewer-error {
+  padding: 16px;
+  color: var(--fg-muted);
+}
+
+.file-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 420px;
+  padding: 28px;
+  text-align: center;
+}
+
+.card-icon {
+  width: 56px;
+  height: 56px;
+  stroke-width: 1.1;
+}
+
+.file-card-name {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.file-card-meta {
+  margin-top: 4px;
+  color: var(--fg-subtle);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.file-card-message {
+  margin: 16px 0;
+  color: var(--fg-muted);
+}
