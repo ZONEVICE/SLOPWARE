@@ -244,7 +244,7 @@ can bring new sources without it.
   CodeMirror, one loader in `editors/codemirror/languages.js`.
 - **Theme:** a block in `styles/themes.css` defining every variable of the
   Dark block, an entry in `THEMES` (`core/themes.js`) and in `public/boot.js`
-  and `public/login.js`.
+  and `public/login.js`. Its `--editor-line` must be translucent (section 6).
 - **Icon:** one entry in `ICONS` (`core/icons.js`).
 - **Viewer:** extension lists in `core/languages.js` (`VIEWERS`) and
   `src/services/files/mime.rs`, a renderer in `viewers/media.js`.
@@ -438,6 +438,14 @@ shell (three threads per terminal: reader, control, waiter — see
   the queue filled or after; on Windows it came late and a later line took the
   freed slot. The test now waits until the writer is blocked on the console,
   so exactly lines 0–256 come out, in order.
+- **A one-line selection was invisible in Dos and Eye Burned** (GitHub issue
+  #1, CodeMirror only). CodeMirror paints the selection in a layer behind the
+  lines, and those two themes gave the active line an opaque color
+  (`#0000c8`, `#ffffff`), which covered it; a selection over several lines
+  still showed on the other lines. `--editor-line` is now translucent in every
+  theme (Dos `#0000ff5a`, the same blue over its background; Eye Burned
+  transparent) and `web/test/core.test.js` refuses an opaque one. Monaco was
+  never affected.
 
 ### Windows (found and fixed on real Windows 10, build 19045)
 
@@ -734,7 +742,7 @@ bytes). S7, virtual adapters in the banner, is filtered (`netinfo.rs`).
 ```bash
 # Linux: 136 (103 unit + 33 integration). Windows: 128 (96 unit + 32 integration).
 cargo test
-npm --prefix web test                        # 9 front-end unit tests (node --test)
+npm --prefix web test                        # 10 front-end unit tests (node --test)
 cargo build && node --test tests/browser/*.test.mjs   # 13 e2e steps, headless Chromium/Edge
 TENDRIL_E2E_SLOW=1 node --test tests/browser/*.test.mjs   # + the idle "stopped" page (over a minute)
 ```
@@ -757,7 +765,7 @@ need `git` installed; without it they pass empty.
 | `tests/lifecycle.rs` | HTTPS and a new certificate per start, port walk, settings round trip, password precedence, what counts as activity, idle shutdown (also on time with the production check interval), stop button, info |
 | `tests/git_api.rs` | git over HTTP against the real `git`: not a repository, status, `show` at HEAD/index, stage/unstage/commit, branches, path confinement, push without remote, logs without messages |
 | `tests/terminal.rs` | shell in the workspace (`/bin/sh` on Unix, `cmd.exe` on Windows; answers ConPTY's ESC[6n), output, resize, exit code, activity, kill on close, Origin/session/limit checks |
-| `web/test/core.test.js` | paths (incl. link resolution), fuzzy matching, indentation detection, formatting, languages, shortcuts and key dispatch rules, the bus, the preview's URL filter and fence languages |
+| `web/test/core.test.js` | paths (incl. link resolution), fuzzy matching, indentation detection, formatting, languages, shortcuts and key dispatch rules, the bus, the preview's URL filter and fence languages, translucent active lines in every theme |
 | `tests/browser/workbench.test.mjs` | the whole UI against the real binary (see README): split editor with both engines, Markdown preview with hostile HTML, git staging/commit/diff, menus |
 
 `tests/common/mod.rs` starts in-process servers (port 0, temp data dir,

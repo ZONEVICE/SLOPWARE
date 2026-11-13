@@ -3,6 +3,7 @@
  * built-in runner:  npm --prefix web test   (or: node --test web/test/)
  */
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { createBus } from '../src/app/core/bus.js';
@@ -13,6 +14,7 @@ import { detectIndent } from '../src/app/core/indent.js';
 import { fileIcon, languageFor, viewerFor } from '../src/app/core/languages.js';
 import { basename, dirname, extname, isWithin, join, naturalCompare, rebase, resolve } from '../src/app/core/paths.js';
 import { internals as markdown } from '../src/app/preview/markdown.js';
+import { THEMES } from '../src/app/core/themes.js';
 
 test('paths', () => {
   assert.equal(join('a', '', 'b/', './c'), 'a/b/c');
@@ -170,4 +172,20 @@ test('the bus isolates failing handlers', () => {
   bus.emit('x', 2);
   console.error = originalError;
   assert.deepEqual(seen, ['a1', 'c1', 'c2']);
+});
+
+// Issue #1: CodeMirror draws the selection in a layer behind the lines, so an
+// opaque active-line color hid any selection that stayed on one line (Dos and
+// Eye Burned). Every theme's --editor-line must let the selection show through.
+test('every theme keeps the active line translucent', () => {
+  const css = readFileSync(new URL('../src/styles/themes.css', import.meta.url), 'utf8');
+  const blocks = new Map();
+  for (const [, id, body] of css.matchAll(/:root\[data-theme="([\w-]+)"\]\s*\{([^}]*)\}/g)) blocks.set(id, body);
+  for (const { id } of THEMES) {
+    assert.ok(blocks.has(id), `themes.css has no block for ${id}`);
+    const value = /--editor-line:\s*(#[0-9a-fA-F]+)/.exec(blocks.get(id))?.[1];
+    assert.ok(value, `${id} defines --editor-line`);
+    assert.match(value, /^#[0-9a-fA-F]{8}$/, `${id}: --editor-line ${value} needs an alpha (#rrggbbaa)`);
+    assert.ok(parseInt(value.slice(7), 16) < 0xff, `${id}: --editor-line ${value} is opaque`);
+  }
 });

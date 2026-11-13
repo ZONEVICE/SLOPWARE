@@ -22,6 +22,8 @@ export const theme = EditorView.theme({
   '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
     backgroundColor: 'var(--editor-selection) !important',
   },
+  // Lines are drawn over the selection layer: --editor-line must stay
+  // translucent or a one-line selection disappears under it (themes.css).
   '.cm-activeLine': { backgroundColor: 'var(--editor-line)' },
   '.cm-gutters': {
     backgroundColor: 'var(--editor-gutter)',

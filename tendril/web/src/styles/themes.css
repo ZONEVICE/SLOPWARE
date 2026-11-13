@@ -7,6 +7,11 @@
  * themes are built at run time by reading them (app/core/themes.js), which is
  * why every color is written as #rrggbb or #rrggbbaa (Monaco requires hex).
  *
+ * --editor-line (the active line) must be translucent (#rrggbbaa with an
+ * alpha below ff): CodeMirror paints the selection in a layer behind the
+ * lines, so an opaque active line hides a selection that stays on one line.
+ * web/test/core.test.js checks it.
+ *
  * Adding a theme: add a block below that defines every variable of the
  * "dark" block, then add it to THEMES in app/core/themes.js and in
  * public/boot.js.
@@ -568,7 +573,7 @@
   --editor-gutter: #0000aa;
   --editor-gutter-fg: #5555ff;
   --editor-gutter-active: #ffff55;
-  --editor-line: #0000c8;
+  --editor-line: #0000ff5a; /* #0000c8 over the blue background */
   --editor-selection: #aaaaaa99;
   --editor-match: #00aaaa99;
   --editor-cursor: #ffff55;
@@ -870,7 +875,7 @@
   --editor-gutter: #ffffff;
   --editor-gutter-fg: #000000;
   --editor-gutter-active: #0000ff;
-  --editor-line: #ffffff;
+  --editor-line: #ffffff00;
   --editor-selection: #ffff00;
   --editor-match: #00ffff;
   --editor-cursor: #ff0000;
